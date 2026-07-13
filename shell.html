@@ -1,0 +1,466 @@
+<!--
+  Guaita Apps - Suite d'eines autònomes per a arquitectura, BIM i documentació.
+  Copyright (c) 2026 Jordi Subirós
+  GNU Affero General Public License v3.0
+  See LICENSE file for details
+-->
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8" />
+<title>Guaita apps</title>
+<style>
+  :root { --groc:#CDF500; --verd:#0F4B45; --verd-clar:#14625a; --border:#1c5f57; --text:#eaf3f1; --tenue:#9fc3bd; --fons:#0b322e; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { display: flex; flex-direction: column; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--fons); color: var(--text); }
+
+  #bar { flex: 0 0 auto; display: flex; align-items: center; gap: 12px; padding: 12px 18px; background: var(--verd); border-bottom: 2px solid var(--groc); }
+  #bar .logo { width: 20px; height: 20px; border-radius: 5px; background: var(--groc); box-shadow: 0 0 10px rgba(205,245,0,.6); }
+  #bar .marca { font-size: 22px; font-weight: 400; letter-spacing: .02em; cursor: pointer; }
+  #bar .marca b { color: var(--groc); font-weight: 400; }
+  #bar .marca .tab { color: var(--tenue); font-size: 16px; }
+  #bar .sp { margin-left: auto; }
+  #bar button { background: var(--verd-clar); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer; }
+  #bar button:hover { background: #1a746a; }
+
+  #body { flex: 1 1 auto; display: flex; min-height: 0; }
+
+  #side { flex: 0 0 auto; width: 264px; min-width: 180px; max-width: 520px; background: #0d3a35; border-right: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; resize: horizontal; overflow: hidden; }
+  #sidetitol { flex: 0 0 auto; padding: 12px 14px 0; font-size: 17px; font-weight: 400; }
+  #sidetitol b { color: var(--groc); font-weight: 400; }
+  #tabs { flex: 0 0 auto; display: flex; padding: 10px 10px 0; gap: 6px; }
+  .tab-btn { flex: 1 1 0; text-align: center; padding: 9px 8px; font-size: 13px; cursor: pointer; color: var(--tenue); border: 1px solid var(--border); border-bottom: none; border-radius: 8px 8px 0 0; background: transparent; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.actiu { color: var(--verd); background: var(--groc); border-color: var(--groc); font-weight: 600; }
+  #llista { flex: 1 1 auto; overflow: auto; padding: 12px 10px; }
+  .apartat { margin: 14px 4px 8px; font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--groc); }
+  .apartat:first-child { margin-top: 4px; }
+  .sepcentena { height: 2px; background: var(--groc); opacity: .55; border-radius: 2px; margin: 14px 6px; }
+  .item.dropzona { border-color: var(--groc); border-style: dashed; background: #14625a; }
+  body.arrossegant .item:not(.falta) { border-color: rgba(205,245,0,.35); }
+  .item { display: flex; align-items: center; gap: 10px; padding: 12px 12px; margin-bottom: 8px; border-radius: 9px; cursor: pointer; font-size: 14px; background: var(--verd); border: 1px solid var(--border); transition: transform .08s, border-color .12s; }
+  .item:hover { transform: translateY(-1px); border-color: var(--groc); }
+  .item.actiu { border-color: var(--groc); box-shadow: inset 3px 0 0 var(--groc); }
+  .item .quad { width: 12px; height: 12px; border-radius: 3px; background: var(--groc); flex: 0 0 auto; box-shadow: 0 0 6px rgba(205,245,0,.5); }
+  .item .interr { width: 14px; flex: 0 0 auto; color: var(--groc); font-weight: 800; font-size: 16px; line-height: 1; text-align: center; text-shadow: 0 0 6px rgba(205,245,0,.5); }
+  .item .nom { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .item.falta { opacity: .45; cursor: default; border-style: dashed; }
+  .item.falta:hover { transform: none; border-color: var(--border); }
+  .item.falta .quad { background: transparent; border: 1px solid var(--tenue); box-shadow: none; }
+  .item .badge { font-size: 10px; color: #d98; }
+  #buit { padding: 20px 12px; color: var(--tenue); font-size: 13px; line-height: 1.6; }
+  #buit code { background: var(--verd); padding: 1px 5px; border-radius: 4px; color: var(--groc); }
+
+  #safata { flex: 0 0 auto; border-top: 1px solid var(--border); padding: 10px; max-height: 40%; display: flex; flex-direction: column; }
+  #safata .cap { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--groc); margin-bottom: 8px; }
+  #safata .cap .n { margin-left: auto; color: var(--tenue); font-weight: 400; letter-spacing: 0; text-transform: none; }
+  #safata .cap .buida { cursor: pointer; color: var(--tenue); font-weight: 400; letter-spacing: 0; text-transform: none; }
+  #safata .cap .buida:hover { color: var(--groc); }
+  #xips { overflow: auto; display: flex; flex-direction: column; gap: 6px; }
+  #safata.dropzona { background: #14625a; outline: 2px dashed var(--groc); outline-offset: -4px; }
+  #safata .cap-buit { font-size: 12px; color: var(--tenue); line-height: 1.5; font-weight: 400; }
+  .xip { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 7px; background: var(--verd); border: 1px solid var(--border); font-size: 12.5px; cursor: grab; }
+  .xip:active { cursor: grabbing; }
+  .xip:hover { border-color: var(--groc); }
+  .xip .ic { width: 10px; height: 10px; border-radius: 2px; background: var(--groc); flex: 0 0 auto; }
+  .xip .nom { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .xip .mida { color: var(--tenue); font-size: 10.5px; flex: 0 0 auto; }
+  .xip .treu { flex: 0 0 auto; color: var(--tenue); cursor: pointer; font-size: 14px; line-height: 1; padding: 0 2px; }
+  .xip .treu:hover { color: #e88; }
+
+  #main { flex: 1 1 auto; position: relative; min-height: 0; background: #fff; }
+  #main .vista { position: absolute; inset: 0; width: 100%; height: 100%; border: none; background: #fff; display: none; }
+  #main .vista.activa { display: block; }
+
+  #peu { flex: 0 0 auto; text-align: center; padding: 8px 14px; background: var(--verd); border-top: 1px solid var(--border); font-size: 11px; color: var(--tenue); }
+</style>
+</head>
+<body>
+  <div id="bar">
+    <span class="logo"></span>
+    <span class="marca" id="marca">Guaita <b>apps</b></span>
+  </div>
+  <div id="body">
+    <nav id="side">
+      <div id="sidetitol">Guaita <b id="sidetab">les apps</b></div>
+      <div id="tabs">
+        <div class="tab-btn actiu" data-tab="apps">les apps</div>
+        <div class="tab-btn" data-tab="ajuda">l'ajuda</div>
+      </div>
+      <div id="llista"></div>
+      <div id="safata">
+        <div class="cap">
+          <span>Safata de fitxers</span>
+          <span class="n" id="safataN"></span>
+          <span class="buida" id="safataBuida" hidden>buida-la</span>
+        </div>
+        <div id="xips"></div>
+      </div>
+    </nav>
+    <div id="main">
+      <iframe id="portada" class="vista" src="about:blank"></iframe>
+    </div>
+  </div>
+  <div id="peu">SBS BIM Consulting 2026</div>
+
+  <script>
+  (function () {
+    const llista = document.getElementById('llista');
+    const main = document.getElementById('main');
+    const portada = document.getElementById('portada');
+    const marca = document.getElementById('marca');
+    const sidetab = document.getElementById('sidetab');
+    const tabs = document.querySelectorAll('.tab-btn');
+    let itemActiu = null;
+    let fitxerActiu = null;
+    let dades = [];
+    let tabActual = 'apps';
+    const oberts = new Map(); // file -> iframe viu (conserva l'estat)
+    const llestos = new Set();  // apps que ja han anunciat que poden rebre fitxers
+    const pendents = new Map(); // app destí -> fitxers a lliurar quan estigui llesta
+    let arrossegant = null;     // fitxers arrossegats des d'una app
+    const safata = new Map();   // nom -> File (repositori de la sessió)
+    const elSafata = document.getElementById('safata');
+    const elXips = document.getElementById('xips');
+    const elSafataN = document.getElementById('safataN');
+    const elSafataBuida = document.getElementById('safataBuida');
+
+    const etiqueta = { apps: "les apps", ajuda: "l'ajuda" };
+
+    function setSidetab() {
+      sidetab.textContent = etiqueta[tabActual];
+    }
+
+    function mostraVista(elVista) {
+      main.querySelectorAll('.vista').forEach((v) => v.classList.remove('activa'));
+      elVista.classList.add('activa');
+    }
+
+    function openApp(a, el) {
+      let frame = oberts.get(a.file);
+      if (!frame) {
+        // Primer cop: crea un iframe persistent per aquesta app.
+        frame = document.createElement('iframe');
+        frame.className = 'vista';
+        frame.src = 'apps/' + encodeURIComponent(a.file);
+        main.appendChild(frame);
+        oberts.set(a.file, frame);
+      }
+      mostraVista(frame);
+      fitxerActiu = a.file;
+      if (itemActiu) itemActiu.classList.remove('actiu');
+      itemActiu = el || null; if (el) el.classList.add('actiu');
+    }
+
+    // Intercepta els enllaços .html de la portada perquè s'obrin dins el visor.
+    function interceptaPortada() {
+      let doc;
+      try { doc = portada.contentDocument; } catch (e) { return; }
+      if (!doc) return;
+      doc.querySelectorAll('a[href]').forEach((a) => {
+        const href = a.getAttribute('href') || '';
+        if (!/\.html?($|[?#])/i.test(href)) return;
+        a.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          const file = decodeURIComponent(href.split(/[?#]/)[0].split('/').pop());
+          openApp({ file: file }, null);
+        });
+      });
+    }
+
+    function goHome() {
+      mostraVista(portada);
+      fitxerActiu = null;
+      if (itemActiu) { itemActiu.classList.remove('actiu'); itemActiu = null; }
+    }
+
+    // ---- Pont entre apps: passar fitxers d'una app a una altra ----
+
+    // Envia un missatge a totes les apps obertes (opcionalment excloent-ne una,
+    // p. ex. la que origina l'arrossegament, per no interferir el seu drag intern).
+    function difon(msg, excepte) {
+      oberts.forEach((frame) => {
+        try {
+          if (frame.contentWindow && frame.contentWindow !== excepte) frame.contentWindow.postMessage(msg, '*');
+        } catch (e) { /* iframe destruït */ }
+      });
+    }
+
+    // Envia els fitxers a l'app destí, o els encua si encara no està llesta.
+    function lliura(appFile, fitxers) {
+      const frame = oberts.get(appFile);
+      if (frame && llestos.has(appFile)) {
+        frame.contentWindow.postMessage({ tipus: 'guaita:fitxers', fitxers: fitxers }, '*');
+      } else {
+        pendents.set(appFile, fitxers);
+      }
+    }
+
+    // Obre l'app destí (si cal) i li fa arribar els fitxers.
+    function obreAmb(appFile, fitxers) {
+      const info = dades.find((d) => d.file === appFile);
+      if (!info || info.falta) return;
+      const jaOberta = oberts.has(appFile) && llestos.has(appFile);
+      openApp(info, null);
+      // Re-marca l'ítem actiu a la barra lateral, si és visible.
+      pintar();
+      if (jaOberta) lliura(appFile, fitxers);
+      else pendents.set(appFile, fitxers);
+    }
+
+    // Identifica quina app ha enviat un missatge (a partir del seu iframe).
+    function appDeLaFinestra(win) {
+      for (const [file, frame] of oberts) {
+        if (frame.contentWindow === win) return file;
+      }
+      return null;
+    }
+
+    // ---- Safata: repositori de fitxers de la sessió ----
+
+    function fmtMida(b) {
+      if (!b && b !== 0) return '';
+      const u = ['B', 'KB', 'MB', 'GB'];
+      let i = 0, n = b;
+      while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
+      return n.toFixed(n < 10 && i > 0 ? 1 : 0) + ' ' + u[i];
+    }
+
+    function afegeixASafata(fitxers) {
+      Array.from(fitxers || []).forEach((f) => safata.set(f.name, f));
+      pintaSafata();
+    }
+
+    function xip(f) {
+      const el = document.createElement('div');
+      el.className = 'xip';
+      el.title = f.name + ' — arrossega\'l sobre una app';
+      el.draggable = true;
+
+      const ic = document.createElement('span'); ic.className = 'ic';
+      const nom = document.createElement('span'); nom.className = 'nom'; nom.textContent = f.name;
+      const mida = document.createElement('span'); mida.className = 'mida'; mida.textContent = fmtMida(f.size);
+      const treu = document.createElement('span'); treu.className = 'treu'; treu.textContent = '×';
+      treu.title = 'Treu de la safata';
+      treu.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        safata.delete(f.name);
+        pintaSafata();
+      });
+
+      el.appendChild(ic); el.appendChild(nom); el.appendChild(mida); el.appendChild(treu);
+
+      el.addEventListener('dragstart', (ev) => {
+        // Posa el File al dataTransfer natiu: així qualsevol app que ja accepti
+        // fitxers arrossegats des de l'Explorador el rep sense cap canvi.
+        try { ev.dataTransfer.items.add(f); } catch (e) { /* navegador sense suport */ }
+        ev.dataTransfer.setData('text/plain', f.name);
+        ev.dataTransfer.effectAllowed = 'copy';
+        arrossegant = [f];
+        document.body.classList.add('arrossegant');
+        difon({ tipus: 'guaita:drag-fitxers-inici', fitxers: [f] });
+      });
+      el.addEventListener('dragend', () => {
+        arrossegant = null;
+        document.body.classList.remove('arrossegant');
+        difon({ tipus: 'guaita:drag-fitxers-fi' });
+      });
+      return el;
+    }
+
+    function pintaSafata() {
+      elXips.innerHTML = '';
+      elSafataN.textContent = safata.size ? safata.size + (safata.size === 1 ? ' fitxer' : ' fitxers') : '';
+      elSafataBuida.hidden = safata.size === 0;
+      if (safata.size === 0) {
+        const d = document.createElement('div');
+        d.className = 'cap-buit';
+        d.textContent = "Deixa-hi anar fitxers, o envia'ls des de Guaita Fitxers. Després arrossega'ls sobre una app.";
+        elXips.appendChild(d);
+        return;
+      }
+      safata.forEach((f) => elXips.appendChild(xip(f)));
+    }
+
+    elSafataBuida.addEventListener('click', () => { safata.clear(); pintaSafata(); });
+
+    // Deixar anar fitxers a la safata: de l'Explorador o d'una app Guaita.
+    elSafata.addEventListener('dragover', (ev) => {
+      if (!ev.dataTransfer.types.includes('Files') && !arrossegant) return;
+      ev.preventDefault();
+      ev.dataTransfer.dropEffect = 'copy';
+      elSafata.classList.add('dropzona');
+    });
+    elSafata.addEventListener('dragleave', () => elSafata.classList.remove('dropzona'));
+    elSafata.addEventListener('drop', (ev) => {
+      elSafata.classList.remove('dropzona');
+      const fitxers = (ev.dataTransfer.files && ev.dataTransfer.files.length)
+        ? Array.from(ev.dataTransfer.files)
+        : arrossegant;
+      if (!fitxers || !fitxers.length) return;
+      ev.preventDefault();
+      afegeixASafata(fitxers);
+      arrossegant = null;
+      document.body.classList.remove('arrossegant');
+    });
+
+    window.addEventListener('message', (ev) => {
+      const m = ev.data;
+      if (!m || typeof m.tipus !== 'string' || !m.tipus.startsWith('guaita:')) return;
+      const origen = appDeLaFinestra(ev.source);
+
+      switch (m.tipus) {
+        // L'app demana la llista d'apps per muntar el seu menú "Obre amb...".
+        case 'guaita:apps?': {
+          const apps = dades
+            .filter((d) => !d.ajuda && !d.falta && d.file !== origen)
+            .map((d) => ({ file: d.file, nom: d.nom }));
+          ev.source.postMessage({ tipus: 'guaita:apps', apps: apps }, '*');
+          break;
+        }
+        // L'app destí anuncia que ja pot rebre fitxers.
+        case 'guaita:llest': {
+          if (!origen) break;
+          llestos.add(origen);
+          if (pendents.has(origen)) {
+            const f = pendents.get(origen);
+            pendents.delete(origen);
+            oberts.get(origen).contentWindow.postMessage({ tipus: 'guaita:fitxers', fitxers: f }, '*');
+          }
+          break;
+        }
+        // L'app origen vol obrir un fitxer amb una altra app.
+        case 'guaita:obre-amb': {
+          if (m.app && m.fitxers) obreAmb(m.app, m.fitxers);
+          break;
+        }
+        // L'app diposita fitxers a la safata del shell.
+        case 'guaita:a-safata': {
+          if (m.fitxers) afegeixASafata(m.fitxers);
+          break;
+        }
+        // L'app demana el contingut actual de la safata.
+        case 'guaita:safata?': {
+          ev.source.postMessage({ tipus: 'guaita:safata', fitxers: Array.from(safata.values()) }, '*');
+          break;
+        }
+        // L'app origen comença a arrossegar fitxers cap a la barra lateral.
+        case 'guaita:drag-inici': {
+          arrossegant = m.fitxers || null;
+          document.body.classList.add('arrossegant');
+          if (arrossegant) difon({ tipus: 'guaita:drag-fitxers-inici', fitxers: arrossegant }, ev.source);
+          break;
+        }
+        case 'guaita:drag-fi': {
+          arrossegant = null;
+          document.body.classList.remove('arrossegant');
+          difon({ tipus: 'guaita:drag-fitxers-fi' }, ev.source);
+          break;
+        }
+      }
+    });
+
+    function item(a) {
+      const el = document.createElement('div');
+      el.className = 'item' + (a.falta ? ' falta' : '');
+      el.title = a.falta ? a.file + ' (no trobada a la carpeta)' : (a.descripcio || a.file);
+      let icona;
+      if (a.ajuda) {
+        icona = document.createElement('span'); icona.className = 'interr'; icona.textContent = '?';
+      } else {
+        icona = document.createElement('span'); icona.className = 'quad';
+      }
+      const nom = document.createElement('span'); nom.className = 'nom'; nom.textContent = a.nom;
+      el.appendChild(icona); el.appendChild(nom);
+      if (a.falta) {
+        const b = document.createElement('span'); b.className = 'badge'; b.textContent = 'pendent';
+        el.appendChild(b);
+      } else {
+        el.addEventListener('click', () => openApp(a, el));
+        if (!a.ajuda) {
+          // Es pot deixar anar un fitxer aquí: des d'una altra app o des de l'explorador.
+          el.addEventListener('dragover', (ev) => {
+            ev.preventDefault();
+            ev.dataTransfer.dropEffect = 'copy';
+            el.classList.add('dropzona');
+          });
+          el.addEventListener('dragleave', () => el.classList.remove('dropzona'));
+          el.addEventListener('drop', (ev) => {
+            ev.preventDefault();
+            el.classList.remove('dropzona');
+            const fitxers = (ev.dataTransfer.files && ev.dataTransfer.files.length)
+              ? Array.from(ev.dataTransfer.files)
+              : arrossegant;
+            if (fitxers && fitxers.length) obreAmb(a.file, fitxers);
+            arrossegant = null;
+            document.body.classList.remove('arrossegant');
+          });
+        }
+      }
+      return el;
+    }
+
+    function pintar() {
+      llista.innerHTML = '';
+      itemActiu = null;
+      setSidetab();
+      const llista_apps = dades.filter((a) => tabActual === 'ajuda' ? a.ajuda : !a.ajuda);
+      if (llista_apps.length === 0) {
+        const d = document.createElement('div');
+        d.id = 'buit';
+        d.innerHTML = tabActual === 'ajuda'
+          ? "Cap fitxer d'ajuda. Posa HTML amb prefix <code>HLP</code> a la carpeta <code>apps</code>."
+          : 'No hi ha cap app a la carpeta <code>apps</code>.';
+        llista.appendChild(d);
+        return;
+      }
+      let apartatActual = null;
+      let centenaActual = null;
+      llista_apps.forEach((a) => {
+        const ap = a.apartat || '';
+        let novaSeccio = false;
+        if (ap !== apartatActual) {
+          apartatActual = ap;
+          novaSeccio = true;
+          if (ap) {
+            const h = document.createElement('div');
+            h.className = 'apartat'; h.textContent = ap;
+            llista.appendChild(h);
+          }
+        }
+        const centena = Math.floor((a.ordre || 0) / 100);
+        if (centenaActual !== null && centena !== centenaActual && !novaSeccio) {
+          const sep = document.createElement('div');
+          sep.className = 'sepcentena';
+          llista.appendChild(sep);
+        }
+        centenaActual = centena;
+        const el = item(a);
+        if (a.file === fitxerActiu) { el.classList.add('actiu'); itemActiu = el; }
+        llista.appendChild(el);
+      });
+    }
+
+    async function carregar() {
+      try { dades = await (await fetch('api/apps')).json(); } catch (e) { dades = []; }
+      pintar();
+    }
+
+    tabs.forEach((t) => t.addEventListener('click', () => {
+      tabs.forEach((x) => x.classList.remove('actiu'));
+      t.classList.add('actiu');
+      tabActual = t.dataset.tab;
+      pintar();
+    }));
+    marca.addEventListener('click', goHome);
+    setSidetab();
+    pintaSafata();
+    portada.addEventListener('load', interceptaPortada);
+    portada.src = 'portada';
+    goHome();
+    carregar();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,902 @@
+<!--
+  Guaita Apps - Suite d'eines autònomes per a arquitectura, BIM i documentació.
+  Copyright (c) 2026 Jordi Subirós
+  GNU Affero General Public License v3.0
+  See LICENSE file for details
+-->
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guaita Dossier CoAC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<style>
+:root{
+  --paper:#F5F4EF;        /* paper de dibuix */
+  --card:#FFFFFF;
+  --ink:#22262D;          /* grafit */
+  --ink-2:#69707B;
+  --line:#D8D5CC;         /* línia fina de caixetí */
+  --line-forta:#B9B5A9;
+  --blau:#1F4E8C;         /* blau de plànol */
+  --blau-fosc:#153A6B;
+  --blau-clar:#E8EEF7;
+  --visat:#B3282D;        /* vermell de segell */
+  --ok:#2E6B4F;
+  --r:3px;
+  --ui:'Archivo',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--ui);background:var(--paper);color:var(--ink);font-size:14px;display:flex;flex-direction:column;overflow:hidden}
+button{font-family:var(--ui);cursor:pointer}
+input,select,textarea{font-family:var(--ui);font-size:13px;color:var(--ink)}
+:focus-visible{outline:2px solid var(--blau);outline-offset:1px}
+
+/* ── Caixetí superior (barra de títol tipus plànol) ───────── */
+#caixeti{display:flex;align-items:stretch;border-bottom:1.5px solid var(--ink);background:var(--card);flex:0 0 auto}
+.brand{display:flex;flex-direction:column;justify-content:center;padding:8px 16px;border-right:1px solid var(--line-forta);min-width:150px}
+.brand .b1{font-family:var(--mono);font-weight:600;font-size:15px;letter-spacing:.14em}
+.brand .b2{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--visat);margin-top:2px}
+.proj{flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 16px;min-width:0;border-right:1px solid var(--line-forta)}
+.proj .etq{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--ink-2)}
+#capTitol{font-variation-settings:'wdth' 110;font-weight:650;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#capSub{font-size:11.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.accions{display:flex;align-items:center;gap:8px;padding:0 14px}
+.btn{background:var(--card);border:1px solid var(--line-forta);border-radius:var(--r);padding:7px 12px;font-size:12.5px;font-weight:550;color:var(--ink)}
+.btn:hover{border-color:var(--ink);background:#FBFAF7}
+.btn.primari{background:var(--blau);border-color:var(--blau);color:#fff;font-weight:600}
+.btn.primari:hover{background:var(--blau-fosc)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ── Cos ──────────────────────────────────────────────────── */
+#cos{flex:1;display:flex;min-height:0}
+aside{width:308px;flex:0 0 auto;background:var(--card);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.tabs{display:flex;border-bottom:1px solid var(--line);flex:0 0 auto}
+.tab{flex:1;background:none;border:none;border-bottom:2px solid transparent;padding:10px 4px;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink-2)}
+.tab.activa{color:var(--ink);border-bottom-color:var(--blau);font-weight:600}
+.panells{flex:1;overflow-y:auto;min-height:0}
+.panell{display:none;padding:14px}
+.panell.activa{display:block}
+.pista{font-size:11.5px;color:var(--ink-2);line-height:1.45;margin-bottom:12px}
+
+/* Estructura */
+.sec{display:flex;align-items:center;gap:9px;padding:7px 8px;border:1px solid transparent;border-radius:var(--r);width:100%;background:none;text-align:left;margin-bottom:2px}
+.sec:hover{background:#F6F5F0}
+.sec .punt{width:9px;height:9px;border-radius:2px;flex:0 0 auto}
+.sec .codi{font-family:var(--mono);font-size:10.5px;font-weight:600;width:22px;color:var(--ink-2)}
+.sec .nom{flex:1;font-size:12.5px}
+.sec .n{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+.sec .n.zero{color:#C9C5BA}
+.sec.buida .nom{color:var(--ink-2)}
+
+/* Formulari projecte */
+.camp{margin-bottom:11px}
+.camp label{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--ink-2);margin-bottom:4px;text-transform:uppercase}
+.camp input,.camp select{width:100%;border:1px solid var(--line-forta);border-radius:var(--r);padding:7px 9px;background:#FDFCFA}
+.camp input:focus,.camp select:focus{border-color:var(--blau)}
+.fila2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+
+/* Visat */
+.grup{border:1px solid var(--line);border-radius:var(--r);padding:11px;margin-bottom:13px}
+.grup h3{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--ink-2);margin-bottom:9px}
+.opcio{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:12.5px}
+.opcio input[type=checkbox],.opcio input[type=radio]{accent-color:var(--blau)}
+.opcio select{flex:1;border:1px solid var(--line-forta);border-radius:var(--r);padding:5px 7px}
+#segellCustom{width:100%;border:1px solid var(--line-forta);border-radius:var(--r);padding:6px 8px;margin-top:4px}
+.check{display:flex;align-items:flex-start;gap:8px;padding:5px 2px;font-size:12px;line-height:1.35;border-bottom:1px dashed var(--line)}
+.check:last-child{border-bottom:none}
+.check input{accent-color:var(--ok);margin-top:2px}
+.check.fet span{color:var(--ink-2);text-decoration:line-through}
+#progVisat{height:5px;background:var(--line);border-radius:3px;overflow:hidden;margin:6px 0 10px}
+#progVisat i{display:block;height:100%;background:var(--ok);width:0;transition:width .25s}
+#progTxt{font-family:var(--mono);font-size:10.5px;color:var(--ink-2)}
+
+/* ── Àrea principal ──────────────────────────────────────── */
+main{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+#barraSel{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--line);background:#FBFAF6;min-height:44px;flex-wrap:wrap}
+#barraSel .info{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+#barraSel .info b{color:var(--blau);font-weight:600}
+#barraSel select{border:1px solid var(--line-forta);border-radius:var(--r);padding:5px 8px;background:#fff}
+.btn.petit{padding:5px 10px;font-size:12px}
+.btn.perill{color:var(--visat);border-color:#E0B4B6}
+.btn.perill:hover{border-color:var(--visat);background:#FBF1F1}
+
+#zona{flex:1;overflow-y:auto;padding:18px;min-height:0}
+#graella{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px;align-content:start}
+
+/* Targeta de pàgina */
+.pag{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;position:relative;cursor:grab;transition:box-shadow .12s,border-color .12s}
+.pag:hover{border-color:var(--line-forta);box-shadow:0 2px 8px rgba(30,35,45,.08)}
+.pag.sel{border-color:var(--blau);box-shadow:0 0 0 2px var(--blau-clar), 0 2px 8px rgba(31,78,140,.15)}
+.pag.arrossegant{opacity:.35}
+.pag.diana{border-color:var(--blau);border-left:3px solid var(--blau)}
+.franja{height:4px;background:var(--line)}
+.mini{position:relative;background:#EEEDE8;display:flex;align-items:center;justify-content:center;aspect-ratio:1/1.3;overflow:hidden}
+.mini img{max-width:92%;max-height:92%;box-shadow:0 1px 4px rgba(0,0,0,.18);background:#fff;transition:transform .15s}
+.mini .carregant{font-family:var(--mono);font-size:10px;color:var(--ink-2)}
+.peu{padding:6px 8px;display:flex;align-items:center;gap:6px;border-top:1px solid var(--line)}
+.peu .num{font-family:var(--mono);font-size:11px;font-weight:600;min-width:20px}
+.peu .chip{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.06em;padding:2px 5px;border-radius:2px;color:#fff}
+.peu .font-doc{flex:1;font-size:10px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
+.eines{position:absolute;top:8px;right:8px;display:none;gap:4px}
+.pag:hover .eines{display:flex}
+.eina{width:26px;height:26px;border-radius:var(--r);border:1px solid var(--line-forta);background:rgba(255,255,255,.95);font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center}
+.eina:hover{border-color:var(--ink)}
+.eina.esborra:hover{border-color:var(--visat);color:var(--visat)}
+.marca-sel{position:absolute;top:8px;left:8px;width:20px;height:20px;border-radius:3px;border:1.5px solid var(--line-forta);background:rgba(255,255,255,.95);display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff}
+.pag.sel .marca-sel{background:var(--blau);border-color:var(--blau)}
+
+/* Pàgines virtuals (portada / índex) */
+.vpag{width:92%;aspect-ratio:210/297;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18);padding:7% 8%;display:flex;flex-direction:column;font-size:6.5px;overflow:hidden;border:1px solid #E3E1DA}
+.vpag .vtop{font-family:var(--mono);font-size:4.5px;letter-spacing:.15em;color:var(--ink-2);text-align:center;border-bottom:.5px solid var(--line-forta);padding-bottom:4%;margin-bottom:14%}
+.vpag .vfase{font-family:var(--mono);font-size:4.5px;letter-spacing:.2em;color:var(--blau);margin-bottom:3%}
+.vpag .vtitol{font-weight:700;font-size:9px;line-height:1.25;margin-bottom:5%}
+.vpag .vsub{font-size:6px;color:var(--ink-2);line-height:1.4}
+.vpag .vbloc{margin-top:auto;border:.5px solid var(--line-forta);display:grid;grid-template-columns:1fr 1fr}
+.vpag .vbloc div{border:.5px solid var(--line);padding:3px 4px;font-size:4.5px;color:var(--ink-2);min-height:11px}
+.vpag .vbloc div b{display:block;color:var(--ink);font-size:5px;font-weight:600}
+.vpag .vh{font-weight:700;font-size:8.5px;letter-spacing:.1em;margin-bottom:8%}
+.vpag .vlin{display:flex;justify-content:space-between;font-size:5.5px;padding:2.5px 0;border-bottom:.5px dotted var(--line-forta)}
+.vpag .vlin i{font-style:normal;font-family:var(--mono);color:var(--ink-2)}
+
+/* Estat buit */
+#buit{border:1.5px dashed var(--line-forta);border-radius:6px;padding:56px 24px;text-align:center;color:var(--ink-2);margin:24px auto;max-width:520px;background:rgba(255,255,255,.5)}
+#buit .ic{font-size:34px;margin-bottom:10px}
+#buit h2{font-size:16px;color:var(--ink);font-weight:600;margin-bottom:6px}
+#buit p{font-size:12.5px;line-height:1.5}
+#buit .btn{margin-top:16px}
+body.sobre #buit{border-color:var(--blau);background:var(--blau-clar)}
+
+/* Barra d'estat */
+footer{flex:0 0 auto;display:flex;align-items:center;gap:16px;border-top:1px solid var(--line);background:var(--card);padding:5px 16px;font-family:var(--mono);font-size:10.5px;color:var(--ink-2)}
+footer .sep{flex:1}
+
+/* Modal previsualització */
+#modal{position:fixed;inset:0;background:rgba(28,30,35,.72);display:none;align-items:center;justify-content:center;z-index:50;padding:28px}
+#modal.oberta{display:flex}
+#modalCos{background:var(--paper);border-radius:6px;max-width:min(880px,94vw);max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 18px 60px rgba(0,0,0,.4)}
+#modalCap{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--card)}
+#modalTitol{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;flex:1}
+#modalVista{overflow:auto;padding:20px;display:flex;justify-content:center;align-items:flex-start}
+#modalVista canvas,#modalVista .vpag.gran{box-shadow:0 4px 20px rgba(0,0,0,.25);background:#fff}
+.vpag.gran{width:420px;font-size:13px;aspect-ratio:210/297}
+.vpag.gran .vtop{font-size:8px}.vpag.gran .vfase{font-size:8px}.vpag.gran .vtitol{font-size:19px}
+.vpag.gran .vsub{font-size:11px}.vpag.gran .vbloc div{font-size:8px;padding:6px 8px;min-height:26px}
+.vpag.gran .vbloc div b{font-size:9px}.vpag.gran .vh{font-size:16px}
+.vpag.gran .vlin{font-size:10px;padding:5px 0}
+
+/* Toast */
+#toast{position:fixed;bottom:44px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;padding:9px 16px;border-radius:4px;font-size:12.5px;opacity:0;pointer-events:none;transition:all .22s;z-index:60;max-width:80vw}
+#toast.vis{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.err{background:var(--visat)}
+
+@media (max-width:860px){
+  aside{width:250px}
+  .accions .btn:not(.primari){padding:7px 9px}
+  .brand{min-width:0;padding:8px 10px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header id="caixeti">
+  <div class="brand">
+    <span class="b1">DOSSIER</span>
+    <span class="b2">VISAT · COAC</span>
+  </div>
+  <div class="proj">
+    <span class="etq">PROJECTE</span>
+    <div id="capTitol">Sense títol</div>
+    <div id="capSub">Defineix les dades a la pestanya Projecte</div>
+  </div>
+  <div class="accions">
+    <button class="btn" id="btnAfegir">+ Afegir PDFs</button>
+    <button class="btn" id="btnPortada" title="Genera una portada amb les dades del projecte">Portada</button>
+    <button class="btn" id="btnIndex" title="Genera un índex automàtic per seccions">Índex</button>
+    <button class="btn primari" id="btnExport" disabled>Exportar dossier</button>
+  </div>
+</header>
+
+<div id="cos">
+  <aside>
+    <nav class="tabs" role="tablist">
+      <button class="tab activa" data-tab="estructura" role="tab">ESTRUCTURA</button>
+      <button class="tab" data-tab="projecte" role="tab">PROJECTE</button>
+      <button class="tab" data-tab="visat" role="tab">VISAT</button>
+    </nav>
+    <div class="panells">
+
+      <section class="panell activa" id="tab-estructura">
+        <p class="pista">Selecciona pàgines a la graella i assigna-les a una secció de la memòria. L'índex es genera a partir d'aquesta estructura.</p>
+        <div id="llistaSeccions"></div>
+      </section>
+
+      <section class="panell" id="tab-projecte">
+        <p class="pista">Aquestes dades omplen la portada, el caixetí i l'encapçalament del dossier.</p>
+        <div class="camp"><label for="p_titol">Títol del projecte</label><input id="p_titol" placeholder="p. ex. Reforma i ampliació d'habitatge unifamiliar"></div>
+        <div class="camp"><label for="p_tipus">Tipus d'intervenció</label>
+          <select id="p_tipus">
+            <option>Obra nova</option><option>Reforma / rehabilitació</option><option>Ampliació</option>
+            <option>Canvi d'ús</option><option>Enderroc</option><option>Legalització</option><option>Altres</option>
+          </select></div>
+        <div class="camp"><label for="p_fase">Fase</label>
+          <select id="p_fase">
+            <option>Projecte bàsic i executiu</option><option>Projecte bàsic</option><option>Projecte executiu</option>
+            <option>Avantprojecte</option><option>Documentació final d'obra</option>
+          </select></div>
+        <div class="camp"><label for="p_empl">Emplaçament</label><input id="p_empl" placeholder="Carrer, número"></div>
+        <div class="fila2">
+          <div class="camp"><label for="p_mun">Municipi</label><input id="p_mun" placeholder="Municipi"></div>
+          <div class="camp"><label for="p_ref">Ref. cadastral</label><input id="p_ref" placeholder="20 dígits"></div>
+        </div>
+        <div class="camp"><label for="p_prom">Promotor</label><input id="p_prom" placeholder="Nom del promotor"></div>
+        <div class="camp"><label for="p_arq">Arquitecte/a</label><input id="p_arq" placeholder="Nom i cognoms"></div>
+        <div class="fila2">
+          <div class="camp"><label for="p_col">Núm. col·legiat</label><input id="p_col" placeholder="00000"></div>
+          <div class="camp"><label for="p_data">Data</label><input id="p_data" type="date"></div>
+        </div>
+      </section>
+
+      <section class="panell" id="tab-visat">
+        <div class="grup">
+          <h3>NUMERACIÓ DE PÀGINES</h3>
+          <label class="opcio"><input type="checkbox" id="numOn" checked> Numerar les pàgines a l'exportació</label>
+          <label class="opcio">Format
+            <select id="numFormat">
+              <option value="pagde">Pàg. 3 de 24</option>
+              <option value="de">3 / 24</option>
+              <option value="sol">3</option>
+            </select></label>
+          <label class="opcio">Posició
+            <select id="numPos">
+              <option value="dreta">Peu · dreta</option>
+              <option value="centre">Peu · centre</option>
+            </select></label>
+          <label class="opcio"><input type="checkbox" id="numSkip" checked> No numerar la portada</label>
+        </div>
+        <div class="grup">
+          <h3>SEGELL DIAGONAL</h3>
+          <label class="opcio"><input type="radio" name="segell" value="cap" checked> Sense segell</label>
+          <label class="opcio"><input type="radio" name="segell" value="ESBORRANY"> ESBORRANY</label>
+          <label class="opcio"><input type="radio" name="segell" value="PER A VISAT"> PER A VISAT</label>
+          <label class="opcio"><input type="radio" name="segell" value="custom"> Text personalitzat</label>
+          <input id="segellCustom" placeholder="p. ex. VERSIÓ 2 · NO VÀLID PER A OBRA" disabled>
+        </div>
+        <div class="grup">
+          <h3>CHECKLIST DE DOCUMENTACIÓ</h3>
+          <div id="progVisat"><i></i></div>
+          <div id="progTxt">0 de 0 documents</div>
+          <div id="llistaCheck"></div>
+        </div>
+      </section>
+
+    </div>
+  </aside>
+
+  <main>
+    <div id="barraSel"></div>
+    <div id="zona">
+      <div id="buit">
+        <div class="ic">⌂</div>
+        <h2>Comença el dossier</h2>
+        <p>Arrossega aquí els PDFs de la memòria, els annexos i els plànols,<br>o fes clic per afegir-los. Es fusionaran en un únic dossier ordenable.</p>
+        <button class="btn primari" id="btnBuit">Afegir documents PDF</button>
+      </div>
+      <div id="graella"></div>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <span id="estPags">0 pàgines</span>
+  <span id="estDocs">0 documents</span>
+  <span id="estSecc">0 seccions assignades</span>
+  <span class="sep"></span>
+  <span>El dossier es processa íntegrament al teu dispositiu</span>
+</footer>
+
+<input type="file" id="fitxers" accept="application/pdf" multiple hidden>
+
+<div id="modal" role="dialog" aria-modal="true">
+  <div id="modalCos">
+    <div id="modalCap">
+      <span id="modalTitol"></span>
+      <button class="btn petit" id="modalTanca">Tancar (Esc)</button>
+    </div>
+    <div id="modalVista"></div>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+<script>
+/* ════════════════════════════════════════════════════════════
+   GUAITA DOSSIER COAC · muntatge de documentació per a visat
+   pdf.js (renderitzat) + pdf-lib (composició i exportació)
+   ════════════════════════════════════════════════════════════ */
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const SECCIONS = [
+  {code:'PT', nom:'Portada',                          color:'#22262D'},
+  {code:'IX', nom:'Índex',                            color:'#5B6470'},
+  {code:'DG', nom:'Dades generals i agents',          color:'#8A6D1F'},
+  {code:'MD', nom:'Memòria descriptiva',              color:'#1F4E8C'},
+  {code:'MC', nom:'Memòria constructiva',             color:'#2E6B4F'},
+  {code:'SI', nom:'CTE DB-SI · Seguretat en cas d\u2019incendi', color:'#B3282D'},
+  {code:'SU', nom:'CTE DB-SUA · Seguretat d\u2019utilització',   color:'#C05621'},
+  {code:'HE', nom:'CTE DB-HE · Estalvi d\u2019energia',          color:'#3E7C3E'},
+  {code:'HR', nom:'CTE DB-HR · Protecció contra el soroll',     color:'#6B4E8C'},
+  {code:'HS', nom:'CTE DB-HS · Salubritat',           color:'#2C7A7B'},
+  {code:'HA', nom:'Habitabilitat (D. 141/2012)',      color:'#946B2D'},
+  {code:'NU', nom:'Normativa urbanística',            color:'#7B5E3B'},
+  {code:'SS', nom:'Estudi de seguretat i salut',      color:'#A63F6B'},
+  {code:'GR', nom:'Gestió de residus',                color:'#557B2F'},
+  {code:'CQ', nom:'Programa de control de qualitat',  color:'#3B6E8C'},
+  {code:'AM', nom:'Amidaments i pressupost',          color:'#7A4EA8'},
+  {code:'PC', nom:'Plec de condicions',               color:'#4E6E58'},
+  {code:'AN', nom:'Annexos',                          color:'#807A6B'},
+  {code:'PL', nom:'Plànols',                          color:'#1D6FA5'}
+];
+const seccio = c => SECCIONS.find(s => s.code === c);
+
+const CHECKLIST = [
+  'Full d\u2019assumeix / designació de l\u2019arquitecte',
+  'Memòria descriptiva (MD)',
+  'Memòria constructiva (MC)',
+  'Compliment CTE DB-SI',
+  'Compliment CTE DB-SUA',
+  'Compliment CTE DB-HE i certificació energètica',
+  'Compliment CTE DB-HR',
+  'Compliment CTE DB-HS',
+  'Habitabilitat (D. 141/2012), si és habitatge',
+  'Justificació de la normativa urbanística',
+  'Estudi o estudi bàsic de seguretat i salut',
+  'Estudi de gestió de residus (RD 210/2018)',
+  'Programa de control de qualitat',
+  'Amidaments i pressupost (PEM)',
+  'Plec de condicions',
+  'Plànols complets i acotats',
+  'Fitxes estadístiques / característiques'
+];
+
+const estat = {
+  fonts: {},                 // id -> {id, nom, bytes(Uint8Array), doc(pdfjs), nPags}
+  pags: [],                  // {uid, tipus:'pdf'|'portada'|'index', fontId, idx, rot, sec, thumb, calcW, calcH}
+  sel: new Set(),
+  projecte: { titol:'', tipus:'Obra nova', fase:'Projecte bàsic i executiu',
+              empl:'', mun:'', ref:'', prom:'', arq:'', col:'', data:'' },
+  checklist: new Array(CHECKLIST.length).fill(false),
+  exportant: false
+};
+let seqUid = 0, seqFont = 0;
+const nouUid = () => 'p' + (++seqUid);
+
+/* ── utilitats ── */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+function toast(msg, err){ const t = $('#toast'); t.textContent = msg;
+  t.className = 'vis' + (err ? ' err' : '');
+  clearTimeout(t._t); t._t = setTimeout(() => t.className = '', 3200); }
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ════════ Càrrega de PDFs ════════ */
+async function afegirFitxers(llista){
+  const pdfs = [...llista].filter(f => /pdf$/i.test(f.type) || /\.pdf$/i.test(f.name));
+  if (!pdfs.length){ toast('Només s\u2019admeten fitxers PDF', true); return; }
+  for (const f of pdfs){
+    try{
+      const bytes = new Uint8Array(await f.arrayBuffer());
+      const doc = await pdfjsLib.getDocument({ data: bytes.slice() }).promise;
+      const id = 'f' + (++seqFont);
+      estat.fonts[id] = { id, nom: f.name.replace(/\.pdf$/i,''), bytes, doc, nPags: doc.numPages };
+      for (let i = 0; i < doc.numPages; i++)
+        estat.pags.push({ uid: nouUid(), tipus:'pdf', fontId:id, idx:i, rot:0, sec:null, thumb:null });
+      pintaTot();
+      genMiniatures(id);   // en segon pla
+      toast(`«${f.name}» · ${doc.numPages} pàg. afegides`);
+    }catch(e){ console.error(e); toast(`No s\u2019ha pogut llegir «${f.name}» (xifrat o malmès?)`, true); }
+  }
+}
+
+async function genMiniatures(fontId){
+  const s = estat.fonts[fontId];
+  for (let i = 0; i < s.nPags; i++){
+    try{
+      const pg = await s.doc.getPage(i + 1);
+      const base = pg.getViewport({ scale: 1 });
+      const vp = pg.getViewport({ scale: 340 / base.width });
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(vp.width); cv.height = Math.round(vp.height);
+      await pg.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+      const url = cv.toDataURL('image/jpeg', .78);
+      estat.pags.filter(p => p.fontId === fontId && p.idx === i)
+                .forEach(p => { p.thumb = url;
+                  const el = document.querySelector(`[data-uid="${p.uid}"] .mini`);
+                  if (el) el.innerHTML = `<img src="${url}" alt="" style="transform:rotate(${p.rot}deg)">`; });
+    }catch(e){ console.warn('miniatura', e); }
+  }
+}
+
+/* ════════ Pàgines virtuals ════════ */
+function insertaPortada(){
+  let p = estat.pags.find(x => x.tipus === 'portada');
+  if (!p){ p = { uid: nouUid(), tipus:'portada', rot:0, sec:'PT' };
+    estat.pags.unshift(p); toast('Portada afegida al davant del dossier'); }
+  else toast('La portada ja existeix; s\u2019actualitza amb les dades del projecte');
+  pintaTot();
+}
+function insertaIndex(){
+  let p = estat.pags.find(x => x.tipus === 'index');
+  if (!p){ p = { uid: nouUid(), tipus:'index', rot:0, sec:'IX' };
+    const pos = estat.pags.findIndex(x => x.tipus === 'portada') + 1;
+    estat.pags.splice(pos, 0, p); toast('Índex afegit; es calcula automàticament per seccions'); }
+  else toast('L\u2019índex ja existeix; es recalcularà a l\u2019exportació');
+  pintaTot();
+}
+
+/* Entrades d'índex: primera aparició de cada secció (núm. de pàgina final) */
+function entradesIndex(){
+  const vist = new Set(), out = [];
+  estat.pags.forEach((p, i) => {
+    if (p.sec && !['PT','IX'].includes(p.sec) && !vist.has(p.sec)){
+      vist.add(p.sec); out.push({ code:p.sec, nom:seccio(p.sec).nom, pag:i + 1 });
+    }
+  });
+  return out;
+}
+
+function htmlVirtual(p, gran){
+  const pr = estat.projecte, cls = 'vpag' + (gran ? ' gran' : '');
+  if (p.tipus === 'portada'){
+    return `<div class="${cls}">
+      <div class="vtop">DOCUMENTACIÓ PER A VISAT · COL·LEGI D'ARQUITECTES DE CATALUNYA</div>
+      <div class="vfase">${esc(pr.fase || 'FASE').toUpperCase()}</div>
+      <div class="vtitol">${esc(pr.titol || 'Títol del projecte')}</div>
+      <div class="vsub">${esc(pr.tipus)}<br>${esc(pr.empl || 'Emplaçament')}${pr.mun ? ' · ' + esc(pr.mun) : ''}</div>
+      <div class="vbloc">
+        <div><b>PROMOTOR</b>${esc(pr.prom || '—')}</div>
+        <div><b>ARQUITECTE/A</b>${esc(pr.arq || '—')}</div>
+        <div><b>NÚM. COL·LEGIAT</b>${esc(pr.col || '—')}</div>
+        <div><b>REF. CADASTRAL</b>${esc(pr.ref || '—')}</div>
+        <div><b>DATA</b>${esc(pr.data || '—')}</div>
+        <div><b>FASE</b>${esc(pr.fase)}</div>
+      </div></div>`;
+  }
+  const ent = entradesIndex();
+  const files = ent.length
+    ? ent.map(e => `<div class="vlin"><span>${e.code} · ${esc(e.nom)}</span><i>${e.pag}</i></div>`).join('')
+    : `<div class="vsub">Assigna seccions a les pàgines<br>per generar l'índex.</div>`;
+  return `<div class="${cls}"><div class="vh">ÍNDEX</div>${files}</div>`;
+}
+
+/* ════════ Pintat ════════ */
+function pintaTot(){ pintaGraella(); pintaSeccions(); pintaBarraSel(); pintaEstat(); pintaCaixeti(); }
+
+function pintaGraella(){
+  const g = $('#graella'), buit = $('#buit');
+  buit.style.display = estat.pags.length ? 'none' : '';
+  $('#btnExport').disabled = !estat.pags.length || estat.exportant;
+  g.innerHTML = '';
+  estat.pags.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = 'pag' + (estat.sel.has(p.uid) ? ' sel' : '');
+    card.dataset.uid = p.uid; card.draggable = true;
+    const sc = p.sec ? seccio(p.sec) : null;
+    const nomFont = p.tipus === 'pdf' ? esc(estat.fonts[p.fontId].nom)
+                  : p.tipus === 'portada' ? 'generada' : 'generat';
+    const mini = p.tipus !== 'pdf' ? htmlVirtual(p)
+               : p.thumb ? `<img src="${p.thumb}" alt="" style="transform:rotate(${p.rot}deg)">`
+                         : `<span class="carregant">renderitzant…</span>`;
+    card.innerHTML = `
+      <div class="franja" style="background:${sc ? sc.color : 'var(--line)'}"></div>
+      <div class="mini">${mini}</div>
+      <div class="peu">
+        <span class="num">${i + 1}</span>
+        ${sc ? `<span class="chip" style="background:${sc.color}">${sc.code}</span>` : ''}
+        <span class="font-doc">${nomFont}</span>
+      </div>
+      <span class="marca-sel">${estat.sel.has(p.uid) ? '✓' : ''}</span>
+      <span class="eines">
+        ${p.tipus === 'pdf' ? '<button class="eina" data-acc="rot" title="Girar 90°">⟳</button>' : ''}
+        <button class="eina esborra" data-acc="del" title="Treure del dossier">✕</button>
+      </span>`;
+    g.appendChild(card);
+  });
+}
+
+function pintaSeccions(){
+  const comptes = {};
+  estat.pags.forEach(p => { if (p.sec) comptes[p.sec] = (comptes[p.sec] || 0) + 1; });
+  $('#llistaSeccions').innerHTML = SECCIONS.map(s => {
+    const n = comptes[s.code] || 0;
+    return `<button class="sec ${n ? '' : 'buida'}" data-sec="${s.code}" title="${n ? 'Selecciona les pàgines d\u2019aquesta secció' : 'Sense pàgines assignades'}">
+      <span class="punt" style="background:${s.color};opacity:${n ? 1 : .3}"></span>
+      <span class="codi">${s.code}</span><span class="nom">${s.nom}</span>
+      <span class="n ${n ? '' : 'zero'}">${n}</span></button>`;
+  }).join('');
+}
+
+function pintaBarraSel(){
+  const b = $('#barraSel'), n = estat.sel.size;
+  if (!n){
+    b.innerHTML = `<span class="info">Clic: seleccionar · Maj+clic: interval · Doble clic: previsualitzar · Arrossega: reordenar</span>`;
+    return;
+  }
+  b.innerHTML = `
+    <span class="info"><b>${n}</b> pàg. seleccionades</span>
+    <select id="selSeccio">
+      <option value="">Assignar secció…</option>
+      ${SECCIONS.map(s => `<option value="${s.code}">${s.code} · ${s.nom}</option>`).join('')}
+      <option value="__cap">— Treure la secció</option>
+    </select>
+    <button class="btn petit" id="selRot">⟳ Girar 90°</button>
+    <button class="btn petit perill" id="selDel">✕ Eliminar</button>
+    <button class="btn petit" id="selCap">Desseleccionar</button>`;
+  $('#selSeccio').onchange = e => { if (e.target.value) assignarSeccio(e.target.value === '__cap' ? null : e.target.value); };
+  $('#selRot').onclick = () => girarSel();
+  $('#selDel').onclick = () => eliminarSel();
+  $('#selCap').onclick = () => { estat.sel.clear(); pintaGraella(); pintaBarraSel(); };
+}
+
+function pintaEstat(){
+  const nDocs = Object.keys(estat.fonts).length;
+  const nSec = estat.pags.filter(p => p.sec).length;
+  $('#estPags').textContent = estat.pags.length + ' pàgines';
+  $('#estDocs').textContent = nDocs + (nDocs === 1 ? ' document' : ' documents');
+  $('#estSecc').textContent = nSec + ' pàg. amb secció';
+}
+
+function pintaCaixeti(){
+  const pr = estat.projecte;
+  $('#capTitol').textContent = pr.titol || 'Sense títol';
+  const sub = [pr.tipus, pr.empl, pr.mun].filter(Boolean).join(' · ');
+  $('#capSub').textContent = sub || 'Defineix les dades a la pestanya Projecte';
+}
+
+/* ════════ Accions sobre pàgines ════════ */
+function assignarSeccio(code){
+  estat.pags.forEach(p => { if (estat.sel.has(p.uid) && p.tipus === 'pdf') p.sec = code; });
+  pintaTot();
+  toast(code ? `Secció ${code} · ${seccio(code).nom}` : 'Secció treta');
+}
+function girarSel(){
+  estat.pags.forEach(p => { if (estat.sel.has(p.uid) && p.tipus === 'pdf') p.rot = (p.rot + 90) % 360; });
+  pintaGraella();
+}
+function eliminarSel(){
+  estat.pags = estat.pags.filter(p => !estat.sel.has(p.uid));
+  estat.sel.clear(); pintaTot(); toast('Pàgines tretes del dossier (els PDFs originals no es modifiquen)');
+}
+let ultimClic = null;
+function clicPagina(uid, maj){
+  if (maj && ultimClic){
+    const a = estat.pags.findIndex(p => p.uid === ultimClic);
+    const b = estat.pags.findIndex(p => p.uid === uid);
+    if (a > -1 && b > -1){
+      for (let i = Math.min(a,b); i <= Math.max(a,b); i++) estat.sel.add(estat.pags[i].uid);
+    }
+  } else {
+    estat.sel.has(uid) ? estat.sel.delete(uid) : estat.sel.add(uid);
+    ultimClic = uid;
+  }
+  pintaGraella(); pintaBarraSel();
+}
+/* ════════ Esdeveniments de la graella ════════ */
+const graella = $('#graella');
+graella.addEventListener('click', e => {
+  const eina = e.target.closest('.eina');
+  const card = e.target.closest('.pag');
+  if (!card) return;
+  const uid = card.dataset.uid;
+  if (eina){
+    const p = estat.pags.find(x => x.uid === uid);
+    if (eina.dataset.acc === 'rot'){ p.rot = (p.rot + 90) % 360; pintaGraella(); }
+    else { estat.pags = estat.pags.filter(x => x.uid !== uid); estat.sel.delete(uid); pintaTot(); }
+    return;
+  }
+  clicPagina(uid, e.shiftKey);
+});
+graella.addEventListener('dblclick', e => {
+  const card = e.target.closest('.pag'); if (card) obreModal(card.dataset.uid);
+});
+
+/* Reordenació per arrossegament */
+let dragUid = null;
+graella.addEventListener('dragstart', e => {
+  const card = e.target.closest('.pag'); if (!card) return;
+  dragUid = card.dataset.uid; card.classList.add('arrossegant');
+  e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', dragUid);
+});
+graella.addEventListener('dragend', () => { dragUid = null;
+  $$('.pag').forEach(c => c.classList.remove('arrossegant','diana')); });
+graella.addEventListener('dragover', e => {
+  if (!dragUid) return; e.preventDefault();
+  $$('.pag.diana').forEach(c => c.classList.remove('diana'));
+  const card = e.target.closest('.pag');
+  if (card && card.dataset.uid !== dragUid) card.classList.add('diana');
+});
+graella.addEventListener('drop', e => {
+  if (!dragUid) return; e.preventDefault();
+  const card = e.target.closest('.pag');
+  const de = estat.pags.findIndex(p => p.uid === dragUid);
+  if (de < 0) return;
+  const [mov] = estat.pags.splice(de, 1);
+  let a = card ? estat.pags.findIndex(p => p.uid === card.dataset.uid) : estat.pags.length;
+  if (a < 0) a = estat.pags.length;
+  estat.pags.splice(a, 0, mov);
+  dragUid = null; pintaTot();
+});
+
+/* Arrossegar fitxers a la finestra */
+['dragover','dragenter'].forEach(ev => window.addEventListener(ev, e => {
+  if ([...e.dataTransfer.types].includes('Files')){ e.preventDefault(); document.body.classList.add('sobre'); }
+}));
+window.addEventListener('dragleave', e => { if (!e.relatedTarget) document.body.classList.remove('sobre'); });
+window.addEventListener('drop', e => {
+  if ([...e.dataTransfer.types].includes('Files')){
+    e.preventDefault(); document.body.classList.remove('sobre');
+    afegirFitxers(e.dataTransfer.files);
+  }
+});
+
+/* ════════ Modal de previsualització ════════ */
+async function obreModal(uid){
+  const p = estat.pags.find(x => x.uid === uid); if (!p) return;
+  const i = estat.pags.indexOf(p);
+  $('#modal').classList.add('oberta');
+  $('#modalTitol').textContent = `PÀG. ${i + 1} / ${estat.pags.length}` +
+    (p.sec ? `  ·  ${p.sec} ${seccio(p.sec).nom}` : '') +
+    (p.tipus === 'pdf' ? `  ·  ${estat.fonts[p.fontId].nom}` : '');
+  const vista = $('#modalVista');
+  if (p.tipus !== 'pdf'){ vista.innerHTML = htmlVirtual(p, true); return; }
+  vista.innerHTML = '<span class="carregant" style="font-family:var(--mono);font-size:11px;color:var(--ink-2)">renderitzant…</span>';
+  try{
+    const pg = await estat.fonts[p.fontId].doc.getPage(p.idx + 1);
+    const rotTotal = (pg.rotate + p.rot) % 360;
+    const base = pg.getViewport({ scale: 1, rotation: rotTotal });
+    const escala = Math.min(820 / base.width, 1600 / base.height, 2.2);
+    const vp = pg.getViewport({ scale: escala * (window.devicePixelRatio || 1), rotation: rotTotal });
+    const cv = document.createElement('canvas');
+    cv.width = vp.width; cv.height = vp.height;
+    cv.style.width = (vp.width / (window.devicePixelRatio || 1)) + 'px';
+    await pg.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+    vista.innerHTML = ''; vista.appendChild(cv);
+  }catch(e){ vista.textContent = 'No s\u2019ha pogut renderitzar la pàgina.'; }
+}
+$('#modalTanca').onclick = () => $('#modal').classList.remove('oberta');
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') $('#modal').classList.remove('oberta'); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape'){
+    if ($('#modal').classList.contains('oberta')) $('#modal').classList.remove('oberta');
+    else if (estat.sel.size){ estat.sel.clear(); pintaGraella(); pintaBarraSel(); }
+  }
+  if (e.key === 'Delete' && estat.sel.size && !e.target.closest('input,select,textarea')) eliminarSel();
+});
+
+/* ════════ Pestanyes, formulari, checklist ════════ */
+$$('.tab').forEach(t => t.onclick = () => {
+  $$('.tab').forEach(x => x.classList.toggle('activa', x === t));
+  $$('.panell').forEach(p => p.classList.toggle('activa', p.id === 'tab-' + t.dataset.tab));
+});
+let tRefresc;
+[['p_titol','titol'],['p_tipus','tipus'],['p_fase','fase'],['p_empl','empl'],['p_mun','mun'],
+ ['p_ref','ref'],['p_prom','prom'],['p_arq','arq'],['p_col','col'],['p_data','data']]
+.forEach(([id, clau]) => {
+  $('#' + id).addEventListener('input', e => {
+    estat.projecte[clau] = e.target.value; pintaCaixeti();
+    clearTimeout(tRefresc); tRefresc = setTimeout(pintaGraella, 250);
+  });
+});
+$('#p_data').value = new Date().toISOString().slice(0, 10);
+estat.projecte.data = $('#p_data').value;
+
+$('#llistaCheck').innerHTML = CHECKLIST.map((c, i) =>
+  `<label class="check"><input type="checkbox" data-i="${i}"><span>${c}</span></label>`).join('');
+$('#llistaCheck').addEventListener('change', e => {
+  const i = +e.target.dataset.i; estat.checklist[i] = e.target.checked;
+  e.target.closest('.check').classList.toggle('fet', e.target.checked);
+  const fets = estat.checklist.filter(Boolean).length;
+  $('#progVisat i').style.width = (100 * fets / CHECKLIST.length) + '%';
+  $('#progTxt').textContent = `${fets} de ${CHECKLIST.length} documents`;
+});
+$('#progTxt').textContent = `0 de ${CHECKLIST.length} documents`;
+
+$$('input[name=segell]').forEach(r => r.onchange = () =>
+  $('#segellCustom').disabled = document.querySelector('input[name=segell]:checked').value !== 'custom');
+
+$('#llistaSeccions').addEventListener('click', e => {
+  const b = e.target.closest('.sec'); if (!b) return;
+  const code = b.dataset.sec;
+  const uids = estat.pags.filter(p => p.sec === code).map(p => p.uid);
+  estat.sel = new Set(uids);
+  pintaGraella(); pintaBarraSel();
+  toast(uids.length ? `${uids.length} pàg. de «${seccio(code).nom}» seleccionades`
+                    : `Cap pàgina assignada a «${seccio(code).nom}»`);
+});
+
+/* Botons superiors */
+$('#btnAfegir').onclick = () => $('#fitxers').click();
+$('#btnBuit').onclick = () => $('#fitxers').click();
+$('#fitxers').onchange = e => { afegirFitxers(e.target.files); e.target.value = ''; };
+$('#btnPortada').onclick = insertaPortada;
+$('#btnIndex').onclick = insertaIndex;
+$('#btnExport').onclick = exportar;
+
+/* ════════ EXPORTACIÓ (pdf-lib) ════════ */
+const A4 = [595.28, 841.89];
+const net = s => String(s ?? '')
+  .replace(/[^\u0020-\u00FF\u2018\u2019\u201C\u201D\u2013\u2014\u00B7\u20AC]/g, '?');
+
+function ajustaText(text, font, mida, ample){
+  const paraules = net(text).split(/\s+/).filter(Boolean), linies = [];
+  let l = '';
+  for (const w of paraules){
+    const prova = l ? l + ' ' + w : w;
+    if (font.widthOfTextAtSize(prova, mida) <= ample) l = prova;
+    else { if (l) linies.push(l); l = w; }
+  }
+  if (l) linies.push(l);
+  return linies.length ? linies : [''];
+}
+
+function dibuixaPortada(doc, fonts){
+  const { rgb } = PDFLib;
+  const [W, H] = A4, pg = doc.addPage(A4), pr = estat.projecte;
+  const ink = rgb(.13,.15,.18), gris = rgb(.42,.45,.49), blau = rgb(.12,.31,.55), lin = rgb(.72,.70,.64);
+  pg.drawRectangle({ x:30, y:30, width:W-60, height:H-60, borderColor:ink, borderWidth:1 });
+  const cap = 'DOCUMENTACIÓ PER A VISAT · COL·LEGI D\u2019ARQUITECTES DE CATALUNYA';
+  pg.drawText(cap, { x:(W - fonts.b.widthOfTextAtSize(cap, 8))/2, y:H-66, size:8, font:fonts.b, color:gris });
+  pg.drawLine({ start:{x:56,y:H-80}, end:{x:W-56,y:H-80}, thickness:.7, color:lin });
+
+  let y = H - 250;
+  const fase = net(pr.fase || '').toUpperCase();
+  pg.drawText(fase, { x:60, y, size:10, font:fonts.b, color:blau }); y -= 30;
+  const titol = ajustaText(pr.titol || 'Títol del projecte', fonts.b, 25, W-140);
+  for (const l of titol.slice(0,4)){ pg.drawText(l, { x:60, y, size:25, font:fonts.b, color:ink }); y -= 33; }
+  y -= 8;
+  pg.drawText(net(pr.tipus), { x:60, y, size:12, font:fonts.r, color:ink }); y -= 20;
+  const lloc = [pr.empl, pr.mun].filter(Boolean).join(' · ');
+  if (lloc) pg.drawText(net(lloc), { x:60, y, size:12, font:fonts.r, color:gris });
+
+  /* caixetí inferior: 3 columnes × 2 files */
+  const bx = 56, bw = W-112, bh = 108, by = 70, cw = bw/3, ch = bh/2;
+  pg.drawRectangle({ x:bx, y:by, width:bw, height:bh, borderColor:ink, borderWidth:1 });
+  pg.drawLine({ start:{x:bx, y:by+ch}, end:{x:bx+bw, y:by+ch}, thickness:.6, color:lin });
+  for (let c = 1; c < 3; c++)
+    pg.drawLine({ start:{x:bx+c*cw, y:by}, end:{x:bx+c*cw, y:by+bh}, thickness:.6, color:lin });
+  const cel = [
+    ['PROMOTOR', pr.prom], ['ARQUITECTE/A', pr.arq], ['NÚM. COL·LEGIAT', pr.col],
+    ['REF. CADASTRAL', pr.ref], ['DATA', pr.data], ['FASE', pr.fase]
+  ];
+  cel.forEach(([etq, val], i) => {
+    const cx = bx + (i % 3) * cw + 9, cy = by + (i < 3 ? ch : 0);
+    pg.drawText(etq, { x:cx, y:cy + ch - 16, size:6.5, font:fonts.b, color:gris });
+    const linies = ajustaText(val || '—', fonts.r, 9.5, cw - 18);
+    pg.drawText(linies[0], { x:cx, y:cy + ch - 32, size:9.5, font:fonts.r, color:ink });
+    if (linies[1]) pg.drawText(linies[1], { x:cx, y:cy + ch - 44, size:9.5, font:fonts.r, color:ink });
+  });
+  return pg;
+}
+
+function dibuixaIndex(doc, fonts, entrades){
+  const { rgb } = PDFLib;
+  const [W, H] = A4, pg = doc.addPage(A4);
+  const ink = rgb(.13,.15,.18), gris = rgb(.42,.45,.49), lin = rgb(.72,.70,.64);
+  pg.drawText('ÍNDEX', { x:60, y:H-92, size:21, font:fonts.b, color:ink });
+  pg.drawLine({ start:{x:60,y:H-104}, end:{x:W-60,y:H-104}, thickness:1, color:ink });
+  let y = H - 142;
+  for (const e of entrades){
+    if (y < 70) break;
+    pg.drawText(e.code, { x:60, y, size:9, font:fonts.b, color:gris });
+    const nom = net(e.nom);
+    pg.drawText(nom, { x:92, y, size:10.5, font:fonts.r, color:ink });
+    const num = String(e.pag), nw = fonts.b.widthOfTextAtSize(num, 10.5);
+    pg.drawText(num, { x:W-60-nw, y, size:10.5, font:fonts.b, color:ink });
+    const x0 = 96 + fonts.r.widthOfTextAtSize(nom, 10.5) + 8;
+    pg.drawLine({ start:{x:x0, y:y+2}, end:{x:W-68-nw, y:y+2},
+                  thickness:.6, color:lin, dashArray:[1,3] });
+    y -= 24;
+  }
+  if (!entrades.length)
+    pg.drawText('Sense seccions assignades.', { x:60, y, size:10.5, font:fonts.r, color:gris });
+  return pg;
+}
+
+async function exportar(){
+  if (!estat.pags.length || estat.exportant) return;
+  estat.exportant = true;
+  const btn = $('#btnExport'); btn.disabled = true; btn.textContent = 'Exportant…';
+  try{
+    const { PDFDocument, StandardFonts, rgb, degrees } = PDFLib;
+    const out = await PDFDocument.create();
+    const fonts = { r: await out.embedFont(StandardFonts.Helvetica),
+                    b: await out.embedFont(StandardFonts.HelveticaBold) };
+    const cacheSrc = {};
+    const entrades = entradesIndex();
+
+    for (const p of estat.pags){
+      if (p.tipus === 'portada'){ dibuixaPortada(out, fonts); continue; }
+      if (p.tipus === 'index'){ dibuixaIndex(out, fonts, entrades); continue; }
+      const font = estat.fonts[p.fontId];
+      if (!cacheSrc[p.fontId])
+        cacheSrc[p.fontId] = await PDFDocument.load(font.bytes, { ignoreEncryption:true });
+      const [cp] = await out.copyPages(cacheSrc[p.fontId], [p.idx]);
+      const pg = out.addPage(cp);
+      if (p.rot) pg.setRotation(degrees((pg.getRotation().angle + p.rot) % 360));
+    }
+
+    /* numeració i segell */
+    const numOn = $('#numOn').checked, fmt = $('#numFormat').value,
+          pos = $('#numPos').value, salta = $('#numSkip').checked;
+    let segell = document.querySelector('input[name=segell]:checked').value;
+    if (segell === 'custom') segell = $('#segellCustom').value.trim();
+    if (segell === 'cap') segell = '';
+    segell = net(segell).toUpperCase();
+
+    const total = out.getPageCount(), gris = rgb(.45,.47,.50), vermell = rgb(.66,.17,.19);
+    out.getPages().forEach((pg, i) => {
+      const { width:w, height:h } = pg.getSize();
+      const esPortada = estat.pags[i] && estat.pags[i].tipus === 'portada';
+      if (numOn && !(salta && esPortada)){
+        const n = i + 1;
+        const txt = fmt === 'pagde' ? `Pàg. ${n} de ${total}` : fmt === 'de' ? `${n} / ${total}` : String(n);
+        const tw = fonts.r.widthOfTextAtSize(txt, 8.5);
+        const x = pos === 'centre' ? (w - tw)/2 : w - 36 - tw;
+        pg.drawText(txt, { x, y:22, size:8.5, font:fonts.r, color:gris });
+      }
+      if (segell){
+        const mida = Math.min(120, Math.max(34, (w * .92) / (.62 * segell.length)));
+        pg.drawText(segell, { x:w*.10, y:h*.26, size:mida, font:fonts.b,
+                              color:vermell, opacity:.16, rotate:degrees(35) });
+      }
+    });
+
+    const bytes = await out.save();
+    const slug = (estat.projecte.titol || 'dossier').toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,60) || 'dossier';
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([bytes], { type:'application/pdf' }));
+    a.download = slug + '_visat.pdf';
+    a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    toast(`Dossier exportat · ${total} pàgines`);
+  }catch(e){
+    console.error(e);
+    toast('Error en exportar: ' + (e.message || e), true);
+  }finally{
+    estat.exportant = false; btn.disabled = !estat.pags.length; btn.textContent = 'Exportar dossier';
+  }
+}
+
+/* arrencada */
+pintaTot();
+</script>
+<a href="HLP%20dossier-coac-ajuda.html" target="_blank" rel="noopener" class="guaita-help-fab" title="Obre l'ajuda d'aquesta aplicació" style="position:fixed;right:18px;bottom:18px;z-index:2147483000;display:inline-flex;align-items:center;gap:8px;background:#C6FF00;color:#0A0E00;font-family:'Space Grotesk',system-ui,-apple-system,sans-serif;font-weight:600;font-size:14px;line-height:1;text-decoration:none;padding:11px 16px;border-radius:24px;box-shadow:0 4px 14px rgba(0,0,0,.35);border:1px solid #0A0E00;"><span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:700;">?</span>Ajuda</a>
+
+<style id="gtema-css">
+html[data-gtema="fosc"]{ color-scheme:dark; }
+html[data-gtema="fosc"]{--paper:#14161a;--card:#1d2127;--ink:#e5e8ec;--ink-2:#98a1ac;--line:#323841;--line-forta:#4a525d;--blau:#82aae2;--blau-fosc:#a5c2ee;--blau-clar:#1e2836;--visat:#e2565b;--ok:#63b28b}
+html[data-gtema="fosc"] #toast{color:#14161a}
+#gtemaFab{position:fixed;right:18px;bottom:70px;z-index:2147483000;width:40px;height:40px;border-radius:50%;background:#C6FF00;color:#0A0E00;border:1px solid #0A0E00;font-size:17px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+</style>
+<script>
+(function(){var K='gtema-dossiercoac';
+function ap(t){document.documentElement.setAttribute('data-gtema',t);
+var b=document.getElementById('gtemaFab');
+if(b){b.textContent=t==='fosc'?'\u2600':'\ud83c\udf19';b.title=t==='fosc'?'Canvia a mode clar':'Canvia a mode fosc';}
+try{localStorage.setItem(K,t)}catch(e){}}
+var b=document.createElement('button');b.id='gtemaFab';document.body.appendChild(b);
+b.onclick=function(){ap(document.documentElement.getAttribute('data-gtema')==='fosc'?'clar':'fosc')};
+var t;try{t=localStorage.getItem(K)}catch(e){}
+ap(t==='clar'?'clar':'fosc');
+})();
+</script>
+</body>
+</html>

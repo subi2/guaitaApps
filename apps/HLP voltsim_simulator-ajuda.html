@@ -1,0 +1,440 @@
+<!--
+  Guaita Apps - Suite d'eines autònomes per a arquitectura, BIM i documentació.
+  Copyright (c) 2026 Jordi Subirós
+  GNU Affero General Public License v3.0
+  See LICENSE file for details
+-->
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ajuda · VoltSim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0E0A; --panel:#12160F; --panel-2:#191E12; --panel-3:#232A18;
+  --line:#333D1F; --line-soft:#28301A; --txt:#EAF3D8; --dim:#94A377; --dim-2:#5E6B47;
+  --accent:#C6FF00; --accent-ink:#0A0E00; --accent-2:#FF2ECC; --accent-3:#00E5FF; --accent-4:#FFE500;
+  --danger:#FF4D6D; --radius:8px;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Space Grotesk',system-ui,sans-serif;
+  background:var(--ink); color:var(--txt); line-height:1.6;
+  background-image:linear-gradient(rgba(198,255,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(198,255,0,.03) 1px,transparent 1px);
+  background-size:44px 44px;
+}
+.mono{font-family:'IBM Plex Mono',monospace;}
+a{color:var(--accent-3); text-decoration:none;}
+a:hover{color:var(--accent);}
+
+/* ---------- Layout ---------- */
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px; display:grid; grid-template-columns:230px 1fr; gap:48px;}
+@media(max-width:860px){ .wrap{grid-template-columns:1fr; gap:0;} nav.toc{display:none;} }
+
+/* ---------- Hero ---------- */
+header.hero{
+  border-bottom:1px solid var(--line); background:var(--panel);
+  padding:56px 24px 44px; position:relative; overflow:hidden;
+}
+header.hero .inner{max-width:1180px; margin:0 auto;}
+.brand{display:flex; align-items:center; gap:14px; margin-bottom:22px;}
+.brand .cells{display:grid; grid-template-columns:repeat(2,13px); gap:4px;}
+.brand .cells span{width:13px; height:13px;}
+.brand .cells span:nth-child(1){background:var(--accent);}
+.brand .cells span:nth-child(2){background:var(--accent-2);}
+.brand .cells span:nth-child(3){background:var(--accent-3);}
+.brand .cells span:nth-child(4){background:var(--accent-4);}
+.brand .bt{font-weight:700; font-size:20px; letter-spacing:.16em;}
+.brand .bt small{color:var(--accent); font-size:12px; letter-spacing:.1em; margin-left:2px;}
+header.hero h1{
+  font-size:clamp(34px,6vw,60px); line-height:1.02; font-weight:700; letter-spacing:-.02em;
+  max-width:16ch;
+}
+header.hero h1 em{font-style:normal; color:var(--accent);}
+header.hero p.lead{margin-top:18px; font-size:17px; color:var(--dim); max-width:60ch;}
+.hero-tag{
+  display:inline-block; margin-bottom:10px; font-family:'IBM Plex Mono',monospace;
+  font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent-ink);
+  background:var(--accent); padding:4px 10px; border-radius:20px;
+}
+
+/* ---------- TOC ---------- */
+nav.toc{position:sticky; top:32px; align-self:start; padding-top:48px;}
+nav.toc .toc-t{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim-2); margin-bottom:12px;}
+nav.toc ol{list-style:none; counter-reset:s;}
+nav.toc li{counter-increment:s; margin:2px 0;}
+nav.toc a{
+  display:flex; gap:10px; align-items:baseline; padding:6px 8px; border-radius:6px;
+  color:var(--dim); font-size:13.5px; border-left:2px solid transparent;
+}
+nav.toc a::before{content:counter(s,decimal-leading-zero); font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--dim-2);}
+nav.toc a:hover{background:var(--panel-2); color:var(--txt);}
+nav.toc a.active{color:var(--accent); border-left-color:var(--accent); background:var(--panel-2);}
+
+/* ---------- Content ---------- */
+main{padding:48px 0 100px; min-width:0;}
+section{margin-bottom:56px; scroll-margin-top:24px;}
+section > h2{
+  font-size:12px; font-family:'IBM Plex Mono',monospace; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--accent); margin-bottom:6px;
+}
+section > h2 .num{color:var(--dim-2); margin-right:10px;}
+section > .st{font-size:27px; font-weight:600; letter-spacing:-.01em; margin-bottom:18px; line-height:1.15;}
+section p{margin-bottom:14px; color:var(--txt);}
+section p.muted{color:var(--dim);}
+h3{font-size:17px; font-weight:600; margin:26px 0 10px;}
+
+/* ---------- Callouts ---------- */
+.note{
+  border:1px solid var(--line); border-left:3px solid var(--accent-3);
+  background:var(--panel); border-radius:0 var(--radius) var(--radius) 0;
+  padding:14px 16px; margin:18px 0; font-size:14px;
+}
+.note.warn{border-left-color:var(--accent-4);}
+.note.stop{border-left-color:var(--danger);}
+.note .nt{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin-bottom:5px;}
+.note.warn .nt{color:var(--accent-4);}
+.note.stop .nt{color:var(--danger);}
+
+/* ---------- Steps ---------- */
+ol.steps{list-style:none; counter-reset:step; margin:8px 0;}
+ol.steps li{counter-increment:step; position:relative; padding:12px 0 12px 46px; border-bottom:1px solid var(--line-soft);}
+ol.steps li:last-child{border-bottom:none;}
+ol.steps li::before{
+  content:counter(step); position:absolute; left:0; top:11px;
+  width:30px; height:30px; border-radius:8px; background:var(--panel-3); color:var(--accent);
+  font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13px;
+  display:flex; align-items:center; justify-content:center; border:1px solid var(--line);
+}
+ol.steps li b{color:var(--accent);}
+
+/* ---------- Feature cards ---------- */
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:14px; margin:10px 0;}
+.card{border:1px solid var(--line); background:var(--panel); border-radius:var(--radius); padding:16px;}
+.card .ci{width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; background:var(--panel-3);}
+.card .ci svg{width:18px; height:18px; stroke:var(--accent); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
+.card h4{font-size:15px; font-weight:600; margin-bottom:4px;}
+.card p{font-size:13px; color:var(--dim); margin:0;}
+.card:nth-child(4n+2) .ci svg{stroke:var(--accent-2);}
+.card:nth-child(4n+3) .ci svg{stroke:var(--accent-3);}
+.card:nth-child(4n+4) .ci svg{stroke:var(--accent-4);}
+
+/* ---------- Tables ---------- */
+table.tbl{width:100%; border-collapse:collapse; font-size:14px; margin:14px 0;}
+table.tbl th{text-align:left; padding:9px 12px; background:var(--panel-2); color:var(--dim); font-weight:500; font-size:12px; letter-spacing:.03em; text-transform:uppercase; border-bottom:1px solid var(--line);}
+table.tbl td{padding:9px 12px; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+table.tbl tr:hover td{background:var(--panel);}
+kbd{
+  font-family:'IBM Plex Mono',monospace; font-size:12px; background:var(--panel-3);
+  border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:2px 8px; color:var(--accent); white-space:nowrap;
+}
+code{font-family:'IBM Plex Mono',monospace; font-size:.88em; background:var(--panel-2); border:1px solid var(--line-soft); padding:1px 6px; border-radius:4px; color:var(--accent-3);}
+
+/* ---------- Panel map ---------- */
+.map{border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin:16px 0; font-family:'IBM Plex Mono',monospace; font-size:11.5px;}
+.map .mrow{display:flex; border-bottom:1px solid var(--line-soft);}
+.map .mrow:last-child{border-bottom:none;}
+.map .mcell{padding:14px 12px; border-right:1px solid var(--line-soft); color:var(--dim);}
+.map .mcell:last-child{border-right:none;}
+.map .mcell b{display:block; color:var(--accent); font-family:'Space Grotesk',sans-serif; font-size:13px; margin-bottom:3px;}
+.map .l{flex:0 0 26%;} .map .c{flex:1;} .map .r{flex:0 0 24%;}
+.map .top,.map .bot{background:var(--panel-2); color:var(--accent-3); padding:10px 12px; text-align:center;}
+
+/* ---------- Details / FAQ ---------- */
+details{border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); margin:8px 0; overflow:hidden;}
+details summary{padding:14px 16px; cursor:pointer; font-weight:500; list-style:none; display:flex; align-items:center; gap:10px;}
+details summary::-webkit-details-marker{display:none;}
+details summary::before{content:'+'; font-family:'IBM Plex Mono',monospace; color:var(--accent); font-size:16px;}
+details[open] summary::before{content:'−';}
+details .db{padding:0 16px 16px 42px; color:var(--dim); font-size:14px;}
+details[open] summary{color:var(--accent);}
+
+footer.foot{border-top:1px solid var(--line); padding:28px 24px; text-align:center; color:var(--dim-2); font-size:12.5px;}
+footer.foot .fb{display:inline-flex; gap:8px; align-items:center; margin-bottom:8px;}
+footer.foot .fb .cells{display:grid; grid-template-columns:repeat(2,6px); gap:2px;}
+footer.foot .fb .cells span{width:6px; height:6px;}
+footer.foot .fb .cells span:nth-child(1){background:var(--accent);} footer.foot .fb .cells span:nth-child(2){background:var(--accent-2);}
+footer.foot .fb .cells span:nth-child(3){background:var(--accent-3);} footer.foot .fb .cells span:nth-child(4){background:var(--accent-4);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="inner">
+    <div class="brand">
+      <span class="cells"><span></span><span></span><span></span><span></span></span>
+      <span class="bt">GUAITA<small>VOLTSIM</small></span>
+    </div>
+    <span class="hero-tag">Manual d'ús</span>
+    <h1>Simula el consum elèctric de casa i quant et costa <em>cada hora</em>.</h1>
+    <p class="lead">VoltSim modela la corba de potència d'una vivenda al llarg de 24 hores, la creua amb el preu del mercat (patró PVPC), hi suma les plaques solars i el cotxe elèctric, i et diu el cost del dia i la factura mensual estimada.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="toc">
+    <div class="toc-t">Contingut</div>
+    <ol>
+      <li><a href="#intro">Què és</a></li>
+      <li><a href="#modes">Els dos modes</a></li>
+      <li><a href="#interficie">La interfície</a></li>
+      <li><a href="#vivenda">Vivenda i potència</a></li>
+      <li><a href="#basals">Consums basals</a></li>
+      <li><a href="#clima">Climatització</a></li>
+      <li><a href="#ev">Vehicle elèctric</a></li>
+      <li><a href="#electro">Electrodomèstics</a></li>
+      <li><a href="#solar">Autoconsum solar</a></li>
+      <li><a href="#resultats">Llegir els resultats</a></li>
+      <li><a href="#optimitzar">Auto-optimitzar</a></li>
+      <li><a href="#calcul">Com calcula</a></li>
+      <li><a href="#problemes">Problemes</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section id="intro">
+      <h2><span class="num">01</span>Introducció</h2>
+      <div class="st">Un laboratori energètic de la teva llar</div>
+      <p>VoltSim és una calculadora i simulador que viu en una sola pàgina HTML: s'obre a qualsevol navegador modern i tot el càlcul passa dins del teu equip, sense enviar res a cap servidor. Descrius com és casa teva i quins aparells fas servir, i el simulador et dibuixa la corba de consum de tot un dia i la compara amb el preu de la llum hora a hora.</p>
+      <p class="muted">L'objectiu és entendre quan gastes energia, quan és cara i quan és barata, i com desplaçar consums (o afegir solar) rebaixa la factura. No és una eina de facturació oficial: és un model educatiu basat en patrons realistes del mercat espanyol.</p>
+      <div class="cards">
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg></div><h4>24 hores</h4><p>Modela la potència de la llar franja per franja del dia.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div><h4>Preu vs potència</h4><p>Creua el teu consum amb la corba de preu del mercat.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></div><h4>Solar i EV</h4><p>Inclou plaques fotovoltaiques i càrrega de cotxe elèctric.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M9 21V9m6 12V3M3 21V13"/></svg></div><h4>Factura estimada</h4><p>Cost del dia i projecció mensual amb terme fix i variable.</p></div>
+      </div>
+    </section>
+
+    <section id="modes">
+      <h2><span class="num">02</span>Els dos modes d'estudi</h2>
+      <div class="st">Visió ràpida o control total</div>
+      <p>A dalt de tot hi ha un interruptor mestre amb dues posicions. Tria segons el detall que necessitis:</p>
+      <table class="tbl">
+        <thead><tr><th>Mode</th><th>Què fa</th><th>Quan fer-lo servir</th></tr></thead>
+        <tbody>
+          <tr><td><b>Consum Mitjà (Pla)</b></td><td>Estima un consum diari teòric a partir dels habitants i la superfície, i el reparteix pla al llarg del dia. Els panells de detall queden atenuats.</td><td>Per a una primera idea ràpida del cost i la factura mensual.</td></tr>
+          <tr><td><b>Consum Detallat</b></td><td>Activa tots els panells (climatització, EV, electrodomèstics, basals) i dibuixa la corba real amb els pics de cada aparell.</td><td>Per estudiar quan gastes, evitar que saltin els ploms i optimitzar horaris.</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <div class="nt">Nota</div>
+        L'<b>Autoconsum Solar</b> funciona en tots dos modes. La resta de panells de detall només tenen efecte en el mode <b>Detallat</b>.
+      </div>
+    </section>
+
+    <section id="interficie">
+      <h2><span class="num">03</span>La interfície</h2>
+      <div class="st">On és cada cosa</div>
+      <div class="map">
+        <div class="top">Capçalera · logotip VOLTSIM + indicadors globals: Cost net avui · Consum Xarxa · Autoconsum · Factura Mensual Est.</div>
+        <div class="mrow">
+          <div class="mcell l"><b>Interruptor mestre</b>Consum Mitjà / Consum Detallat + avís de tall per potència excedida.</div>
+          <div class="mcell c"><b>Gràfica panoràmica</b>Corba de 24h: preu, consum net a la xarxa, producció solar i consum brut. Botó «Auto-optimitzar».</div>
+          <div class="mcell r"><b>Panell d'anàlisi</b>Consell de l'analista + desglossament de costos per categoria.</div>
+        </div>
+        <div class="bot">Configuració d'Instal·lacions: Solar · Vivenda · Vehicle Elèctric · Climatització · Electrodomèstics · Consums Basals</div>
+      </div>
+    </section>
+
+    <section id="vivenda">
+      <h2><span class="num">04</span>Vivenda i potència contractada</h2>
+      <div class="st">Descriu la teva llar</div>
+      <p>Al panell <b>Vivenda i Demografia</b> ajustes les dades de partida:</p>
+      <table class="tbl">
+        <thead><tr><th>Camp</th><th>Marge</th><th>Per a què serveix</th></tr></thead>
+        <tbody>
+          <tr><td>Habitants</td><td>1 a 10</td><td>Escala el consum basal i el mitjà teòric.</td></tr>
+          <tr><td>Superfície (m²)</td><td>20 a 300</td><td>Dimensiona la potència de climatització i el consum mitjà.</td></tr>
+          <tr><td>Potència contractada</td><td>Bàsica / Elevada</td><td>Fixa el límit legal de potència (ICP) i el terme fix de la factura.</td></tr>
+        </tbody>
+      </table>
+      <p>Les dues opcions de potència corresponen a les electrificacions habituals:</p>
+      <ul style="margin:0 0 14px 20px; color:var(--txt);">
+        <li><b>Bàsica</b> — límit de <b>5,75 kW</b>. Si el consum instantani supera aquest valor, salten els ploms.</li>
+        <li><b>Elevada</b> — límit de <b>9,20 kW</b>. Més marge, però el terme fix mensual és més car.</li>
+      </ul>
+      <div class="note warn">
+        <div class="nt">Interruptor de Control de Potència (ICP)</div>
+        En mode Detallat, si algun instant del dia el consum brut supera el límit contractat, apareix l'avís vermell «Risc de tall per potència excedida». No és un error del simulador: és el que passaria a casa teva.
+      </div>
+    </section>
+
+    <section id="basals">
+      <h2><span class="num">05</span>Consums basals (24h)</h2>
+      <div class="st">El que sempre està engegat</div>
+      <p>Al panell <b>Consums Basals</b> configures la despesa de fons que no s'atura mai, present les 24 hores:</p>
+      <table class="tbl">
+        <thead><tr><th>Element</th><th>Opcions</th><th>Consum aproximat</th></tr></thead>
+        <tbody>
+          <tr><td>Eficiència nevera</td><td>A+++ · A+ · B · C/D</td><td>de 60 W (A+++) a 200 W (C/D)</td></tr>
+          <tr><td>Consum fantasma (standby)</td><td>Baix · Normal · Elevat</td><td>de 40 W a 160 W continus</td></tr>
+          <tr><td>Congelador independent</td><td>casella opcional</td><td>+0,8 kWh/dia (uns 33 W)</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">El watiatge triat es mostra en temps real (p. ex. «120W de mitjana»). Aquests valors sumen a la línia base de cada hora del dia en el mode Detallat.</p>
+    </section>
+
+    <section id="clima">
+      <h2><span class="num">06</span>Climatització (AC / calefacció)</h2>
+      <div class="st">Fred o calor a demanda</div>
+      <p>El panell <b>Climatització</b> (mode Detallat) simula un equip d'aire condicionat o bomba de calor:</p>
+      <ol class="steps">
+        <li>Activa o desactiva l'equip amb l'<b>interruptor</b> del capçal del panell.</li>
+        <li>Tria la <b>classe d'eficiència</b>: Classe A (millor, ~3,0 de rendiment), B o C. Com pitjor és la classe, més potència consumeix per m².</li>
+        <li>Fixa l'<b>horari actiu</b> amb les hores d'inici i final. La potència nominal es calcula segons la superfície i la classe, i s'aplica dins d'aquesta franja.</li>
+      </ol>
+      <div class="note">
+        <div class="nt">Com es dimensiona</div>
+        La potència de clima = superfície (m²) × factor de classe (A ≈ 0,015 · B ≈ 0,025 · C ≈ 0,04 kW/m²). Un pis gran amb equip de classe C és el que més fa disparar el pic de consum.
+      </div>
+    </section>
+
+    <section id="ev">
+      <h2><span class="num">07</span>Vehicle elèctric (EV)</h2>
+      <div class="st">Carrega el cotxe a l'hora que vulguis</div>
+      <p>Al panell <b>Vehicle Elèctric</b> (mode Detallat) defineixes com i quan carregues:</p>
+      <table class="tbl">
+        <thead><tr><th>Paràmetre</th><th>Opcions</th></tr></thead>
+        <tbody>
+          <tr><td>Velocitat de càrrega</td><td>Schuko 2,3 kW · Wallbox 3,7 kW · Wallbox ràpid 7,4 kW · Trifàsica 11 kW</td></tr>
+          <tr><td>Hora d'inici</td><td>qualsevol de les 24 hores del dia</td></tr>
+          <tr><td>Durada</td><td>2, 4, 6, 8 o 10 hores</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">La càrrega afegeix una potència constant (la velocitat triada) durant totes les hores de la durada, a partir de l'hora d'inici. Programar-la de nit esquiva els pics de preu; programar-la al migdia amb plaques l'alimenta amb energia solar gairebé gratuïta.</p>
+    </section>
+
+    <section id="electro">
+      <h2><span class="num">08</span>Electrodomèstics a demanda</h2>
+      <div class="st">Els aparells que engegues tu</div>
+      <p>El panell <b>Electrodomèstics a Demanda</b> (mode Detallat) inclou una llista d'aparells amb la seva potència i durada de cicle. Per a cadascun pots activar-lo o desactivar-lo i triar l'<b>hora d'inici</b>:</p>
+      <table class="tbl">
+        <thead><tr><th>Aparell</th><th>Potència</th><th>Durada</th></tr></thead>
+        <tbody>
+          <tr><td>Rentadora</td><td>1,8 kW</td><td>2 h (pic alt a l'inici)</td></tr>
+          <tr><td>Rentavaixelles</td><td>1,2 kW</td><td>2 h (cicle ECO)</td></tr>
+          <tr><td>Forn elèctric</td><td>2,2 kW</td><td>1 h</td></tr>
+          <tr><td>Termo d'aigua</td><td>1,5 kW</td><td>3 h</td></tr>
+          <tr><td>Depuradora piscina</td><td>1,0 kW</td><td>4 h</td></tr>
+          <tr><td>Planxa de roba</td><td>2,0 kW</td><td>1 h</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">Alguns aparells modulen la potència al llarg del cicle (per exemple, la rentadora concentra el consum a la primera hora d'escalfament de l'aigua). Col·locar-los a les hores de preu baix és el gran truc d'estalvi.</p>
+    </section>
+
+    <section id="solar">
+      <h2><span class="num">09</span>Autoconsum solar</h2>
+      <div class="st">Producció fotovoltaica i excedents</div>
+      <p>El panell <b>Autoconsum Solar</b> (actiu en tots dos modes) afegeix una instal·lació de plaques:</p>
+      <ol class="steps">
+        <li>Activa-la amb l'<b>interruptor</b> verd del capçal.</li>
+        <li>Ajusta la <b>potència instal·lada</b> (kWp) amb el control lliscant, d'1,0 a 10,0 kWp.</li>
+      </ol>
+      <p>La producció es concentra de <b>8 h a 19 h</b>, amb el pic al migdia solar (una corba en forma de campana). L'energia solar es resta directament del consum de la llar:</p>
+      <ul style="margin:0 0 14px 20px; color:var(--txt);">
+        <li>Si produeixes menys del que gastes, la solar rebaixa el que treus de la xarxa (autoconsum).</li>
+        <li>Si produeixes de més, els <b>excedents</b> es compensen a <b>0,06 €/kWh</b> i redueixen la factura.</li>
+      </ul>
+      <div class="note">
+        <div class="nt">Indicador d'autoconsum</div>
+        La capçalera mostra el percentatge d'<b>Autoconsum</b>: quina part del teu consum total has cobert amb el sol en lloc de la xarxa.
+      </div>
+    </section>
+
+    <section id="resultats">
+      <h2><span class="num">10</span>Com llegir els resultats</h2>
+      <div class="st">Els números que importen</div>
+      <h3>Indicadors globals (capçalera)</h3>
+      <table class="tbl">
+        <thead><tr><th>Indicador</th><th>Què significa</th></tr></thead>
+        <tbody>
+          <tr><td>Cost net avui</td><td>Cost de l'energia treta de la xarxa un dia, menys els excedents solars compensats.</td></tr>
+          <tr><td>Consum Xarxa</td><td>Energia total en kWh que has hagut de comprar a la xarxa (net de solar).</td></tr>
+          <tr><td>Autoconsum</td><td>Percentatge del consum cobert amb energia solar pròpia.</td></tr>
+          <tr><td>Factura Mensual Est.</td><td>Projecció a 30 dies: terme fix (potència) + terme variable (consum) del dia simulat.</td></tr>
+        </tbody>
+      </table>
+      <h3>La gràfica panoràmica</h3>
+      <p>Superposa quatre sèries sobre les 24 hores del dia: les <b>barres grogues</b> són el preu del mercat, la <b>línia cian</b> el consum net a la xarxa, la <b>línia verda</b> la producció solar i la <b>línia discontínua gris</b> el consum brut de la llar. Quan la línia cian baixa de zero, estàs injectant excedents.</p>
+      <h3>Desglossament de costos</h3>
+      <p>El panell dret reparteix el cost del dia per categories (Basal, Climatització, Vehicle Elèctric, Electrodomèstics) i mostra el <b>Retorn Financer Solar</b> en verd, que és l'estalvi que et donen les plaques. El <b>Consell de l'Analista Energètic</b> et dona una recomanació personalitzada segons la teva configuració.</p>
+    </section>
+
+    <section id="optimitzar">
+      <h2><span class="num">11</span>El botó Auto-optimitzar</h2>
+      <div class="st">Deixa que el simulador reparteixi les càrregues</div>
+      <p>El botó <b>Auto-optimitzar!</b> de la gràfica fa una feina automàtica:</p>
+      <ol class="steps">
+        <li>Passa al mode <b>Detallat</b> si no hi eres.</li>
+        <li>Ordena els aparells desplaçables (EV i electrodomèstics) de més potència a menys.</li>
+        <li>Els col·loca a les hores <b>més barates</b> possible, aprofitant el sol si en tens, però <b>sense superar mai el límit de potència contractada</b> (perquè no saltin els ploms).</li>
+      </ol>
+      <div class="note">
+        <div class="nt">Resultat</div>
+        Després de prémer-lo veuràs com les hores d'inici dels aparells canvien soles i el cost del dia baixa. És la manera ràpida de trobar la millor combinació d'horaris.
+      </div>
+    </section>
+
+    <section id="calcul">
+      <h2><span class="num">12</span>Com fa el càlcul</h2>
+      <div class="st">El model per dins</div>
+      <p>Per a cada hora del dia, el simulador suma tots els consums actius (basal + clima + EV + electrodomèstics) per obtenir el <b>consum brut</b>. En resta la producció solar per obtenir el <b>consum net</b> a la xarxa. Llavors:</p>
+      <ul style="margin:0 0 14px 20px; color:var(--txt);">
+        <li>Si el net és positiu, es multiplica pel <b>preu de mercat</b> d'aquella hora i se suma al cost.</li>
+        <li>Si el net és negatiu (excedent), es valora a <b>0,06 €/kWh</b> i es resta del cost.</li>
+      </ul>
+      <p>La corba de preu simula el patró real del <b>PVPC</b>: preu alt al matí i al vespre (18-21 h), i vall al migdia coincidint amb la producció solar. La <b>factura mensual</b> és el cost variable del dia × 30 més el terme fix (potència contractada × 0,09 €/kW/dia × 30).</p>
+      <div class="note stop">
+        <div class="nt">No és facturació oficial</div>
+        Els preus, factors d'eficiència i el terme fix són aproximacions realistes amb finalitat educativa i comparativa. La factura real depèn de la teva comercialitzadora, peatges, impostos i tarifa concreta.
+      </div>
+    </section>
+
+    <section id="problemes">
+      <h2><span class="num">13</span>Resolució de problemes</h2>
+      <div class="st">Si alguna cosa no quadra</div>
+      <details>
+        <summary>Els panells de detall estan grisos i no responen</summary>
+        <div class="db">Estàs en mode <b>Consum Mitjà (Pla)</b>. Canvia a <b>Consum Detallat</b> amb l'interruptor mestre de dalt per activar climatització, EV, electrodomèstics i consums basals.</div>
+      </details>
+      <details>
+        <summary>Apareix l'avís vermell «Risc de tall per potència excedida»</summary>
+        <div class="db">És intencionat: en algun moment del dia el consum instantani supera el límit contractat i, a la realitat, saltarien els ploms. Prem <b>Auto-optimitzar</b> per separar les càrregues, o puja la potència contractada a <b>Elevada</b>.</div>
+      </details>
+      <details>
+        <summary>La factura mensual no baixa encara que tinc plaques</summary>
+        <div class="db">Comprova que l'interruptor d'<b>Autoconsum Solar</b> estigui activat i que consumeixis energia dins de la franja solar (8-19 h). Si carregues l'EV o poses la rentadora de nit, no aprofites el sol; mou-los al migdia.</div>
+      </details>
+      <details>
+        <summary>El consell de l'analista sempre em recomana baixar potència</summary>
+        <div class="db">Vol dir que el teu pic màxim de consum és molt inferior al límit contractat (més de 3 kW de marge). Segons el model, podries plantejar-te contractar menys potència i estalviar en el terme fix mensual.</div>
+      </details>
+      <details>
+        <summary>Els valors em semblen massa alts o massa baixos</summary>
+        <div class="db">Recorda que és un model amb valors mitjans típics. Ajusta habitants, superfície, classes d'eficiència i horaris perquè s'assemblin al teu cas real; els números s'actualitzen a l'instant.</div>
+      </details>
+    </section>
+  </main>
+</div>
+
+<footer class="foot">
+  <div class="fb"><span class="cells"><span></span><span></span><span></span><span></span></span> <b style="color:var(--txt); font-weight:600; letter-spacing:.1em;">GUAITA VOLTSIM</b></div>
+  <div>Simulador de consum elèctric intel·ligent · Model educatiu segons patró PVPC i REBT</div>
+</footer>
+
+<script>
+// Ressaltat de la secció activa a l'índex
+const links=[...document.querySelectorAll('nav.toc a')];
+const map=new Map(links.map(a=>[a.getAttribute('href').slice(1),a]));
+const obs=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){ links.forEach(l=>l.classList.remove('active')); const a=map.get(e.target.id); if(a)a.classList.add('active'); } });
+},{rootMargin:'-20% 0px -70% 0px'});
+document.querySelectorAll('main section').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

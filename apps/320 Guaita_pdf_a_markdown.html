@@ -1,0 +1,807 @@
+<!--
+  Guaita Apps - Suite d'eines autònomes per a arquitectura, BIM i documentació.
+  Copyright (c) 2026 Jordi Subirós
+  GNU Affero General Public License v3.0
+  See LICENSE file for details
+-->
+<!DOCTYPE html>
+<html lang="ca" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guaita PDF a markdown</title>
+    <!-- Tailwind CSS para el diseño premium -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para iconos atractivos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Marked.js para renderizar Markdown en tiempo real -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+    <!-- PDF.js de Mozilla para extracción local de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Configuración inicial del Worker de PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        
+        // Configuración de Tailwind para soporte de modo oscuro opcional
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            900: '#4c1d95',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilos personalizados para la vista previa de Markdown renderizado */
+        .markdown-preview h1 { @apply text-3xl font-bold mt-6 mb-4 text-slate-900 dark:text-white border-b pb-2 border-slate-200 dark:border-slate-700; }
+        .markdown-preview h2 { @apply text-2xl font-semibold mt-5 mb-3 text-slate-800 dark:text-slate-100; }
+        .markdown-preview h3 { @apply text-xl font-medium mt-4 mb-2 text-slate-800 dark:text-slate-200; }
+        .markdown-preview p { @apply my-3 text-slate-600 dark:text-slate-300 leading-relaxed; }
+        .markdown-preview ul { @apply list-disc pl-6 my-3 text-slate-600 dark:text-slate-300; }
+        .markdown-preview ol { @apply list-decimal pl-6 my-3 text-slate-600 dark:text-slate-300; }
+        .markdown-preview li { @apply mb-1; }
+        .markdown-preview code { @apply bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono text-pink-600 dark:text-pink-400; }
+        .markdown-preview pre { @apply bg-slate-900 text-slate-100 p-4 rounded-lg my-4 overflow-x-auto font-mono text-sm; }
+        .markdown-preview blockquote { @apply border-l-4 border-brand-500 pl-4 italic my-4 text-slate-500 dark:text-slate-400; }
+        .markdown-preview hr { @apply my-6 border-slate-200 dark:border-slate-700; }
+        .markdown-preview table { @apply min-w-full divide-y divide-slate-200 dark:divide-slate-700 my-4 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden; }
+        .markdown-preview th { @apply bg-slate-50 dark:bg-slate-800/50 px-4 py-2 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider; }
+        .markdown-preview td { @apply px-4 py-2 border-t border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300; }
+        
+        /* Personalización de scrollbars */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { @apply bg-transparent; }
+        ::-webkit-scrollbar-thumb { @apply bg-slate-300 dark:bg-slate-700 rounded-full hover:bg-slate-400 dark:hover:bg-slate-600; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 h-full flex flex-col font-sans transition-colors duration-200">
+
+    <!-- Header / Barra Superior -->
+    <header class="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 py-4 px-6 shrink-0 shadow-sm">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-brand-500 to-indigo-600 flex items-center justify-center text-white text-lg shadow-md">
+                    <i class="fa-solid fa-file-pdf"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                        PDF a Markdown
+                        <span class="text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-400 font-semibold px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/30">
+                            <i class="fa-solid fa-shield-halved mr-1"></i> 100% Privat Local
+                        </span>
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Conversió de PDF a format Markdown directament al teu navegador</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <!-- Botó Canvi de Tema (Fosc/Clar) -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-all" title="Canviar Tema">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:inline"></i>
+                </button>
+                <a href="https://markdown-it.github.io/" target="_blank" class="text-xs text-slate-500 dark:text-slate-400 hover:text-brand-500 flex items-center gap-1 transition-colors">
+                    Guia de Sintaxi MD <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contingut Principal -->
+    <main class="flex-1 flex flex-col md:flex-row overflow-hidden max-w-7xl w-full mx-auto p-4 lg:p-6 gap-6">
+        
+        <!-- Columna Esquerra: Carregador i Configuracions -->
+        <section class="w-full md:w-[350px] shrink-0 flex flex-col gap-6 overflow-y-auto pr-0 md:pr-2">
+            
+            <!-- Targeta d'Arxiu / Upload -->
+            <div class="bg-white dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up text-brand-500"></i> Carregar Document
+                </h2>
+                
+                <div id="dropZone" 
+                     class="border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-brand-500 dark:hover:border-brand-500 rounded-xl p-6 text-center cursor-pointer transition-all bg-slate-50/50 dark:bg-slate-900/30 hover:bg-brand-50/10 dark:hover:bg-brand-950/10 flex flex-col items-center justify-center"
+                     onclick="triggerFileInput()"
+                     ondragover="handleDragOver(event)"
+                     ondragleave="handleDragLeave(event)"
+                     ondrop="handleDrop(event)">
+                    
+                    <input type="file" id="pdfFileInput" accept=".pdf" class="hidden" onchange="handleFileSelect(event)">
+                    
+                    <div id="uploadIcon" class="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-400 dark:text-slate-600 mb-3 transition-colors">
+                        <i class="fa-solid fa-file-pdf text-xl text-red-500"></i>
+                    </div>
+                    
+                    <p class="text-xs font-semibold text-slate-700 dark:text-slate-300" id="uploadTitle">Fes clic o arrossega el PDF</p>
+                    <p class="text-[10px] text-slate-400 mt-1">Només arxius .pdf</p>
+                </div>
+
+                <!-- Detalls de l'arxiu carregat -->
+                <div id="fileDetails" class="hidden mt-4 p-3 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2 overflow-hidden mr-2">
+                        <i class="fa-solid fa-file-lines text-brand-500 shrink-0"></i>
+                        <span id="fileNameDisplay" class="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">nom_document.pdf</span>
+                    </div>
+                    <button onclick="clearCurrentFile()" class="text-slate-400 hover:text-red-500 text-sm p-1" title="Eliminar arxiu">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+
+                <!-- Barra de Progrés -->
+                <div id="progressContainer" class="hidden mt-4">
+                    <div class="flex justify-between text-[11px] mb-1">
+                        <span id="progressStatus" class="text-brand-500 font-medium">Processant pàgines...</span>
+                        <span id="progressPercent" class="text-slate-500">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div id="progressBar" class="bg-gradient-to-r from-brand-500 to-indigo-600 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Targeta de Configuracions -->
+            <div class="bg-white dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-brand-500"></i> Paràmetres d'extracció
+                </h2>
+                
+                <div class="space-y-4">
+                    <!-- Unir Línies Tallades -->
+                    <label class="flex items-start gap-3 cursor-pointer group">
+                        <input type="checkbox" id="optJoinLines" checked class="mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-700 text-brand-600 focus:ring-brand-500">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 group-hover:text-brand-500 transition-colors">Reconstruir paràgrafs</span>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Uneix línies de text properes per evitar salts de línia artificials.</p>
+                        </div>
+                    </label>
+
+                    <!-- Detectar títols per mida de lletra -->
+                    <label class="flex items-start gap-3 cursor-pointer group">
+                        <input type="checkbox" id="optDetectHeadings" checked class="mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-700 text-brand-600 focus:ring-brand-500">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 group-hover:text-brand-500 transition-colors">Detectar encapçalaments</span>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Analitza mides de font per col·locar títols de nivell (#, ##, ###).</p>
+                        </div>
+                    </label>
+
+                    <!-- Detectar Llistes -->
+                    <label class="flex items-start gap-3 cursor-pointer group">
+                        <input type="checkbox" id="optDetectLists" checked class="mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-700 text-brand-600 focus:ring-brand-500">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 group-hover:text-brand-500 transition-colors">Detectar llistes</span>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Converteix vinyetes o llistes numerades del PDF a sintaxi Markdown.</p>
+                        </div>
+                    </label>
+
+                    <!-- Incloure talls de pàgina -->
+                    <label class="flex items-start gap-3 cursor-pointer group">
+                        <input type="checkbox" id="optPageDividers" checked class="mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-700 text-brand-600 focus:ring-brand-500">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 group-hover:text-brand-500 transition-colors">Incloure talls de pàgina</span>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Afegeix línies horitzontals `---` i el número de pàgina com a referència.</p>
+                        </div>
+                    </label>
+                </div>
+                
+                <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800/50">
+                    <button onclick="reprocessPDF()" id="reprocessBtn" disabled class="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-center bg-slate-100 dark:bg-slate-900 text-slate-400 dark:text-slate-600 cursor-not-allowed transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Reconvertir amb nous ajustos
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ajuda de suport ràpid -->
+            <div class="bg-slate-100 dark:bg-slate-950/30 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 p-4">
+                <h3 class="text-xs font-bold text-slate-800 dark:text-slate-300 mb-1 flex items-center gap-1.5">
+                    <i class="fa-regular fa-lightbulb text-amber-500"></i> Com funciona millor?
+                </h3>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                    Aquesta eina extreu text en brut i estils digitals. Si el teu PDF és escanejat (com una foto o fotocòpia), el navegador no podrà detectar el text directament sense un mòdul OCR de pes. Utilitza PDFs digitals de text editable per a un resultat excel·lent.
+                </p>
+            </div>
+        </section>
+
+        <!-- Columna Dreta: Workspace de pantalla dividida (Editor MD i Previsualització) -->
+        <section class="flex-1 flex flex-col bg-white dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+            
+            <!-- Barra d'eines del Workspace -->
+            <div class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+                
+                <!-- Navegació pestanyes mòbils / desktop -->
+                <div class="flex bg-slate-200/60 dark:bg-slate-800 p-1 rounded-lg w-full sm:w-auto">
+                    <button onclick="switchTab('editor')" id="tabBtnEditor" class="flex-1 sm:flex-none py-1.5 px-4 text-xs font-bold rounded-md transition-all bg-white dark:bg-slate-950 text-slate-950 dark:text-white shadow-sm flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-code"></i> Editor Markdown
+                    </button>
+                    <button onclick="switchTab('preview')" id="tabBtnPreview" class="flex-1 sm:flex-none py-1.5 px-4 text-xs font-bold rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-eye"></i> Vista Prèvia HTML
+                    </button>
+                </div>
+                
+                <!-- Accions globals (Copiar, Descarregar, etc.) -->
+                <div class="flex items-center justify-end gap-2 w-full sm:w-auto">
+                    <button onclick="copyToClipboard()" id="actionCopyBtn" class="py-1.5 px-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5" title="Copiar al porta-retalls">
+                        <i class="fa-regular fa-copy"></i> Copiar
+                    </button>
+                    
+                    <button onclick="downloadMarkdown()" id="actionDownloadBtn" class="py-1.5 px-4 bg-brand-600 text-white hover:bg-brand-700 rounded-lg text-xs font-bold shadow-md shadow-brand-500/10 transition-all flex items-center gap-1.5" title="Descarregar fitxer .md">
+                        <i class="fa-solid fa-download"></i> Descarregar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Àrea de Treball Principal (Split Screen o Single depenent de pestanya) -->
+            <div class="flex-1 flex overflow-hidden relative">
+                
+                <!-- Toast de notificació personalitzat (Evitant Alert) -->
+                <div id="toastNotification" class="absolute bottom-5 right-5 z-50 transform translate-y-10 opacity-0 pointer-events-none transition-all duration-300 bg-slate-900 dark:bg-white text-white dark:text-slate-950 text-xs py-2.5 px-4 rounded-xl shadow-lg flex items-center gap-2 font-medium">
+                    <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                    <span id="toastText">S'ha copiat correctament!</span>
+                </div>
+
+                <!-- Panell Editor (Markdown Directe) -->
+                <div id="panelEditor" class="w-full h-full flex flex-col transition-all duration-300">
+                    <textarea id="markdownTextArea" 
+                              class="flex-1 w-full h-full p-6 font-mono text-sm bg-transparent border-0 focus:ring-0 resize-none outline-none text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none" 
+                              placeholder="Aquí apareixerà el codi Markdown extret del PDF..." 
+                              oninput="updatePreviewFromEditor()"></textarea>
+                </div>
+
+                <!-- Panell Vista Prèvia (HTML Renderitzat) -->
+                <div id="panelPreview" class="hidden w-full h-full p-6 overflow-y-auto bg-slate-50/50 dark:bg-slate-950/20">
+                    <div id="htmlPreviewArea" class="markdown-preview max-w-3xl mx-auto">
+                        <!-- Aquí va el HTML generat de Marked -->
+                        <div class="text-center py-20 text-slate-400 dark:text-slate-600">
+                            <i class="fa-solid fa-file-invoice text-4xl mb-3"></i>
+                            <p class="text-sm font-medium">La previsualització d'estil apareixerà en carregar o redactar Markdown</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer d'Estat del Document -->
+            <div class="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-4 py-2 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 shrink-0">
+                <div id="documentStats" class="flex items-center gap-3">
+                    <span>Línies: <strong id="statLines" class="text-slate-700 dark:text-slate-300">0</strong></span>
+                    <span>Paraules: <strong id="statWords" class="text-slate-700 dark:text-slate-300">0</strong></span>
+                    <span>Caràcters: <strong id="statChars" class="text-slate-700 dark:text-slate-300">0</strong></span>
+                </div>
+                <div id="statusIndicator" class="flex items-center gap-1.5">
+                    <span class="h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-700" id="statusDot"></span>
+                    <span id="statusText">Esperant PDF</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Script de Gestió de l'Aplicació -->
+    <script>
+        // Memòria d'estat
+        let currentArrayBuffer = null;
+        let originalFileName = "";
+        let currentActiveTab = "editor"; // "editor" o "preview"
+
+        // Contingut Markdown de mostra al carregar l'aplicació
+        const sampleMarkdown = `# Benvingut al Convertidor de PDF a Markdown!
+
+Aquest és un exemple de com es veurà el contingut extret dels teus documents PDF. Pots editar lliurement aquest text directament.
+
+## Característiques de l'Eina
+* **Completament Local:** Tot el processament de text es realitza al teu navegador web. Cap arxiu s'envia a cap servidor de tercers.
+* **Format Intel·ligent:** Detecció automàtica de títols, taules o llistes ordenades basades en les propietats estructurals del PDF.
+* **Previsualització Immediata:** Revisa el resultat renderitzat a l'instant abans de descarregar el document final.
+
+### Recomanació d'ús
+> Per obtenir la millor precisió de format, assegura't que els PDFs utilitzats continguin text real seleccionable (no imatges escanejades).
+
+#### Exemple de Codi Extret
+\`\`\`javascript
+// Un exemple de codi en JavaScript
+function salutacio() {
+    console.log("Hola, món Markdown!");
+}
+salutacio();
+\`\`\`
+
+Proba de carregar el teu propi PDF a la barra lateral esquerra per començar!`;
+
+        // Al carregar el Document, posem contingut fictici i configurem tema
+        window.onload = function() {
+            // Inicialitza el contingut d'exemple
+            document.getElementById('markdownTextArea').value = sampleMarkdown;
+            updatePreviewFromEditor();
+            
+            // Inicialització de Tema (Detecta sistema operatiu o guarda en localStorage)
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        // Funció de canvi de tema (Clar / Fosc)
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+
+        // Mostrar Notificació Personalitzada (Toast)
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toastNotification');
+            const textSpan = document.getElementById('toastText');
+            
+            textSpan.textContent = message;
+            
+            if (isError) {
+                toast.classList.add('bg-red-900', 'text-white');
+                toast.querySelector('i').className = 'fa-solid fa-circle-exclamation text-red-400';
+            } else {
+                toast.classList.remove('bg-red-900');
+                toast.classList.add('bg-slate-900', 'dark:bg-white', 'text-white', 'dark:text-slate-950');
+                toast.querySelector('i').className = 'fa-solid fa-circle-check text-emerald-500';
+            }
+            
+            // Animació d'entrada
+            toast.classList.remove('translate-y-10', 'opacity-0', 'pointer-events-none');
+            
+            setTimeout(() => {
+                // Animació de sortida
+                toast.classList.add('translate-y-10', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        // Control de Pestanyes de l'Editor
+        function switchTab(tab) {
+            currentActiveTab = tab;
+            const btnEditor = document.getElementById('tabBtnEditor');
+            const btnPreview = document.getElementById('tabBtnPreview');
+            const panelEditor = document.getElementById('panelEditor');
+            const panelPreview = document.getElementById('panelPreview');
+
+            if (tab === 'editor') {
+                btnEditor.className = "flex-1 sm:flex-none py-1.5 px-4 text-xs font-bold rounded-md transition-all bg-white dark:bg-slate-950 text-slate-950 dark:text-white shadow-sm flex items-center justify-center gap-1.5";
+                btnPreview.className = "flex-1 sm:flex-none py-1.5 px-4 text-xs font-bold rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center gap-1.5";
+                
+                panelEditor.classList.remove('hidden');
+                panelPreview.classList.add('hidden');
+            } else {
+                btnPreview.className = "flex-1 sm:flex-none py-1.5 px-4 text-xs font-bold rounded-md transition-all bg-white dark:bg-slate-950 text-slate-950 dark:text-white shadow-sm flex items-center justify-center gap-1.5";
+                btnEditor.className = "flex-1 sm:flex-none py-1.5 px-4 text-xs font-bold rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center gap-1.5";
+                
+                panelPreview.classList.remove('hidden');
+                panelEditor.classList.add('hidden');
+                
+                // Actualitzem renderització immediata de Markdown
+                updatePreviewFromEditor();
+            }
+        }
+
+        // Sincronitza la vista prèvia renderitzada de Markdown
+        function updatePreviewFromEditor() {
+            const mdText = document.getElementById('markdownTextArea').value;
+            const previewArea = document.getElementById('htmlPreviewArea');
+            
+            if (mdText.trim() === '') {
+                previewArea.innerHTML = `
+                    <div class="text-center py-20 text-slate-400 dark:text-slate-600">
+                        <i class="fa-solid fa-pen-fancy text-4xl mb-3"></i>
+                        <p class="text-sm font-medium">L'editor està buit. Escriu o carrega un PDF per previsualitzar.</p>
+                    </div>
+                `;
+            } else {
+                // Utilitzar Marked.js per convertir MD a HTML actiu
+                previewArea.innerHTML = marked.parse(mdText);
+            }
+            
+            // Actualització d'estadístiques
+            updateStats(mdText);
+        }
+
+        // Calcula i mostra les estadístiques de text del Markdown
+        function updateStats(text) {
+            const lines = text.split('\n').length;
+            const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+            const chars = text.length;
+            
+            document.getElementById('statLines').textContent = lines;
+            document.getElementById('statWords').textContent = words;
+            document.getElementById('statChars').textContent = chars;
+        }
+
+        // Copiar Text al Porta-retalls
+        function copyToClipboard() {
+            const textArea = document.getElementById('markdownTextArea');
+            
+            if (textArea.value.trim() === "") {
+                showToast("No hi ha text per copiar", true);
+                return;
+            }
+            
+            // Selecció del text de l'editor
+            textArea.select();
+            textArea.setSelectionRange(0, 99999); // Per a dispositius mòbils
+            
+            try {
+                // Compatibilitat robusta fora de HTTPS i en iframes
+                document.execCommand('copy');
+                showToast("S'ha copiat el Markdown al porta-retalls!");
+            } catch (err) {
+                showToast("No s'ha pogut copiar el text", true);
+            }
+            
+            // Treure la selecció blava visual
+            window.getSelection().removeAllRanges();
+        }
+
+        // Descarregar document Markdown (.md)
+        function downloadMarkdown() {
+            const mdText = document.getElementById('markdownTextArea').value;
+            if (mdText.trim() === "") {
+                showToast("No hi ha text per descarregar", true);
+                return;
+            }
+            
+            // Generem nom d'arxiu basat en l'original o un per defecte
+            let outputName = "document_convertit.md";
+            if (originalFileName) {
+                outputName = originalFileName.replace(/\.[^/.]+$/, "") + ".md";
+            }
+            
+            const blob = new Blob([mdText], { type: "text/markdown;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            
+            const downloadLink = document.createElement("a");
+            downloadLink.href = url;
+            downloadLink.download = outputName;
+            
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(url);
+            showToast("Document descarregat amb èxit!");
+        }
+
+        // Interaccions de Fitxer (Drag & Drop)
+        function triggerFileInput() {
+            document.getElementById('pdfFileInput').click();
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            const dropZone = document.getElementById('dropZone');
+            dropZone.classList.add('border-brand-500', 'bg-brand-50/10', 'dark:bg-brand-950/10');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            const dropZone = document.getElementById('dropZone');
+            dropZone.classList.remove('border-brand-500', 'bg-brand-50/10', 'dark:bg-brand-950/10');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const dropZone = document.getElementById('dropZone');
+            dropZone.classList.remove('border-brand-500', 'bg-brand-50/10', 'dark:bg-brand-950/10');
+            
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                if (file.type === "application/pdf" || file.name.endsWith('.pdf')) {
+                    processUploadedFile(file);
+                } else {
+                    showToast("Només s'admeten fitxers de format .pdf", true);
+                }
+            }
+        }
+
+        function handleFileSelect(e) {
+            if (e.target.files && e.target.files.length > 0) {
+                processUploadedFile(e.target.files[0]);
+            }
+        }
+
+        // Processa l'arxiu pujat convertint-lo a buffer binari
+        function processUploadedFile(file) {
+            originalFileName = file.name;
+            document.getElementById('fileNameDisplay').textContent = file.name;
+            document.getElementById('fileDetails').classList.remove('hidden');
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentArrayBuffer = e.target.result;
+                
+                // Activar el botó de reconversió de la barra lateral
+                const reprocessBtn = document.getElementById('reprocessBtn');
+                reprocessBtn.disabled = false;
+                reprocessBtn.className = "w-full py-2.5 px-4 rounded-xl text-xs font-bold text-center bg-brand-600 text-white hover:bg-brand-700 cursor-pointer transition-all flex items-center justify-center gap-2 shadow-sm shadow-brand-500/10";
+                
+                // Començar la conversió automàticament
+                convertPDFText();
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Eliminar fitxer carregat actual
+        function clearCurrentFile() {
+            currentArrayBuffer = null;
+            originalFileName = "";
+            document.getElementById('fileDetails').classList.add('hidden');
+            document.getElementById('pdfFileInput').value = "";
+            
+            // Reset de barra de progrés
+            document.getElementById('progressContainer').classList.add('hidden');
+            document.getElementById('progressBar').style.width = "0%";
+            
+            // Desactivar botó de reconversió
+            const reprocessBtn = document.getElementById('reprocessBtn');
+            reprocessBtn.disabled = true;
+            reprocessBtn.className = "w-full py-2.5 px-4 rounded-xl text-xs font-bold text-center bg-slate-100 dark:bg-slate-900 text-slate-400 dark:text-slate-600 cursor-not-allowed transition-all flex items-center justify-center gap-2";
+            
+            // Restablir indicadors
+            const statusIndicator = document.getElementById('statusIndicator');
+            document.getElementById('statusDot').className = "h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-700";
+            document.getElementById('statusText').textContent = "Esperant PDF";
+            
+            showToast("S'ha descarregat l'arxiu de la memòria.");
+        }
+
+        // Forçar reconversió manual amb noves configuracions d'opcions
+        function reprocessPDF() {
+            if (currentArrayBuffer) {
+                convertPDFText();
+            } else {
+                showToast("No hi ha cap PDF carregat per reconvertir", true);
+            }
+        }
+
+        // === Algorisme d'Extracció i Conversió de PDF a Markdown ===
+        async function convertPDFText() {
+            if (!currentArrayBuffer) return;
+            
+            // elements de progrés
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+            const progressStatus = document.getElementById('progressStatus');
+            
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = "0%";
+            progressPercent.textContent = "0%";
+            progressStatus.textContent = "Iniciant lectura del PDF...";
+            
+            // Indicador d'estat a la barra inferior
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            statusDot.className = "h-2 w-2 rounded-full bg-amber-500 animate-pulse";
+            statusText.textContent = "Convertint document...";
+
+            // Llegim valors d'opcions seleccionats per l'usuari
+            const options = {
+                joinLines: document.getElementById('optJoinLines').checked,
+                detectHeadings: document.getElementById('optDetectHeadings').checked,
+                detectLists: document.getElementById('optDetectLists').checked,
+                pageDividers: document.getElementById('optPageDividers').checked
+            };
+
+            try {
+                // Carregar el document mitjançant PDF.js
+                const loadingTask = pdfjsLib.getDocument({ data: currentArrayBuffer });
+                const pdf = await loadingTask.promise;
+                const totalPages = pdf.numPages;
+                
+                let fullMarkdown = "";
+                
+                // Iteració de pàgines
+                for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+                    progressStatus.textContent = `Llegint pàgina ${pageNum} de ${totalPages}...`;
+                    let percentage = Math.round((pageNum / totalPages) * 100);
+                    progressBar.style.width = `${percentage}%`;
+                    progressPercent.textContent = `${percentage}%`;
+
+                    const page = await pdf.getPage(pageNum);
+                    const textContent = await page.getTextContent({ normalizeWhitespace: true });
+                    
+                    // Extraure els elements individuals de text amb les seves metadades geomètriques
+                    let items = textContent.items.map(item => {
+                        return {
+                            text: item.str,
+                            x: item.transform[4], // Posició X
+                            y: item.transform[5], // Posició Y
+                            fontSize: item.transform[0] || item.transform[3] || 10, // Escala de font (aproximació de mida)
+                            fontName: item.fontName
+                        };
+                    });
+                    
+                    if (items.length === 0) {
+                        continue; // Pàgina buida o només imatge
+                    }
+
+                    // 1. Agrupament de caràcters o paraules properes en la mateixa línia visual (eix Y similar)
+                    let lines = [];
+                    items.forEach(item => {
+                        let placed = false;
+                        for (let line of lines) {
+                            // Si la diferència de Y és menor que la meitat de la mida de lletra, s'agrupen junts
+                            if (Math.abs(line.y - item.y) < (item.fontSize * 0.4 || 4)) {
+                                line.items.push(item);
+                                placed = true;
+                                break;
+                            }
+                        }
+                        if (!placed) {
+                            lines.push({
+                                y: item.y,
+                                fontSize: item.fontSize,
+                                items: [item]
+                            });
+                        }
+                    });
+
+                    // Ordenar les línies de dalt a baix (Y descendent en coordenades de PDF)
+                    lines.sort((a, b) => b.y - a.y);
+
+                    // Per a cada línia, ordenar els ítems de text d'esquerra a dreta (X ascendent)
+                    lines.forEach(line => {
+                        line.items.sort((a, b) => a.x - b.x);
+                    });
+
+                    // 2. Anàlisi del text de la pàgina
+                    let pageMarkdown = "";
+                    
+                    // Càlcul de la mida mitjana de font en la pàgina per poder identificar títols
+                    let fontSizes = items.map(it => it.fontSize).filter(fs => fs > 0);
+                    let avgFontSize = fontSizes.reduce((a, b) => a + b, 0) / (fontSizes.length || 1);
+                    
+                    // Separador de pàgines en Markdown
+                    if (options.pageDividers && pageNum > 1) {
+                        pageMarkdown += `\n\n---\n*Pàgina ${pageNum}*\n\n`;
+                    } else if (pageNum === 1 && options.pageDividers) {
+                        pageMarkdown += `*Pàgina 1*\n\n`;
+                    }
+
+                    let currentParagraph = "";
+
+                    for (let i = 0; i < lines.length; i++) {
+                        let line = lines[i];
+                        
+                        // Uneix elements d'un text línia evitant separacions per espais dobles
+                        let lineText = line.items.map(it => it.text).join(' ').replace(/\s+/g, ' ').trim();
+                        if (!lineText) continue;
+
+                        // Heurística de títol per mida de la font
+                        let isHeading = false;
+                        let headingLevel = 1;
+                        if (options.detectHeadings && line.fontSize > avgFontSize * 1.25) {
+                            isHeading = true;
+                            if (line.fontSize > avgFontSize * 1.7) headingLevel = 1;
+                            else if (line.fontSize > avgFontSize * 1.45) headingLevel = 2;
+                            else headingLevel = 3;
+                        }
+
+                        // Heurística de llistes (Detecta boles i números)
+                        let isListItem = false;
+                        if (options.detectLists) {
+                            // Detecta boles típiques (•, -, *, etc.) o llistes numèriques (1., 2., etc.)
+                            if (/^[\u2022\u2023\u25E6\u2043\u2219\-\*]\s*/.test(lineText)) {
+                                isListItem = true;
+                                lineText = "- " + lineText.replace(/^[\u2022\u2023\u25E6\u2043\u2219\-\*]\s*/, "");
+                            } else if (/^\d+[\.\)]\s+/.test(lineText)) {
+                                isListItem = true;
+                                // Manté la llista numerada
+                            }
+                        }
+
+                        if (isHeading) {
+                            // Si estàvem acumulant un paràgraf anterior, el tanquem
+                            if (currentParagraph) {
+                                pageMarkdown += currentParagraph.trim() + "\n\n";
+                                currentParagraph = "";
+                            }
+                            pageMarkdown += `${'#'.repeat(headingLevel)} ${lineText}\n\n`;
+                        } else if (isListItem) {
+                            if (currentParagraph) {
+                                pageMarkdown += currentParagraph.trim() + "\n\n";
+                                currentParagraph = "";
+                            }
+                            pageMarkdown += `${lineText}\n`;
+                        } else {
+                            // Paràgraf de text normal
+                            if (options.joinLines) {
+                                // Mirem la distància vertical amb la següent línia per estimar si continua el paràgraf
+                                let nextLine = lines[i + 1];
+                                let isGapLarge = false;
+                                
+                                if (nextLine) {
+                                    // Si la distància vertical és superior a 1.7 vegades la mida de font, assumim final de paràgraf
+                                    let verticalGap = Math.abs(line.y - nextLine.y);
+                                    if (verticalGap > line.fontSize * 1.8) {
+                                        isGapLarge = true;
+                                    }
+                                }
+
+                                currentParagraph += lineText + " ";
+                                
+                                if (isGapLarge || !nextLine) {
+                                    pageMarkdown += currentParagraph.trim() + "\n\n";
+                                    currentParagraph = "";
+                                }
+                            } else {
+                                pageMarkdown += lineText + "\n\n";
+                            }
+                        }
+                    }
+
+                    // Afegir text restant
+                    if (currentParagraph) {
+                        pageMarkdown += currentParagraph.trim() + "\n\n";
+                    }
+
+                    fullMarkdown += pageMarkdown;
+                }
+
+                // Neteja extra de format del text final
+                fullMarkdown = cleanUpMarkdown(fullMarkdown);
+
+                // Escriure el contingut final a l'editor
+                document.getElementById('markdownTextArea').value = fullMarkdown;
+                
+                // Actualitzar vista prèvia HTML i demanar canvi de pestanya dinàmic per a una millor visualització
+                updatePreviewFromEditor();
+                
+                // Mostrar èxit
+                progressStatus.textContent = "Conversió completada!";
+                progressBar.style.width = "100%";
+                progressPercent.textContent = "100%";
+                
+                statusDot.className = "h-2 w-2 rounded-full bg-emerald-500";
+                statusText.textContent = "Extracció feta";
+                
+                showToast("S'ha convertit el PDF correctament!");
+                
+                // Canviar a la pestanya de vista prèvia automàticament per impressionar l'usuari
+                switchTab('preview');
+
+            } catch (error) {
+                console.error("Error en llegir o convertir el PDF: ", error);
+                progressStatus.textContent = "Error de lectura";
+                statusDot.className = "h-2 w-2 rounded-full bg-red-500";
+                statusText.textContent = "Error de conversió";
+                showToast("S'ha produït un error al processar el document PDF.", true);
+            }
+        }
+
+        // Millora el Markdown final mitjançant neteja de patrons comuns repetitius de l'extracció
+        function cleanUpMarkdown(text) {
+            return text
+                // Corregir espais en blanc duplicats o de fusions
+                .replace(/[ \t]+/g, ' ')
+                // Eliminar paràgrafs buits excessius
+                .replace(/\n{3,}/g, '\n\n')
+                // Treure espais abans de signes de puntuació
+                .replace(/\s+([,;\.\:\!\?])/g, '$1')
+                // Espais extra després de codis de títols Markdown
+                .replace(/^#+\s+/gm, match => match.trim() + ' ')
+                .trim();
+        }
+    </script>
+<a href="HLP%20convertidor_pdf_markdown-ajuda.html" target="_blank" rel="noopener" class="guaita-help-fab" title="Obre l'ajuda d'aquesta aplicació" style="position:fixed;right:18px;bottom:18px;z-index:2147483000;display:inline-flex;align-items:center;gap:8px;background:#C6FF00;color:#0A0E00;font-family:'Space Grotesk',system-ui,-apple-system,sans-serif;font-weight:600;font-size:14px;line-height:1;text-decoration:none;padding:11px 16px;border-radius:24px;box-shadow:0 4px 14px rgba(0,0,0,.35);border:1px solid #0A0E00;"><span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:700;">?</span>Ajuda</a>
+</body>
+</html>

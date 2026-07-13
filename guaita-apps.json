@@ -1,0 +1,7 @@
+{
+  "01_GuaitaFitxers.html": { "nom": "Guaita Fitxers", "descripcio": "Gestor de fitxers Revit/CAD", "apartat": "Gestió de fitxers", "ordreApartat": 1, "ordre": 1 },
+  "02_GuaitaHistorial.html": { "nom": "Guaita Historial", "descripcio": "Auditoria d'historial RVT", "apartat": "Gestió de fitxers", "ordreApartat": 1, "ordre": 2 },
+  "03_GuaitaQuery.html": { "nom": "Guaita Query", "descripcio": "Visor IFC amb verificació BEP/EIR", "apartat": "Visors", "ordreApartat": 2, "ordre": 1 },
+  "04_GuaitaDoc.html": { "nom": "Guaita Doc", "descripcio": "Editor DOCX", "apartat": "Documents", "ordreApartat": 3, "ordre": 1 },
+  "05_GuaitaMd.html": { "nom": "Guaita .md Editor", "descripcio": "Editor Markdown", "apartat": "Documents", "ordreApartat": 3, "ordre": 2 }
+}

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>Ajuda · Guaita apps</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--groc:#e8ff2b;--fons:#16181c;--panell:#1f2228;--vora:#31353d;--text:#e8eaee;--mut:#9aa0ab}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.6 "Segoe UI",system-ui,sans-serif;background:var(--fons);color:var(--text)}
+header{display:flex;align-items:baseline;gap:14px;padding:16px 28px;border-bottom:2px solid var(--groc);position:sticky;top:0;background:var(--fons);z-index:2}
+header h1{margin:0;font-size:22px;letter-spacing:.5px}
+header h1 span{color:var(--groc)}
+header small{color:var(--mut)}
+.embolcall{display:flex;max-width:1100px;margin:0 auto;gap:28px;padding:24px 28px 60px}
+nav{flex:none;width:230px;position:sticky;top:78px;align-self:flex-start;font-size:14px}
+nav a{display:block;color:var(--mut);text-decoration:none;padding:4px 8px;border-left:2px solid transparent;border-radius:0 5px 5px 0}
+nav a:hover{color:var(--text);border-left-color:var(--vora)}
+nav a.tit{color:var(--groc);font-weight:700;margin-top:12px}
+main{flex:1;min-width:0}
+h2{color:var(--groc);border-bottom:1px solid var(--vora);padding-bottom:6px;margin:34px 0 12px;font-size:19px}
+h2:first-child{margin-top:0}
+h3{font-size:16px;margin:20px 0 6px}
+p{margin:8px 0}
+ul,ol{margin:8px 0;padding-left:22px}
+li{margin:4px 0}
+kbd{background:var(--panell);border:1px solid var(--vora);border-bottom-width:2px;border-radius:5px;padding:1px 7px;font-family:Consolas,monospace;font-size:13px;color:var(--text)}
+.tec{color:var(--groc);font-weight:700}
+code{background:var(--panell);border:1px solid var(--vora);border-radius:4px;padding:1px 6px;font-family:Consolas,monospace;font-size:13.5px}
+.nota{background:var(--panell);border-left:3px solid var(--groc);border-radius:0 8px 8px 0;padding:10px 14px;margin:14px 0}
+.avis{background:var(--panell);border-left:3px solid #d9930d;border-radius:0 8px 8px 0;padding:10px 14px;margin:14px 0}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--vora)}
+th{color:var(--groc)}
+a{color:var(--groc)}
+footer{border-top:1px solid var(--vora);text-align:center;color:var(--mut);font-size:12px;padding:16px}
+footer b{color:var(--groc)}
+.quadre{display:inline-block;width:11px;height:11px;border-radius:3px;background:var(--groc);vertical-align:baseline;margin-right:2px}
+</style>
+</head>
+<body>
+<header><h1><span>Guaita</span> apps</h1><small>ajuda general del launcher</small></header>
+
+<div class="embolcall">
+<nav>
+  <a class="tit" href="#intro">Introducció</a>
+  <a href="#finestra">La finestra</a>
+  <a href="#pestanyes">Les apps / l'ajuda</a>
+  <a href="#carpeta">La carpeta apps</a>
+  <a href="#ordre">Ordre i apartats</a>
+  <a class="tit" href="#estat">Estat de les apps</a>
+  <a href="#memoria">Memòria de sessió</a>
+  <a class="tit" href="#safata">La Safata de fitxers</a>
+  <a href="#quees">Què és</a>
+  <a href="#omplir">Com s'omple</a>
+  <a href="#usar">Com s'usa</a>
+  <a href="#arrossegament">Tots els arrossegaments</a>
+  <a href="#limits">Límits i detalls</a>
+  <a class="tit" href="#privadesa">Privadesa</a>
+</nav>
+
+<main>
+<h2 id="intro">Introducció</h2>
+<p><b>Guaita apps</b> és el llançador d'escriptori de la suite Guaita: un únic executable que reuneix totes les eines (HTML autocontinguts) en una sola finestra, hi afegeix la <b>Safata de fitxers</b> per passar fitxers d'una eina a l'altra, i manté l'estat de cada app mentre treballes.</p>
+<p>Tècnicament, l'executable aixeca un petit servidor <b>només al teu equip</b> (<code>127.0.0.1</code>, en un port aleatori) i obre una finestra del navegador Edge o Chrome en mode aplicació. Res no surt del teu ordinador.</p>
+
+<h3 id="finestra">La finestra</h3>
+<ul>
+<li><b>Barra superior</b>: la marca «Guaita apps». Clicant-la tornes a la portada.</li>
+<li><b>Barra lateral esquerra</b> (redimensionable arrossegant-ne la vora dreta): el títol amb la pestanya activa, les pestanyes, la llista d'eines i, al peu, la <b>Safata de fitxers</b>.</li>
+<li><b>Zona central</b>: la portada o l'eina oberta.</li>
+</ul>
+
+<h3 id="pestanyes">Les apps / l'ajuda</h3>
+<p>La barra lateral té dues pestanyes: <b>les apps</b> (les eines) i <b>l'ajuda</b> (les pàgines d'ajuda de cada eina, com aquesta). Canviar de pestanya <b>no tanca</b> l'eina que tinguis oberta: pots consultar una ajuda i tornar a l'app, que segueix exactament on era.</p>
+<p>Cada entrada és una targeta amb un <span class="quadre"></span> quadradet groc (apps) o un <b style="color:var(--groc)">?</b> (ajudes). La targeta ressaltada amb la franja groga és la que tens oberta.</p>
+
+<h3 id="carpeta">La carpeta apps</h3>
+<p>Les eines viuen a la carpeta <code>apps</code>, al costat de l'executable. Per afegir o treure eines només cal copiar-hi o esborrar-ne els HTML: no s'ha de reinstal·lar res. Amb <kbd>F5</kbd> la llista es refresca.</p>
+
+<h3 id="ordre">Ordre i apartats</h3>
+<p>L'ordre de les llistes surt del <b>prefix numèric</b> del nom del fitxer: <code>110- Guaita Fitxers.html</code>, <code>230- Guaita Query.html</code>… Les ajudes porten el mateix número seguit de <code>HLP</code> (<code>110 HLP- …</code>) i s'ordenen igual que les seves apps. Cada canvi de <b>centena</b> (1xx → 2xx) dibuixa una línia separadora groga. El fitxer opcional <code>apps/guaita-apps.json</code> permet afinar noms, descripcions, apartats i ordres, i pre-llistar apps pendents.</p>
+
+<h2 id="estat">Estat de les apps</h2>
+<h3 id="memoria">Memòria de sessió</h3>
+<p>Cada eina que obres es queda <b>viva en segon pla</b> quan canvies a una altra: el fitxer carregat, els filtres, l'scroll i les pestanyes internes es conserven. Tornar-hi és instantani i tot és on ho havies deixat.</p>
+<div class="avis">Aquesta memòria dura mentre la finestra de Guaita apps és oberta. En tancar-la o prémer <kbd>F5</kbd>, les eines es reinicien. Els documents que hagis desat, evidentment, no es perden.</div>
+
+<h2 id="safata">La Safata de fitxers</h2>
+<h3 id="quees">Què és</h3>
+<p>La Safata de fitxers és el <b>repositori compartit de la sessió</b>: un espai al peu de la barra lateral on deixes fitxers per obrir-los després amb qualsevol eina. Cada fitxer hi apareix com un <b>xip</b> amb el nom, la mida i una <b>×</b> per treure'l. L'enllaç <b>buida-la</b> la neteja tota.</p>
+<p>És útil quan treballes amb els mateixos fitxers en diverses eines: un IFC que vols mirar amb Guaita Query i auditar amb IFC Classes, un PDF que vols anotar i convertir a DXF, etc. El fitxer es diposita un cop i s'arrossega tants cops com calgui.</p>
+
+<h3 id="omplir">Com s'omple</h3>
+<ol>
+<li><b>Des de l'Explorador de Windows</b>: arrossega fitxers de qualsevol carpeta directament sobre la Safata.</li>
+<li><b>Des de Guaita Fitxers</b> — de dues maneres:
+  <ul>
+  <li>Selecciona fitxers i prem el botó <b>📤</b> de la barra d'eines.</li>
+  <li>Arrossega una fila (o la selecció) i deixa-la anar sobre la Safata.</li>
+  </ul>
+</li>
+</ol>
+
+<h3 id="usar">Com s'usa</h3>
+<p>Un cop el fitxer és a la Safata, tens dos gestos:</p>
+<ul>
+<li><b>Xip → finestra de l'app oberta</b>: arrossega el xip sobre la zona central. L'eina el rep com si l'haguessis arrossegat des de l'Explorador, amb el seu comportament habitual.</li>
+<li><b>Xip → targeta d'una app a la llista</b>: arrossega el xip sobre la fila de l'eina a la barra lateral. Si l'eina no era oberta, s'obre i carrega el fitxer; si ja ho era, passa a primer pla i el rep. Mentre arrossegues, les targetes que poden rebre el fitxer s'il·luminen.</li>
+</ul>
+<div class="nota">Cada eina aplica els seus <b>propis filtres</b>: guaita-dxf només accepta <code>.dxf</code>, Guaita Query espera <code>.ifc</code>… Si deixes anar un fitxer d'un tipus que l'eina no admet, el rebutjarà exactament igual que si vingués de l'Explorador.</div>
+
+<h3 id="arrossegament">Tots els arrossegaments, d'un cop d'ull</h3>
+<table>
+<tr><th>D'on</th><th>A on</th><th>Què passa</th></tr>
+<tr><td>Explorador de Windows</td><td>Safata</td><td>El fitxer queda dipositat com a xip</td></tr>
+<tr><td>Explorador de Windows</td><td>Finestra d'una app</td><td>L'app el carrega (comportament de sempre)</td></tr>
+<tr><td>Guaita Fitxers (fila)</td><td>Safata</td><td>Es diposita com a xip</td></tr>
+<tr><td>Guaita Fitxers (fila)</td><td>Targeta d'una app</td><td>L'app s'obre (si cal) i el carrega</td></tr>
+<tr><td>Guaita Fitxers (fila)</td><td>Finestra d'una app oberta</td><td>L'app el carrega</td></tr>
+<tr><td>Safata (xip)</td><td>Targeta d'una app</td><td>L'app s'obre (si cal) i el carrega</td></tr>
+<tr><td>Safata (xip)</td><td>Finestra d'una app oberta</td><td>L'app el carrega</td></tr>
+</table>
+<p>L'arrossegament <b>intern</b> de Guaita Fitxers (moure o copiar entre les seves carpetes) no es veu afectat per res d'això.</p>
+
+<h3 id="limits">Límits i detalls</h3>
+<ul>
+<li>La Safata viu <b>en memòria</b>: es buida en tancar Guaita apps o prémer <kbd>F5</kbd>. No és un porta-retalls permanent.</li>
+<li>Els fitxers s'identifiquen <b>pel nom</b>: tornar a dipositar un fitxer amb el mateix nom substitueix l'anterior (útil per treballar amb la versió més recent).</li>
+<li>El que viatja és una <b>còpia en memòria</b> del contingut: les eines receptores no modifiquen mai el fitxer original del disc.</li>
+<li>Amb fitxers molt grans (RVT o IFC de centenars de MB), dipositar-los i passar-los consumeix la memòria corresponent.</li>
+<li>Les pàgines d'ajuda no accepten fitxers; només les apps.</li>
+</ul>
+
+<h2 id="privadesa">Privadesa</h2>
+<p>Tot passa al teu equip: el servidor del launcher escolta només a <code>127.0.0.1</code>, les eines processen els fitxers al navegador i la Safata és memòria local de la finestra. Cap fitxer ni cap dada no s'envia enlloc.</p>
+</main>
+</div>
+
+<footer>Guaita apps · <b>SBS BIM Consulting</b> 2026 — tot el processament és local</footer>
+</body>
+</html>

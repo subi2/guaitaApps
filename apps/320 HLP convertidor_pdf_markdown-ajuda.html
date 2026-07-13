@@ -1,0 +1,327 @@
+<!--
+  Guaita Apps - Suite d'eines autònomes per a arquitectura, BIM i documentació.
+  Copyright (c) 2026 Jordi Subirós
+  GNU Affero General Public License v3.0
+  See LICENSE file for details
+-->
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ajuda · Convertidor PDF → Markdown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0E0A; --panel:#12160F; --panel-2:#191E12; --panel-3:#232A18;
+  --line:#333D1F; --line-soft:#28301A; --txt:#EAF3D8; --dim:#94A377; --dim-2:#5E6B47;
+  --accent:#C6FF00; --accent-ink:#0A0E00; --accent-2:#FF2ECC; --accent-3:#00E5FF; --accent-4:#FFE500;
+  --danger:#FF4D6D; --radius:8px;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Space Grotesk',system-ui,sans-serif;
+  background:var(--ink); color:var(--txt); line-height:1.6;
+  background-image:linear-gradient(rgba(198,255,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(198,255,0,.03) 1px,transparent 1px);
+  background-size:44px 44px;
+}
+.mono{font-family:'IBM Plex Mono',monospace;}
+a{color:var(--accent-3); text-decoration:none;}
+a:hover{color:var(--accent);}
+
+/* ---------- Layout ---------- */
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px; display:grid; grid-template-columns:230px 1fr; gap:48px;}
+@media(max-width:860px){ .wrap{grid-template-columns:1fr; gap:0;} nav.toc{display:none;} }
+
+/* ---------- Hero ---------- */
+header.hero{
+  border-bottom:1px solid var(--line); background:var(--panel);
+  padding:56px 24px 44px; position:relative; overflow:hidden;
+}
+header.hero .inner{max-width:1180px; margin:0 auto;}
+.brand{display:flex; align-items:center; gap:14px; margin-bottom:22px;}
+.brand .cells{display:grid; grid-template-columns:repeat(2,13px); gap:4px;}
+.brand .cells span{width:13px; height:13px;}
+.brand .cells span:nth-child(1){background:var(--accent);}
+.brand .cells span:nth-child(2){background:var(--accent-2);}
+.brand .cells span:nth-child(3){background:var(--accent-3);}
+.brand .cells span:nth-child(4){background:var(--accent-4);}
+.brand .bt{font-weight:700; font-size:20px; letter-spacing:.16em;}
+.brand .bt small{color:var(--accent); font-size:12px; letter-spacing:.1em; margin-left:2px;}
+header.hero h1{
+  font-size:clamp(34px,6vw,60px); line-height:1.02; font-weight:700; letter-spacing:-.02em;
+  max-width:16ch;
+}
+header.hero h1 em{font-style:normal; color:var(--accent);}
+header.hero p.lead{margin-top:18px; font-size:17px; color:var(--dim); max-width:60ch;}
+.hero-tag{
+  display:inline-block; margin-bottom:10px; font-family:'IBM Plex Mono',monospace;
+  font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent-ink);
+  background:var(--accent); padding:4px 10px; border-radius:20px;
+}
+
+/* ---------- TOC ---------- */
+nav.toc{position:sticky; top:32px; align-self:start; padding-top:48px;}
+nav.toc .toc-t{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim-2); margin-bottom:12px;}
+nav.toc ol{list-style:none; counter-reset:s;}
+nav.toc li{counter-increment:s; margin:2px 0;}
+nav.toc a{
+  display:flex; gap:10px; align-items:baseline; padding:6px 8px; border-radius:6px;
+  color:var(--dim); font-size:13.5px; border-left:2px solid transparent;
+}
+nav.toc a::before{content:counter(s,decimal-leading-zero); font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--dim-2);}
+nav.toc a:hover{background:var(--panel-2); color:var(--txt);}
+nav.toc a.active{color:var(--accent); border-left-color:var(--accent); background:var(--panel-2);}
+
+/* ---------- Content ---------- */
+main{padding:48px 0 100px; min-width:0;}
+section{margin-bottom:56px; scroll-margin-top:24px;}
+section > h2{
+  font-size:12px; font-family:'IBM Plex Mono',monospace; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--accent); margin-bottom:6px;
+}
+section > h2 .num{color:var(--dim-2); margin-right:10px;}
+section > .st{font-size:27px; font-weight:600; letter-spacing:-.01em; margin-bottom:18px; line-height:1.15;}
+section p{margin-bottom:14px; color:var(--txt);}
+section p.muted{color:var(--dim);}
+h3{font-size:17px; font-weight:600; margin:26px 0 10px;}
+
+/* ---------- Callouts ---------- */
+.note{
+  border:1px solid var(--line); border-left:3px solid var(--accent-3);
+  background:var(--panel); border-radius:0 var(--radius) var(--radius) 0;
+  padding:14px 16px; margin:18px 0; font-size:14px;
+}
+.note.warn{border-left-color:var(--accent-4);}
+.note.stop{border-left-color:var(--danger);}
+.note .nt{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin-bottom:5px;}
+.note.warn .nt{color:var(--accent-4);}
+.note.stop .nt{color:var(--danger);}
+
+/* ---------- Steps ---------- */
+ol.steps{list-style:none; counter-reset:step; margin:8px 0;}
+ol.steps li{counter-increment:step; position:relative; padding:12px 0 12px 46px; border-bottom:1px solid var(--line-soft);}
+ol.steps li:last-child{border-bottom:none;}
+ol.steps li::before{
+  content:counter(step); position:absolute; left:0; top:11px;
+  width:30px; height:30px; border-radius:8px; background:var(--panel-3); color:var(--accent);
+  font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13px;
+  display:flex; align-items:center; justify-content:center; border:1px solid var(--line);
+}
+ol.steps li b{color:var(--accent);}
+
+/* ---------- Feature cards ---------- */
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:14px; margin:10px 0;}
+.card{border:1px solid var(--line); background:var(--panel); border-radius:var(--radius); padding:16px;}
+.card .ci{width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; background:var(--panel-3);}
+.card .ci svg{width:18px; height:18px; stroke:var(--accent); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
+.card h4{font-size:15px; font-weight:600; margin-bottom:4px;}
+.card p{font-size:13px; color:var(--dim); margin:0;}
+.card:nth-child(4n+2) .ci svg{stroke:var(--accent-2);}
+.card:nth-child(4n+3) .ci svg{stroke:var(--accent-3);}
+.card:nth-child(4n+4) .ci svg{stroke:var(--accent-4);}
+
+/* ---------- Tables ---------- */
+table.tbl{width:100%; border-collapse:collapse; font-size:14px; margin:14px 0;}
+table.tbl th{text-align:left; padding:9px 12px; background:var(--panel-2); color:var(--dim); font-weight:500; font-size:12px; letter-spacing:.03em; text-transform:uppercase; border-bottom:1px solid var(--line);}
+table.tbl td{padding:9px 12px; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+table.tbl tr:hover td{background:var(--panel);}
+kbd{
+  font-family:'IBM Plex Mono',monospace; font-size:12px; background:var(--panel-3);
+  border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:2px 8px; color:var(--accent); white-space:nowrap;
+}
+code{font-family:'IBM Plex Mono',monospace; font-size:.88em; background:var(--panel-2); border:1px solid var(--line-soft); padding:1px 6px; border-radius:4px; color:var(--accent-3);}
+
+/* ---------- Panel map ---------- */
+.map{border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin:16px 0; font-family:'IBM Plex Mono',monospace; font-size:11.5px;}
+.map .mrow{display:flex; border-bottom:1px solid var(--line-soft);}
+.map .mrow:last-child{border-bottom:none;}
+.map .mcell{padding:14px 12px; border-right:1px solid var(--line-soft); color:var(--dim);}
+.map .mcell:last-child{border-right:none;}
+.map .mcell b{display:block; color:var(--accent); font-family:'Space Grotesk',sans-serif; font-size:13px; margin-bottom:3px;}
+.map .l{flex:0 0 26%;} .map .c{flex:1;} .map .r{flex:0 0 24%;}
+.map .top,.map .bot{background:var(--panel-2); color:var(--accent-3); padding:10px 12px; text-align:center;}
+
+/* ---------- Details / FAQ ---------- */
+details{border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); margin:8px 0; overflow:hidden;}
+details summary{padding:14px 16px; cursor:pointer; font-weight:500; list-style:none; display:flex; align-items:center; gap:10px;}
+details summary::-webkit-details-marker{display:none;}
+details summary::before{content:'+'; font-family:'IBM Plex Mono',monospace; color:var(--accent); font-size:16px;}
+details[open] summary::before{content:'−';}
+details .db{padding:0 16px 16px 42px; color:var(--dim); font-size:14px;}
+details[open] summary{color:var(--accent);}
+
+footer.foot{border-top:1px solid var(--line); padding:28px 24px; text-align:center; color:var(--dim-2); font-size:12.5px;}
+footer.foot .fb{display:inline-flex; gap:8px; align-items:center; margin-bottom:8px;}
+footer.foot .fb .cells{display:grid; grid-template-columns:repeat(2,6px); gap:2px;}
+footer.foot .fb .cells span{width:6px; height:6px;}
+footer.foot .fb .cells span:nth-child(1){background:var(--accent);} footer.foot .fb .cells span:nth-child(2){background:var(--accent-2);}
+footer.foot .fb .cells span:nth-child(3){background:var(--accent-3);} footer.foot .fb .cells span:nth-child(4){background:var(--accent-4);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="inner">
+    <div class="brand">
+      <span class="cells"><span></span><span></span><span></span><span></span></span>
+      <span class="bt">GUAITA<small>PDF→MD</small></span>
+    </div>
+    <span class="hero-tag">Manual d'ús</span>
+    <h1>Converteix un <em>PDF</em> a text <em>Markdown</em> al navegador.</h1>
+    <p class="lead">El Convertidor PDF → Markdown extreu el text d'un PDF digital, en dedueix l'estructura (títols, llistes, paràgrafs) i te'l lliura com a Markdown editable, amb vista prèvia i descàrrega — tot en local, sense pujar el fitxer enlloc.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="toc">
+    <div class="toc-t">Contingut</div>
+    <ol>
+      <li><a href="#intro">Què és</a></li>
+      <li><a href="#carregar">Carregar el PDF</a></li>
+      <li><a href="#parametres">Paràmetres d'extracció</a></li>
+      <li><a href="#interficie">La interfície</a></li>
+      <li><a href="#editar">Editar i previsualitzar</a></li>
+      <li><a href="#exportar">Copiar i descarregar</a></li>
+      <li><a href="#tema">Tema</a></li>
+      <li><a href="#problemes">Problemes</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section id="intro">
+      <h2><span class="num">01</span>Introducció</h2>
+      <div class="st">Del PDF al Markdown, sense sortir del navegador</div>
+      <p>Aquesta eina és una aplicació autònoma en una sola pàgina HTML. Carrega un PDF, en <b>llegeix el text i les seves propietats</b> (posició i mida de la lletra) amb la biblioteca PDF.js de Mozilla, i a partir d'aquestes dades reconstrueix un document Markdown: detecta títols, paràgrafs i llistes i te'ls entrega en un editor amb vista prèvia.</p>
+      <p class="muted">Tot el processament es fa <b>al teu navegador</b>. El PDF no s'envia a cap servidor de tercers, així que pots convertir documents privats amb tota tranquil·litat.</p>
+      <div class="cards">
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M12 15V3m0 12-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div><h4>100% local</h4><p>Cap fitxer surt del teu equip; s'extreu al navegador.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></div><h4>Estructura</h4><p>Dedueix títols, paràgrafs i llistes del text del PDF.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div><h4>Vista prèvia</h4><p>Veu el Markdown renderitzat abans de desar.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div><h4>Editable</h4><p>Retoca el resultat i descarrega'l com a .md.</p></div>
+      </div>
+    </section>
+
+    <section id="carregar">
+      <h2><span class="num">02</span>Carregar el PDF</h2>
+      <div class="st">Comença la conversió</div>
+      <ol class="steps">
+        <li>A la targeta <b>Carregar Document</b>, fes <b>clic a la zona de càrrega</b> o <b>arrossega-hi el PDF</b>.</li>
+        <li>La conversió comença <b>automàticament</b>: una barra de progrés indica quina pàgina s'està llegint.</li>
+        <li>En acabar, el Markdown apareix a l'editor i l'aplicació salta a la <b>Vista Prèvia HTML</b> perquè en vegis el resultat.</li>
+      </ol>
+      <p>El nom del fitxer carregat es mostra sota la zona de càrrega; pots eliminar-lo amb la <b>icona de paperera</b> per començar de nou.</p>
+      <div class="note">
+        <div class="nt">Format acceptat</div>
+        Només fitxers <code>.pdf</code>. Per a millors resultats, fes servir PDFs <b>digitals amb text seleccionable</b> (no imatges escanejades).
+      </div>
+    </section>
+
+    <section id="parametres">
+      <h2><span class="num">03</span>Paràmetres d'extracció</h2>
+      <div class="st">Ajusta com s'interpreta el text</div>
+      <p>A la targeta <b>Paràmetres d'extracció</b> hi ha quatre opcions que controlen la conversió. Pots canviar-les i tornar a processar el mateix PDF amb el botó <b>Reconvertir amb nous ajustos</b>.</p>
+      <table class="tbl">
+        <thead><tr><th>Opció</th><th>Què fa</th></tr></thead>
+        <tbody>
+          <tr><td><b>Reconstruir paràgrafs</b></td><td>Uneix les línies properes en un mateix paràgraf, per evitar salts de línia artificials heretats del PDF.</td></tr>
+          <tr><td><b>Detectar encapçalaments</b></td><td>Analitza la mida de la lletra per assignar nivells de títol (<code>#</code>, <code>##</code>, <code>###</code>).</td></tr>
+          <tr><td><b>Detectar llistes</b></td><td>Reconeix vinyetes (•, -, *…) i llistes numerades i les converteix a sintaxi Markdown.</td></tr>
+          <tr><td><b>Incloure talls de pàgina</b></td><td>Afegeix una línia horitzontal <code>---</code> i el número de pàgina com a referència entre pàgines.</td></tr>
+        </tbody>
+      </table>
+      <div class="note warn">
+        <div class="nt">És una heurística</div>
+        La detecció de títols i llistes es basa en la geometria i la mida del text del PDF. En documents amb maquetes complexes pot no encertar-ho tot; revisa i retoca el resultat a l'editor.
+      </div>
+    </section>
+
+    <section id="interficie">
+      <h2><span class="num">04</span>La interfície</h2>
+      <div class="st">On és cada cosa</div>
+      <div class="map">
+        <div class="top">Capçalera · títol «PDF a Markdown» + botó de tema + enllaç a la guia de sintaxi Markdown</div>
+        <div class="mrow">
+          <div class="mcell l"><b>Columna esquerra</b>Carregar document · Paràmetres d'extracció · consell d'ús.</div>
+          <div class="mcell c"><b>Àrea de treball</b>Pestanyes «Editor Markdown» i «Vista Prèvia HTML», amb els botons Copiar i Descarregar.</div>
+        </div>
+        <div class="bot">Barra d'estat inferior: línies · paraules · caràcters &nbsp;·&nbsp; indicador d'estat de la conversió</div>
+      </div>
+    </section>
+
+    <section id="editar">
+      <h2><span class="num">05</span>Editar i previsualitzar</h2>
+      <div class="st">Retoca el resultat</div>
+      <p>L'àrea de treball té dues pestanyes:</p>
+      <ul style="margin:0 0 14px 20px; color:var(--txt);">
+        <li><b>Editor Markdown</b> — el text convertit, que pots <b>editar lliurement</b> per corregir el que calgui.</li>
+        <li><b>Vista Prèvia HTML</b> — el mateix contingut <b>renderitzat amb estil</b>, tal com es veurà.</li>
+      </ul>
+      <p>Els canvis que fas a l'editor es reflecteixen a la previsualització i actualitzen el recompte de <b>línies, paraules i caràcters</b> de la barra inferior. En obrir l'aplicació ja hi trobaràs un text d'exemple perquè vegis com funciona.</p>
+    </section>
+
+    <section id="exportar">
+      <h2><span class="num">06</span>Copiar i descarregar</h2>
+      <div class="st">Treu el Markdown de l'eina</div>
+      <table class="tbl">
+        <thead><tr><th>Acció</th><th>Què fa</th></tr></thead>
+        <tbody>
+          <tr><td><b>Copiar</b></td><td>Copia tot el Markdown al porta-retalls per enganxar-lo on vulguis.</td></tr>
+          <tr><td><b>Descarregar</b></td><td>Desa un fitxer <code>.md</code> al disc, amb el nom del PDF original.</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">Un avís emergent (toast) confirma que l'acció s'ha completat correctament.</p>
+    </section>
+
+    <section id="tema">
+      <h2><span class="num">07</span>Tema clar i fosc</h2>
+      <div class="st">Treballa com et vagi millor</div>
+      <p>El botó de <b>tema</b> (icona de lluna/sol) a la capçalera alterna entre el mode <b>clar</b> i el <b>fosc</b>. La preferència es recorda al teu navegador per a la propera vegada.</p>
+    </section>
+
+    <section id="problemes">
+      <h2><span class="num">08</span>Resolució de problemes</h2>
+      <div class="st">Si alguna cosa no va</div>
+      <details>
+        <summary>El resultat surt buit o gairebé buit</summary>
+        <div class="db">Probablement el PDF és <b>escanejat</b> (una imatge del document, no text real). Aquesta eina no fa OCR, així que no pot llegir text que estigui dins d'imatges. Fes servir un PDF digital amb text seleccionable.</div>
+      </details>
+      <details>
+        <summary>Els títols no es detecten bé</summary>
+        <div class="db">La detecció es basa en la mida de la lletra. Si el PDF no marca els títols amb una mida clarament més gran, activa o desactiva <b>Detectar encapçalaments</b> i torna a convertir, o corregeix els nivells manualment a l'editor.</div>
+      </details>
+      <details>
+        <summary>El text apareix trossejat en moltes línies</summary>
+        <div class="db">Activa <b>Reconstruir paràgrafs</b> i prem <b>Reconvertir amb nous ajustos</b>; l'eina unirà les línies properes en paràgrafs continus.</div>
+      </details>
+      <details>
+        <summary>«No s'ha pogut copiar el text»</summary>
+        <div class="db">Alguns navegadors restringeixen l'accés al porta-retalls quan la pàgina s'obre com a fitxer local. Fes servir el botó <b>Descarregar</b> per obtenir el <code>.md</code>, o obre l'aplicació servida per HTTP.</div>
+      </details>
+      <details>
+        <summary>Error en processar el document PDF</summary>
+        <div class="db">El fitxer pot estar protegit, malmès o no ser un PDF vàlid. Comprova que s'obri correctament en un lector de PDF normal i torna-ho a provar.</div>
+      </details>
+    </section>
+  </main>
+</div>
+
+<footer class="foot">
+  <div class="fb"><span class="cells"><span></span><span></span><span></span><span></span></span> <b style="color:var(--txt); font-weight:600; letter-spacing:.1em;">GUAITA PDF → MD</b></div>
+  <div>Convertidor de PDF a Markdown · SBS BIM</div>
+</footer>
+
+<script>
+// Ressaltat de la secció activa a l'índex
+const links=[...document.querySelectorAll('nav.toc a')];
+const map=new Map(links.map(a=>[a.getAttribute('href').slice(1),a]));
+const obs=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){ links.forEach(l=>l.classList.remove('active')); const a=map.get(e.target.id); if(a)a.classList.add('active'); } });
+},{rootMargin:'-20% 0px -70% 0px'});
+document.querySelectorAll('main section').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

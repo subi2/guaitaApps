@@ -1,0 +1,379 @@
+<!--
+  Guaita Apps - Suite d'eines autònomes per a arquitectura, BIM i documentació.
+  Copyright (c) 2026 Jordi Subirós
+  GNU Affero General Public License v3.0
+  See LICENSE file for details
+-->
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zona Climàtica CTE</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#0b1120;color:#cbd5e1;font-size:14px;line-height:1.5;min-height:100vh}
+header{padding:14px 22px;background:linear-gradient(135deg,#0d1629,#0f1f3d);border-bottom:1px solid #1e2d3d}
+header h1{font-size:16px;font-weight:700;color:#f1f5f9}
+header p{font-size:11px;color:#475569;margin-top:2px}
+main{max-width:940px;margin:0 auto;padding:22px 18px 48px}
+.search-box{display:flex;gap:8px;margin-bottom:8px}
+.search-box input{flex:1;padding:11px 16px;background:#1e293b;border:2px solid #2d3f55;border-radius:10px;color:#f1f5f9;font-size:15px;transition:border-color .15s}
+.search-box input:focus{outline:none;border-color:#3b82f6}
+.search-box input::placeholder{color:#475569}
+.btn{padding:11px 18px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity .15s,background .15s}
+.btn-search{background:#3b82f6;color:#fff}
+.btn-search:hover{background:#2563eb}
+.hint{font-size:11px;color:#334155;margin-bottom:16px;padding-left:2px}
+.hint span{color:#475569}
+.status{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#1a1f35;border:1px solid #312e81;border-radius:8px;font-size:12px;color:#818cf8;margin-bottom:14px}
+.spin{display:inline-block;animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+/* Disambiguation — purple (multiple provinces) */
+.disamb{background:#161d32;border:1px solid #2d3f65;border-left:3px solid #818cf8;border-radius:10px;padding:14px 17px;margin-bottom:14px}
+.disamb-t{font-size:13px;color:#a5b4fc;margin-bottom:12px;font-weight:600;line-height:1.5}
+.disamb-t em{color:#f1f5f9;font-style:normal;font-weight:700}
+/* Suggestions — teal (did you mean?) */
+.suggest{background:#0d1e20;border:1px solid #1a4045;border-left:3px solid #2dd4bf;border-radius:10px;padding:14px 17px;margin-bottom:14px}
+.suggest-t{font-size:13px;color:#5eead4;margin-bottom:12px;font-weight:600;line-height:1.5}
+.suggest-t em{color:#f1f5f9;font-style:normal;font-weight:700}
+.disamb-btns,.suggest-btns{display:flex;flex-wrap:wrap;gap:8px}
+.btn-d{padding:7px 16px;background:#1e2d50;border:1px solid #374f7a;border-radius:8px;color:#c7d2fe;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s}
+.btn-d:hover{background:#2d3f6a;border-color:#818cf8;color:#f1f5f9}
+.btn-s{padding:7px 16px;background:#0d2525;border:1px solid #1a4a4a;border-radius:8px;color:#99f6e4;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s}
+.btn-s:hover{background:#163535;border-color:#2dd4bf;color:#f1f5f9}
+.panel-sub{margin-top:10px;padding-top:10px;border-top:1px solid #1e2d3d;font-size:11px;color:#475569;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn-ai-sm{padding:4px 11px;background:#2e1065;border:1px solid #6d28d9;border-radius:6px;color:#a78bfa;font-size:11px;font-weight:600;cursor:pointer}
+.btn-ai-sm:hover{background:#3b1080}
+.empty{text-align:center;padding:52px 16px;color:#334155}
+.empty .ico{font-size:44px;margin-bottom:10px}
+.empty p{font-size:13px;line-height:1.85}
+.card{background:#161f2e;border:1px solid #1e2d3d;border-radius:12px;padding:15px 17px;margin-bottom:12px}
+.ct{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.08em;margin-bottom:11px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ai-badge{padding:2px 8px;background:#2e1065;border:1px solid #6d28d9;border-radius:10px;font-size:10px;color:#a78bfa;font-weight:600}
+.zbw{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.zb{width:82px;height:82px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff;flex-shrink:0;letter-spacing:-1px}
+.zn{font-size:19px;font-weight:700;color:#f1f5f9;margin-bottom:1px}
+.zp{font-size:12px;color:#64748b;margin-bottom:2px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pill{padding:3px 10px;border-radius:16px;font-size:11px;font-weight:600;border:1px solid}
+.altb{display:inline-flex;align-items:center;gap:5px;padding:3px 11px;background:#0f1825;border:1px solid #1a2538;border-radius:16px;font-size:12px;color:#94a3b8;margin-top:6px;font-weight:600}
+.ai-nota{font-size:10px;color:#64748b;margin-top:5px;font-style:italic}
+.warn-nota{font-size:10px;color:#d97706;margin-top:5px;background:#1c1200;border:1px solid #3d2800;padding:4px 9px;border-radius:6px;display:inline-block}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hg{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px}
+.hi{background:#0f1825;border:1px solid #1a2538;border-radius:8px;padding:10px 8px;text-align:center}
+.hi .lb{font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;margin-bottom:4px;line-height:1.3}
+.hi .vl{font-size:20px;font-weight:800}
+.hi .un{font-size:9px;color:#334155;margin-top:1px}
+.hn{font-size:10px;color:#2d4360;line-height:1.7;margin-top:5px}
+.catcard{background:#131108;border:1px solid #2a2510;border-left:3px solid #d97706;border-radius:10px;padding:13px 15px;margin-bottom:12px}
+.cath{font-size:10px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px}
+.catz{font-size:17px;font-weight:800;color:#fbbf24}
+.catdd{font-size:11px;color:#7a6535;margin-top:3px;line-height:1.5}
+.catref{font-size:9.5px;color:#3d3010;margin-top:8px;padding-top:8px;border-top:1px solid #2a2510;line-height:1.75}
+.catref strong{color:#7a6535}
+.slbl{display:flex;justify-content:space-between;font-size:9px;color:#334155;margin-bottom:4px}
+.spc{display:flex;gap:3px;padding-bottom:20px;margin-top:4px}
+.seg{flex:1;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;position:relative;transition:transform .2s,opacity .2s}
+.seg.on{transform:translateY(-6px)}
+.seg.on::after{content:'▼';position:absolute;bottom:-15px;font-size:9px;opacity:.9}
+.seg.off{opacity:.14}
+.typ{font-size:11px;color:#374151;margin-top:8px;line-height:1.75}
+.fn{padding:11px 15px;background:#0c1220;border-left:2px solid #1e3a5f;border-radius:4px;font-size:10px;color:#2d4360;line-height:1.9}
+.fn strong{color:#3a5c80}
+@media(max-width:580px){.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🌡️ Calculadora de Zona Climàtica</h1>
+  <p>CTE DB-HE · Decret 21/2006 Catalunya · Transmitàncies HE1 · Altitud · Tots els municipis d'Espanya</p>
+</header>
+<main>
+  <div class="search-box">
+    <input type="text" id="iSearch" list="dl" placeholder="Escriu el nom del municipi... (ex: Viladecavalls, vila de cavalls, Berga...)" autocomplete="off">
+    <datalist id="dl"></datalist>
+    <button class="btn btn-search" id="btnSearch">🔍 Cercar</button>
+  </div>
+  <div class="hint">~580 municipis en base de dades. <span>Si no es troba, la IA cerca automàticament. Accepta errors ortogràfics i noms amb espais.</span></div>
+  <div id="stEl" style="display:none" class="status"></div>
+  <div id="panelEl" style="display:none"></div>
+  <div id="emEl" class="empty">
+    <div class="ico">🏛️</div>
+    <p>Escriu el <strong>nom del municipi</strong> i prem <strong>Cercar</strong>.<br>
+    Funciona amb errors tipogràfics i noms amb espais:<br>
+    <span style="color:#1e4a4a;font-size:12px;margin-top:5px;display:block">«vila de cavalls» → Viladecavalls · «sant cugat» → Sant Cugat del Vallès</span></p>
+  </div>
+  <div id="resEl" style="display:none">
+    <div class="card" id="zCard"></div>
+    <div class="g2">
+      <div class="card">
+        <div class="ct">📐 Transmitàncies màximes — DB-HE Taula 3.1.1</div>
+        <div class="hg" id="hg"></div>
+        <div class="hn" id="hn"></div>
+      </div>
+      <div>
+        <div id="catDiv"></div>
+        <div class="card">
+          <div class="ct">🗺️ Espectre zones hivernals CTE</div>
+          <div class="slbl"><span>← A (molt suau)</span><span>(molt fred) E →</span></div>
+          <div class="spc" id="spc"></div>
+          <div class="typ" id="typ"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fn" id="fn"></div>
+  </div>
+</main>
+<script>
+const DB={
+"Álava":[["Vitoria-Gasteiz","D1",524,null],["Amurrio","C1",219,null],["Llodio","C1",120,null],["Agurain/Salvatierra","D1",549,null]],
+"Albacete":[["Albacete","D3",686,null],["Almansa","C4",712,null],["Hellín","B4",566,null],["La Roda","D3",724,null],["Villarrobledo","D3",724,null],["Tobarra","C3",636,null],["Caudete","C3",585,null],["Casas-Ibáñez","C3",689,null]],
+"Alicante / Alacant":[["Alacant/Alicante","B4",8,null],["Alcoi/Alcoy","C3",814,null],["Benidorm","B3",6,null],["Dénia","B3",7,null],["Elche/Elx","B4",86,null],["Orihuela","B4",28,null],["Torrevieja","B4",4,null],["Villena","C3",508,null],["Elda","B3",485,null],["Petrer","B3",640,null],["Novelda","B4",352,null],["Ibi","C3",826,null],["Crevillent","B4",66,null],["Santa Pola","B3",6,null],["Guardamar del Segura","B4",10,null],["Callosa de Segura","B4",35,null],["Benissa","B3",281,null],["Calpe/Calp","B3",10,null],["Altea","B3",10,null],["La Vila Joiosa","B3",9,null],["Xàbia/Jávea","B3",10,null],["Cocentaina","C3",460,null],["Sax","C3",610,null],["Pego","B3",50,null]],
+"Almería":[["Almería","A4",22,null],["El Ejido","A4",30,null],["Huércal-Overa","B4",290,null],["Roquetas de Mar","A4",6,null],["Vera","B4",82,null],["Adra","A4",18,null],["Vícar","A4",100,null],["Berja","A4",420,null],["Carboneras","B4",2,null],["Garrucha","B4",15,null],["Níjar","B4",310,null],["Cuevas del Almanzora","B4",128,null]],
+"Asturias":[["Oviedo","C1",236,null],["Avilés","C1",7,null],["Gijón","C1",28,null],["Langreo","D1",140,null],["Mieres","C1",200,null],["Siero","C1",180,null],["Castrillón","C1",10,null],["Llanes","C1",10,null],["Cangas del Narcea","D1",440,null],["Tineo","D1",450,null],["Navia","C1",15,null],["Grado","C1",170,null]],
+"Ávila":[["Ávila","E1",1131,null],["Arévalo","D2",823,null],["Arenas de San Pedro","C3",505,null],["El Barco de Ávila","D2",1008,null]],
+"Badajoz":[["Badajoz","B4",186,null],["Almendralejo","B3",335,null],["Don Benito","B4",305,null],["Mérida","B4",218,null],["Zafra","B3",510,null],["Villanueva de la Serena","B4",276,null],["Montijo","B4",207,null],["Olivenza","B4",258,null],["Jerez de los Caballeros","B3",568,null],["Azuaga","B3",631,null],["Sancti-Spíritus","B3",620,null]],
+"Balears (Illes)":[["Palma","B3",10,null],["Calvià","B3",40,null],["Eivissa","B3",8,null],["Inca","B3",120,null],["Maó","B3",50,null],["Manacor","B3",115,null],["Llucmajor","B3",10,null],["Marratxí","B3",20,null],["Andratx","B3",30,null],["Felanitx","B3",100,null],["Pollença","B3",30,null],["Sóller","B3",50,null],["Ciutadella de Menorca","B3",20,null],["Sant Antoni de Portmany","B3",10,null]],
+"Barcelona":[["Barcelona","C2",10,1],["Badalona","C2",11,1],["L'Hospitalet de Llobregat","C2",17,1],["Sant Adrià de Besòs","C2",6,1],["Santa Coloma de Gramenet","C2",18,2],["Terrassa","C2",277,2],["Sabadell","C2",190,2],["Sant Cugat del Vallès","C2",124,2],["Rubí","C2",130,2],["Cerdanyola del Vallès","C2",108,2],["Barberà del Vallès","C2",127,2],["Ripollet","C2",95,2],["Montcada i Reixac","C2",38,2],["Castellar del Vallès","C2",250,2],["Sant Quirze del Vallès","C2",183,2],["Polinyà","C2",180,2],["Santa Perpètua de Mogoda","C2",79,2],["Sentmenat","C2",220,2],["Granollers","C2",148,2],["Mollet del Vallès","C2",62,2],["Montornès del Vallès","C2",73,2],["Parets del Vallès","C2",70,2],["La Garriga","C2",225,2],["Llinars del Vallès","C2",168,2],["Sant Celoni","C2",155,2],["Caldes de Montbui","C2",180,2],["Mataró","C2",21,1],["Montgat","C2",10,1],["Premià de Mar","C2",15,1],["Premià de Dalt","C2",95,2],["Arenys de Mar","C2",20,1],["El Masnou","C2",11,1],["Calella","C2",9,1],["Pineda de Mar","C2",10,1],["Malgrat de Mar","C2",9,1],["Sant Pol de Mar","C2",10,1],["Canet de Mar","C2",10,1],["Vilassar de Mar","C2",12,1],["Vilassar de Dalt","C2",180,2],["Argentona","C2",100,2],["Alella","C2",80,2],["Tiana","C2",100,2],["Palafolls","C2",24,1],["Cornellà de Llobregat","C2",14,1],["Sant Boi de Llobregat","C2",16,1],["Viladecans","C2",12,1],["Gavà","C2",11,1],["Castelldefels","C2",10,1],["El Prat de Llobregat","C2",8,1],["Martorell","C2",56,2],["Sant Andreu de la Barca","C2",65,2],["Molins de Rei","C2",55,2],["Sant Vicenç dels Horts","C2",80,2],["Pallejà","C2",115,2],["Castellbisbal","C2",90,2],["Abrera","C2",145,2],["Olesa de Montserrat","C2",163,2],["Esparreguera","C2",188,2],["Sant Pere de Ribes","C2",70,1],["Cubelles","C2",10,1],["Vilanova i la Geltrú","C2",17,1],["Sitges","C2",10,1],["Viladecavalls","C2",308,2],["Vacarisses","C2",340,2],["Rellinars","C2",430,2],["Ullastrell","C2",305,2],["Manresa","C2",241,2],["Sallent","C2",290,2],["Navàs","D2",457,3],["Santpedor","C2",310,2],["Cardona","D2",750,3],["Igualada","C3",315,2],["Capellades","C3",370,2],["Piera","C2",350,2],["Collbató","C2",260,2],["Calaf","D2",608,3],["Vic","D2",487,3],["Torelló","D2",543,3],["Manlleu","D2",515,3],["Berga","D2",715,3],["Gironella","D2",658,3],["Puig-reig","D2",604,3]],
+"Bizkaia":[["Bilbao","C1",10,null],["Barakaldo","C1",25,null],["Basauri","C1",90,null],["Getxo","C1",50,null],["Leioa","C1",40,null],["Santurtzi","C1",5,null],["Sestao","C1",10,null],["Portugalete","C1",5,null],["Galdakao","C1",60,null],["Durango","C1",176,null],["Ermua","C1",135,null],["Erandio","C1",10,null]],
+"Burgos":[["Burgos","E1",860,null],["Aranda de Duero","D2",798,null],["Miranda de Ebro","D1",467,null],["Medina de Pomar","D1",600,null]],
+"Cáceres":[["Cáceres","C4",459,null],["Plasencia","C3",355,null],["Navalmoral de la Mata","B4",308,null],["Trujillo","B4",560,null]],
+"Cádiz":[["Cádiz","A3",7,null],["Algeciras","A3",25,null],["Chiclana de la Frontera","A3",20,null],["El Puerto de Santa María","A3",5,null],["Jerez de la Frontera","B3",55,null],["La Línea de la Concepción","A3",5,null],["San Fernando","A3",11,null],["Sanlúcar de Barrameda","A3",10,null],["Los Barrios","A3",30,null],["Conil de la Frontera","A3",10,null],["Barbate","A3",5,null],["Rota","A3",10,null]],
+"Cantabria":[["Santander","C1",7,null],["Castro-Urdiales","C1",5,null],["Laredo","C1",5,null],["Torrelavega","C1",25,null],["Camargo","C1",30,null],["El Astillero","C1",5,null],["Reinosa","D1",850,null],["Cieza","D1",600,null],["Villaescusa","C1",80,null]],
+"Castellón / Castelló":[["Castelló de la Plana","B3",28,null],["Benicarló","B3",11,null],["Borriana","B3",18,null],["Nules","B3",30,null],["Vila-real","B3",41,null],["Vinaròs","B3",12,null],["Almassora","B3",37,null],["Benicàssim","B3",6,null],["Onda","B3",243,null],["La Vall d'Uixó","B3",128,null],["Segorbe","C3",360,null]],
+"Ciudad Real":[["Ciudad Real","C4",628,null],["Alcázar de San Juan","C3",651,null],["Manzanares","C3",643,null],["Puertollano","C4",703,null],["Tomelloso","C3",660,null],["Valdepeñas","C4",720,null],["Daimiel","C3",617,null],["Villanueva de los Infantes","C4",830,null]],
+"Córdoba":[["Córdoba","B4",111,null],["Cabra","B3",452,null],["Lucena","B4",481,null],["Montilla","B3",388,null],["Pozoblanco","C3",715,null],["Priego de Córdoba","B3",643,null],["Aguilar de la Frontera","B3",348,null],["Palma del Río","B4",103,null],["Puente Genil","B3",190,null]],
+"A Coruña":[["A Coruña","C1",5,null],["Ferrol","C1",10,null],["Narón","C1",15,null],["Santiago de Compostela","C1",260,null],["Arteixo","C1",10,null],["Oleiros","C1",10,null],["Cambre","C1",25,null],["Carballo","C1",35,null],["Ames","C1",220,null],["Boiro","C1",5,null],["Sada","C1",5,null],["Sobrado","C1",660,null]],
+"Cuenca":[["Cuenca","D3",1000,null],["Motilla del Palancar","C3",820,null],["Tarancón","C3",750,null]],
+"Girona":[["Girona","C2",70,2],["Salt","C2",73,2],["Sarrià de Ter","C2",68,2],["Celrà","C2",43,2],["Lloret de Mar","C2",10,1],["Blanes","C2",10,1],["Tossa de Mar","C2",10,1],["Santa Cristina d'Aro","C2",93,2],["Llagostera","C2",94,2],["Caldes de Malavella","C2",81,2],["Santa Coloma de Farners","C2",121,2],["Vidreres","C2",138,2],["Anglès","C2",147,2],["Riudellots de la Selva","C2",74,2],["Platja d'Aro","C2",9,1],["Palamós","C2",10,1],["Palafrugell","C2",41,1],["La Bisbal d'Empordà","C2",37,1],["Sant Feliu de Guíxols","C2",10,1],["Torroella de Montgrí","C2",20,1],["Begur","C2",200,2],["Calonge i Sant Antoni","C2",85,2],["Figueres","C2",39,2],["Roses","C2",9,1],["Castelló d'Empúries","C2",17,1],["L'Escala","C2",8,1],["El Port de la Selva","C2",5,1],["Cadaqués","C2",5,1],["Portbou","C2",5,1],["Llançà","C2",10,1],["Sant Pere Pescador","C2",10,1],["Banyoles","C2",172,2],["Olot","D1",443,3],["Ripoll","D1",682,3],["Sant Joan de les Abadesses","D1",783,3],["Camprodon","D1",960,3],["Campdevànol","D1",706,3],["Puigcerdà","E1",1202,4],["Llívia","E1",1224,4]],
+"Granada":[["Granada","C3",685,null],["Almuñécar","A3",18,null],["Baza","D3",872,null],["Guadix","D3",938,null],["Loja","C3",487,null],["Motril","A3",35,null],["Salobreña","A3",5,null],["Armilla","C3",690,null],["Las Gabias","C3",680,null],["Maracena","C3",700,null]],
+"Guadalajara":[["Guadalajara","D3",708,null],["Azuqueca de Henares","D3",690,null],["Sigüenza","D2",1007,null],["Cabanillas del Campo","D3",755,null]],
+"Gipuzkoa":[["Donostia/San Sebastián","C1",5,null],["Eibar","C1",121,null],["Errenteria","C1",10,null],["Irun","C1",6,null],["Zarautz","C1",15,null],["Hernani","C1",35,null],["Pasaia","C1",5,null],["Tolosa","C1",74,null],["Arrasate/Mondragón","D1",215,null]],
+"Huelva":[["Huelva","A4",5,null],["Almonte","A3",78,null],["Ayamonte","A3",24,null],["Isla Cristina","A3",5,null],["Lepe","A3",20,null],["Moguer","A3",50,null],["Nerva","B3",617,null],["Punta Umbría","A3",5,null]],
+"Huesca":[["Huesca","D2",488,null],["Barbastro","D2",341,null],["Fraga","C3",118,null],["Jaca","D1",820,null],["Monzón","D2",262,null],["Sabiñánigo","D1",790,null],["Binéfar","D2",280,null]],
+"Jaén":[["Jaén","C4",574,null],["Andújar","B4",212,null],["Baeza","C4",766,null],["Linares","B4",418,null],["Martos","C3",571,null],["Úbeda","C4",757,null],["Alcalá la Real","C3",881,null]],
+"León":[["León","E1",822,null],["Astorga","E1",868,null],["Ponferrada","D1",543,null],["San Andrés del Rabanedo","E1",840,null],["Bembibre","D1",750,null],["Sobrado","D1",920,null]],
+"Lleida":[["Lleida","D3",155,3],["Alpicat","D3",210,3],["Balaguer","D2",233,3],["Artesa de Segre","D2",380,3],["Tàrrega","D2",370,3],["Agramunt","D2",350,3],["Bellpuig","D2",315,3],["Mollerussa","D2",265,3],["Les Borges Blanques","C3",302,3],["Cervera","D2",554,3],["Guissona","D2",380,3],["Solsona","D2",664,3],["La Seu d'Urgell","E1",691,4],["Pont de Suert","E1",838,4],["Tremp","D2",465,3],["Sort","D2",681,3],["Vielha e Mijaran","E1",980,4],["Bossòst","E1",717,4]],
+"Lugo":[["Lugo","D1",485,null],["Monforte de Lemos","D1",298,null],["Viveiro","C1",10,null],["Sarria","D1",664,null]],
+"Madrid":[["Madrid","D3",664,null],["Alcalá de Henares","D3",587,null],["Alcobendas","D3",680,null],["Alcorcón","D3",738,null],["Fuenlabrada","D3",726,null],["Getafe","D3",621,null],["Las Rozas de Madrid","D3",720,null],["Leganés","D3",668,null],["Móstoles","D3",665,null],["Parla","D3",651,null],["Pozuelo de Alarcón","D3",690,null],["Torrejón de Ardoz","D3",588,null],["Rivas-Vaciamadrid","D3",541,null],["Valdemoro","D3",574,null],["San Sebastián de los Reyes","D3",714,null],["Coslada","D3",603,null],["Collado Villalba","D3",912,null],["Majadahonda","D3",756,null],["Boadilla del Monte","D3",740,null],["Arganda del Rey","D3",543,null],["El Escorial","E1",1032,null],["Aranjuez","C3",491,null],["Torrelodones","D3",860,null],["Navalcarnero","D3",703,null]],
+"Málaga":[["Málaga","A3",10,null],["Antequera","B4",464,null],["Benalmádena","A3",10,null],["Estepona","A3",10,null],["Fuengirola","A3",10,null],["Marbella","A3",10,null],["Nerja","A3",35,null],["Ronda","C3",723,null],["Torremolinos","A3",10,null],["Vélez-Málaga","A3",73,null],["Mijas","A3",160,null],["Alhaurín de la Torre","A3",160,null],["Coín","B3",230,null],["Archidona","B4",627,null]],
+"Murcia":[["Murcia","B3",43,null],["Alcantarilla","B3",45,null],["Cartagena","B3",9,null],["Cieza","C3",360,null],["Lorca","B3",331,null],["Molina de Segura","B3",100,null],["Yecla","C3",780,null],["Jumilla","C3",575,null],["Mazarrón","B3",15,null],["San Javier","B3",5,null],["Torre-Pacheco","B3",50,null],["Águilas","B3",10,null],["Totana","B3",416,null]],
+"Navarra":[["Pamplona/Iruña","D1",449,null],["Barañáin","D1",440,null],["Burlada","D1",450,null],["Estella/Lizarra","D2",426,null],["Tudela","C3",267,null],["Tafalla","D2",426,null],["Zizur Mayor","D1",450,null],["Sada","D1",500,null]],
+"Ourense":[["Ourense","C2",125,null],["Verín","C2",408,null],["Xinzo de Limia","D2",698,null]],
+"Palencia":[["Palencia","D2",735,null],["Aguilar de Campoo","D1",895,null]],
+"Las Palmas":[["Las Palmas de Gran Canaria","α3",5,null],["Arrecife","α3",5,null],["Puerto del Rosario","α3",30,null],["San Bartolomé de Tirajana","α3",850,null],["Telde","α3",115,null],["Tías","α3",170,null],["Mogán","α3",15,null]],
+"Pontevedra":[["Vigo","C1",30,null],["Pontevedra","C1",20,null],["Vilagarcía de Arousa","C1",10,null],["Moaña","C1",5,null],["Redondela","C1",10,null],["Cangas","C1",5,null],["Marín","C1",5,null],["Lalín","D1",560,null]],
+"La Rioja":[["Logroño","D2",384,null],["Calahorra","C3",358,null],["Haro","D2",479,null],["Arnedo","C3",542,null],["Alfaro","C3",303,null]],
+"Salamanca":[["Salamanca","D2",800,null],["Béjar","D2",960,null],["Ciudad Rodrigo","D2",648,null],["Sancti-Spíritus","D2",870,null]],
+"Santa Cruz de Tenerife":[["Santa Cruz de Tenerife","α3",52,null],["Adeje","α3",460,null],["Arona","α3",645,null],["San Cristóbal de La Laguna","α3",540,null],["La Orotava","α3",350,null],["Los Realejos","α3",150,null],["Puerto de la Cruz","α3",9,null],["Granadilla de Abona","α3",620,null]],
+"Segovia":[["Segovia","D2",1002,null],["El Espinar","E1",1198,null],["Cuéllar","D2",857,null]],
+"Sevilla":[["Sevilla","B4",13,null],["Alcalá de Guadaíra","B4",56,null],["Dos Hermanas","B4",58,null],["Écija","B4",100,null],["Mairena del Aljarafe","B4",25,null],["Utrera","B4",45,null],["Morón de la Frontera","B4",218,null],["La Rinconada","B4",26,null],["Camas","B4",25,null],["Coria del Río","B4",8,null],["Tomares","B4",40,null],["Carmona","B4",248,null]],
+"Soria":[["Soria","E1",1063,null],["Almazán","D2",841,null],["El Burgo de Osma","E1",895,null]],
+"Tarragona":[["Tarragona","B3",66,1],["Salou","B3",6,1],["Cambrils","B3",2,1],["Vila-seca","B3",8,1],["Vandellòs i l'Hospitalet de l'Infant","B3",15,1],["Altafulla","C2",10,1],["Torredembarra","C2",10,1],["Mont-roig del Camp","B3",30,1],["Reus","C2",135,2],["Riudoms","C2",110,2],["La Selva del Camp","C2",263,2],["Alcover","C2",354,2],["Constantí","C2",90,2],["Valls","C2",209,2],["El Vendrell","C2",60,1],["Calafell","C2",11,1],["Cunit","C2",10,1],["Tortosa","B4",12,1],["Deltebre","B3",5,1],["Amposta","B3",15,1],["Sant Carles de la Ràpita","B3",5,1],["Alcanar","B3",18,1],["Ulldecona","B3",100,1],["Gandesa","C3",370,3],["Batea","C3",430,3],["Móra d'Ebre","C3",85,2],["Flix","C3",85,2],["Falset","C3",280,2],["Montblanc","C3",400,3],["L'Espluga de Francolí","C3",420,3],["La Secuita","C2",190,2]],
+"Teruel":[["Teruel","D2",900,null],["Alcañiz","C3",359,null],["Andorra","D2",795,null],["Utrillas","D2",1034,null],["Calamocha","D2",930,null]],
+"Toledo":[["Toledo","C4",529,null],["Illescas","C4",615,null],["Talavera de la Reina","C4",375,null],["Torrijos","C4",493,null],["Madridejos","C4",690,null],["Ocaña","C4",735,null]],
+"Valencia / València":[["València","B3",13,null],["Alzira","B3",27,null],["Burjassot","B3",53,null],["Gandia","B3",4,null],["Paterna","B3",77,null],["Torrent","B3",67,null],["Xirivella","B3",24,null],["Ontinyent","C3",396,null],["Aldaia","B3",80,null],["Manises","B3",60,null],["Mislata","B3",32,null],["Quart de Poblet","B3",53,null],["Ribarroja de Túria","B3",142,null],["Sagunt/Sagunto","B3",26,null],["Xàtiva","B3",115,null],["Llíria","B3",200,null],["Sueca","B3",15,null],["Cullera","B3",5,null],["Requena","C3",692,null]],
+"Valladolid":[["Valladolid","D2",694,null],["Medina del Campo","D2",730,null],["Laguna de Duero","D2",700,null],["Arroyo de la Encomienda","D2",720,null],["Villanueva de los Infantes","D2",796,null]],
+"Zamora":[["Zamora","D2",656,null],["Benavente","D1",756,null],["Toro","D2",695,null]],
+"Zaragoza":[["Zaragoza","D3",199,null],["Calatayud","C3",534,null],["Ejea de los Caballeros","D2",317,null],["Tarazona","D2",480,null],["Utebo","D3",199,null],["Zuera","D3",291,null],["Caspe","C3",143,null]]
+};
+
+const CAT_P=new Set(["Barcelona","Girona","Lleida","Tarragona"]);
+const COL={α:"#be185d",A:"#d97706",B:"#ea580c",C:"#16a34a",D:"#2563eb",E:"#7c3aed"};
+const HE1={α:{Um:"1.26†",Uc:"0.80†",Us:"—",Uh:"5.70†"},A:{Um:0.82,Uc:0.45,Us:0.50,Uh:3.10},B:{Um:0.66,Uc:0.38,Us:0.42,Uh:2.70},C:{Um:0.49,Uc:0.33,Us:0.37,Uh:2.30},D:{Um:0.41,Uc:0.28,Us:0.32,Uh:1.80},E:{Um:0.37,Uc:0.25,Us:0.28,Uh:1.60}};
+const WLBL={α:"Zona especial — Canàries",A:"Hivern molt suau",B:"Hivern suau",C:"Hivern moderat",D:"Hivern fred",E:"Hivern molt fred"};
+const SLBL={"1":"Estiu molt suau","2":"Estiu suau","3":"Estiu moderat","4":"Estiu càlid"};
+const TYP={α:"Illes Canàries — zona especial",A:"Almería, Huelva, costa de Màlaga i Cadis",B:"Sevilla, Badajoz, Tarragona litoral, Balears, costa mediterrània S",C:"Barcelona, Bilbao, Donostia, Santander, A Coruña, Castelló, València",D:"Madrid, Saragossa, Lleida, Pamplona, Vitoria-Gasteiz, Valladolid",E:"Burgos, Ávila, Soria, León, Puigcerdà, La Seu d'Urgell, Vielha"};
+const CATNOM={1:"Zona 1 — Litoral",2:"Zona 2 — Pre-litoral",3:"Zona 3 — Interior / Pre-pirinenc",4:"Zona 4 — Pirineu / Alta muntanya"};
+const CATDD={1:"Municipis costaners amb influència mediterrània directa. Alt. generalment < 100 m.",2:"Zona pre-litoral mediterrània, hiverns suaus. Alt. 100–500 m aprox.",3:"Interior / pre-pirinenc, hiverns freds. Alt. 500–1.000 m aprox.",4:"Alta muntanya i Pirineu, condicions rigoroses. Alt. > 1.000 m aprox."};
+
+// ── Helpers ──────────────────────────────────────────────
+// Normalize: lowercase, remove accents, apostrophes, hyphens, spaces
+function norm(s){
+  return s.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/['\-\s·]/g,'');
+}
+// Levenshtein distance
+function lev(a,b){
+  if(!a.length)return b.length;
+  if(!b.length)return a.length;
+  const m=Array.from({length:b.length+1},(_,i)=>i);
+  for(let j=1;j<=a.length;j++){
+    let prev=j;
+    for(let i=1;i<=b.length;i++){
+      const tmp=m[i];
+      m[i]=a[j-1]===b[i-1]?m[i-1]:1+Math.min(m[i-1],m[i],prev);
+      prev=tmp;
+    }
+  }
+  return m[b.length];
+}
+// Fuzzy threshold based on length
+function threshold(len){return len<=4?1:len<=8?2:3;}
+
+// ── Build flat sorted list ────────────────────────────────
+const FLAT=[];
+Object.entries(DB).forEach(([prov,munis])=>{
+  munis.forEach(([nm,zone,alt,cat])=>FLAT.push({nm,prov,zone,alt,cat,_n:norm(nm)}));
+});
+FLAT.sort((a,b)=>a.nm.localeCompare(b.nm,'ca'));
+
+// Count name occurrences
+const nmCount={};
+FLAT.forEach(e=>{nmCount[e._n]=(nmCount[e._n]||0)+1;});
+
+// Populate datalist
+const dl=document.getElementById('dl');
+FLAT.forEach(e=>{
+  const o=document.createElement('option');
+  o.value=nmCount[e._n]>1?`${e.nm} (${e.prov})`:e.nm;
+  dl.appendChild(o);
+});
+
+// ── DOM refs ──────────────────────────────────────────────
+const iSearch=document.getElementById('iSearch');
+const btnSearch=document.getElementById('btnSearch');
+const stEl=document.getElementById('stEl');
+const panelEl=document.getElementById('panelEl');
+const emEl=document.getElementById('emEl');
+const resEl=document.getElementById('resEl');
+
+// ── Search logic ──────────────────────────────────────────
+function doSearch(){
+  const raw=iSearch.value.trim();
+  if(!raw)return;
+
+  const m=raw.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+  const muniStr=m?m[1].trim():raw;
+  const muniQ=muniStr.toLowerCase();
+  const normQ=norm(muniStr);
+  const provHint=m?m[2].trim().toLowerCase():null;
+
+  // 1. Exact case-insensitive match
+  let exact=FLAT.filter(e=>e.nm.toLowerCase()===muniQ);
+  if(provHint&&exact.length>1) exact=exact.filter(e=>e.prov.toLowerCase().includes(provHint))||exact;
+  if(exact.length===1){render(exact[0].nm,exact[0].prov,exact[0].zone,exact[0].alt,exact[0].cat,false);return;}
+  if(exact.length>1){showDisamb(exact[0].nm,exact);return;}
+
+  // 2. Normalized exact match (handles spaces, accents: "vila de cavalls" → "Viladecavalls")
+  let normExact=FLAT.filter(e=>e._n===normQ);
+  if(normExact.length===1){render(normExact[0].nm,normExact[0].prov,normExact[0].zone,normExact[0].alt,normExact[0].cat,false);return;}
+  if(normExact.length>1){showDisamb(normExact[0].nm,normExact);return;}
+
+  // 3. Fuzzy: substring OR Levenshtein
+  const thr=threshold(normQ.length);
+  const fuzzy=FLAT.filter(e=>{
+    const en=e._n;
+    if(normQ.length>=4&&en.includes(normQ))return true;  // query is substring of name
+    if(en.length>=4&&normQ.includes(en))return true;     // name is substring of query
+    return lev(en,normQ)<=thr;
+  }).slice(0,6);
+
+  if(fuzzy.length>0){showSuggest(muniStr,fuzzy);return;}
+
+  // 4. No match anywhere → AI
+  queryAI(muniStr);
+}
+
+function showDisamb(nm,matches){
+  panelEl.style.display='block';
+  panelEl.innerHTML=`<div class="disamb">
+    <div class="disamb-t">⚠️ Existeixen <em>${matches.length} municipis</em> amb el nom «<em>${nm}</em>». Selecciona la província:</div>
+    <div class="disamb-btns">${matches.map((e,i)=>`<button class="btn-d" data-i="${i}">📍 ${e.prov} <span style="opacity:.55;font-size:11px;font-weight:400;margin-left:4px">${e.zone} · ${e.alt}m</span></button>`).join('')}</div>
+    <div class="panel-sub">No és cap d'aquests? <button class="btn-ai-sm" id="dAI">🤖 Cercar per IA</button></div>
+  </div>`;
+  panelEl.querySelectorAll('.btn-d').forEach(btn=>{
+    btn.addEventListener('click',()=>{const e=matches[+btn.dataset.i];panelEl.style.display='none';render(e.nm,e.prov,e.zone,e.alt,e.cat,false);});
+  });
+  document.getElementById('dAI').addEventListener('click',()=>{panelEl.style.display='none';queryAI(nm);});
+  emEl.style.display='none';resEl.style.display='none';stEl.style.display='none';
+}
+
+function showSuggest(query,matches){
+  panelEl.style.display='block';
+  panelEl.innerHTML=`<div class="suggest">
+    <div class="suggest-t">🔍 No hem trobat «<em>${query}</em>» exactament. Volies dir...?</div>
+    <div class="suggest-btns">${matches.map((e,i)=>`<button class="btn-s" data-i="${i}">${e.nm} <span style="opacity:.6;font-size:11px;font-weight:400;margin-left:4px">· ${e.prov}</span></button>`).join('')}</div>
+    <div class="panel-sub">Cap d'aquests? <button class="btn-ai-sm" id="sAI">🤖 Cercar «${query}» per IA</button></div>
+  </div>`;
+  panelEl.querySelectorAll('.btn-s').forEach(btn=>{
+    btn.addEventListener('click',()=>{const e=matches[+btn.dataset.i];panelEl.style.display='none';render(e.nm,e.prov,e.zone,e.alt,e.cat,false);});
+  });
+  document.getElementById('sAI').addEventListener('click',()=>{panelEl.style.display='none';queryAI(query);});
+  emEl.style.display='none';resEl.style.display='none';stEl.style.display='none';
+}
+
+btnSearch.addEventListener('click',doSearch);
+iSearch.addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+iSearch.addEventListener('change',doSearch);
+
+async function queryAI(muni){
+  stEl.style.display='flex';
+  stEl.innerHTML=`<span class="spin">↻</span> Cercant <strong style="color:#f1f5f9;margin:0 4px">${muni}</strong> a tota Espanya via IA...`;
+  panelEl.style.display='none';resEl.style.display='none';emEl.style.display='none';
+  try{
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",max_tokens:700,
+        messages:[{role:"user",content:`Expert CTE DB-HE espanyol i normativa catalana. Municipi: "${muni}".
+CRÍTIC: Determina TU MATEIX a quina província pertany. No assumeixis cap província.
+Si el nom existeix en diverses províncies, indica-ho a "homonims":true i proporciona la dada del més poblat.
+JSON vàlid únicament (sense markdown):
+{"provincia":"","zona_cte":"","altitud_m":0,"zona_cat":null,"nota":"","homonims":false}
+zona_cte: codi CTE Annex B (C2, D3, B4, E1, A4, α3...). zona_cat: 1-4 si Catalunya, null si no. nota: màx 100 car.`}]
+      })
+    });
+    const d=await resp.json();
+    const txt=d.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+    const r=JSON.parse(txt.replace(/```json|```/g,'').trim());
+    stEl.style.display='none';
+    render(muni,r.provincia,r.zona_cte,r.altitud_m,r.zona_cat,true,r.nota||'',r.homonims||false);
+  }catch(e){
+    stEl.innerHTML='❌ Error en la consulta. Reviseu la connexió.';
+    setTimeout(()=>{stEl.style.display='none';emEl.style.display='block';},3000);
+  }
+}
+
+function render(nm,prov,zone,alt,cat,isAI,nota='',homonims=false){
+  const w=zone[0],s=zone.slice(1),he=HE1[w]||HE1.A,col=COL[w]||'#64748b';
+  document.getElementById('zCard').innerHTML=`
+    <div class="ct">📍 Zona climàtica CTE${isAI?' <span class="ai-badge">🤖 IA</span>':''}</div>
+    <div class="zbw">
+      <div class="zb" style="background:${col}">${zone}</div>
+      <div>
+        <div class="zn">${nm}</div>
+        <div class="zp">📌 ${prov}</div>
+        <div class="altb">⛰ ${alt?alt+' m s.n.m.':'altitud no especificada'}</div>
+        <div class="pills">
+          <span class="pill" style="color:${col};border-color:${col};background:${col}30">${WLBL[w]||w}</span>
+          ${s?`<span class="pill" style="color:#94a3b8;border-color:#2d3f55;background:#1a2540">${SLBL[s]||'Estiu '+s}</span>`:''}
+        </div>
+        ${homonims?`<div class="warn-nota">⚠️ Nom compartit amb altres províncies. Verifiqueu que la província és correcta.</div>`:''}
+        ${nota&&!homonims?`<div class="ai-nota">📝 ${nota}</div>`:''}
+      </div>
+    </div>`;
+  document.getElementById('hg').innerHTML=[
+    {lb:'Murs i façanes',vl:he.Um,c:col},{lb:'Cobertes',vl:he.Uc,c:'#64748b'},
+    {lb:'Sòls',vl:he.Us,c:'#475569'},{lb:'Buits / lluernes',vl:he.Uh,c:'#334155'}
+  ].map(it=>`<div class="hi"><div class="lb">${it.lb}</div><div class="vl" style="color:${it.c}">${it.vl}</div><div class="un">W/m²K</div></div>`).join('');
+  document.getElementById('hn').innerHTML=`U<sub>max</sub> per habitatge residencial privat — zona hivernal <strong>${w}</strong>. Verificar g<sub>lim</sub> buits (Taula 3.1.2).${w==='α'?' <strong>† Zona α: verificar CTE Annex B.</strong>':''}`;
+  const catDiv=document.getElementById('catDiv');
+  if(CAT_P.has(prov)){
+    catDiv.innerHTML=cat?`<div class="catcard">
+      <div class="cath">🏴 Zona climàtica Catalunya — Decret 21/2006</div>
+      <div class="catz">${CATNOM[cat]}</div><div class="catdd">${CATDD[cat]}</div>
+      <div class="catref"><strong>Ref.:</strong> Decret 21/2006, de 14 de febrer (DOGC núm. 4574, de 16.02.2006). <strong>Annex 3: Zonificació climàtica de Catalunya</strong> (Zones 1–4). Verificar vigència normativa actual.</div>
+    </div>`:`<div class="catcard"><div class="cath">🏴 Zona Cat. — Decret 21/2006</div><div style="font-size:11px;color:#7a6535;margin-top:4px">Zona no assignada. Consultar Annex 3 del Decret 21/2006 (DOGC 4574).</div></div>`;
+  }else{catDiv.innerHTML='';}
+  document.getElementById('spc').innerHTML=['A','B','C','D','E'].map(sg=>`<div class="seg ${sg===w?'on':'off'}" style="background:${COL[sg]}">${sg}</div>`).join('');
+  document.getElementById('typ').innerHTML=`<strong>Municipis típics zona ${w==='α'?'α':w}:</strong><br>${TYP[w]||''}`;
+  const catRef=CAT_P.has(prov)?'<strong>Decret 21/2006</strong> (DOGC 4574) · Annex 3 — ':'';
+  document.getElementById('fn').innerHTML=`📋 <strong>Fonts:</strong> <strong>CTE DB-HE</strong> (RD 732/2019) · Annex B · Taula 3.1.1: U<sub>max</sub> habitatge residencial. ${catRef}Altitud aproximada — verificar IGN o CTE Annex B. <strong>Validar sempre amb la normativa vigent.</strong>`;
+  emEl.style.display='none';stEl.style.display='none';panelEl.style.display='none';resEl.style.display='block';
+}
+</script>
+<a href="HLP%20zona_climatica-ajuda.html" target="_blank" rel="noopener" class="guaita-help-fab" title="Obre l'ajuda d'aquesta aplicació" style="position:fixed;right:18px;bottom:18px;z-index:2147483000;display:inline-flex;align-items:center;gap:8px;background:#C6FF00;color:#0A0E00;font-family:'Space Grotesk',system-ui,-apple-system,sans-serif;font-weight:600;font-size:14px;line-height:1;text-decoration:none;padding:11px 16px;border-radius:24px;box-shadow:0 4px 14px rgba(0,0,0,.35);border:1px solid #0A0E00;"><span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:700;">?</span>Ajuda</a>
+</body>
+</html>

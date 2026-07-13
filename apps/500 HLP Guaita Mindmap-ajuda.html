@@ -1,0 +1,393 @@
+<!--
+  Guaita Apps - Suite d'eines autònomes per a arquitectura, BIM i documentació.
+  Copyright (c) 2026 Jordi Subirós
+  GNU Affero General Public License v3.0
+  See LICENSE file for details
+-->
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ajuda · Guaita Mindmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0E0A; --panel:#12160F; --panel-2:#191E12; --panel-3:#232A18;
+  --line:#333D1F; --line-soft:#28301A; --txt:#EAF3D8; --dim:#94A377; --dim-2:#5E6B47;
+  --accent:#C6FF00; --accent-ink:#0A0E00; --accent-2:#FF2ECC; --accent-3:#00E5FF; --accent-4:#FFE500;
+  --danger:#FF4D6D; --radius:8px;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Space Grotesk',system-ui,sans-serif;
+  background:var(--ink); color:var(--txt); line-height:1.6;
+  background-image:linear-gradient(rgba(198,255,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(198,255,0,.03) 1px,transparent 1px);
+  background-size:44px 44px;
+}
+.mono{font-family:'IBM Plex Mono',monospace;}
+a{color:var(--accent-3); text-decoration:none;}
+a:hover{color:var(--accent);}
+
+/* ---------- Layout ---------- */
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px; display:grid; grid-template-columns:230px 1fr; gap:48px;}
+@media(max-width:860px){ .wrap{grid-template-columns:1fr; gap:0;} nav.toc{display:none;} }
+
+/* ---------- Hero ---------- */
+header.hero{
+  border-bottom:1px solid var(--line); background:var(--panel);
+  padding:56px 24px 44px; position:relative; overflow:hidden;
+}
+header.hero .inner{max-width:1180px; margin:0 auto;}
+.brand{display:flex; align-items:center; gap:14px; margin-bottom:22px;}
+.brand .cells{display:grid; grid-template-columns:repeat(2,13px); gap:4px;}
+.brand .cells span{width:13px; height:13px;}
+.brand .cells span:nth-child(1){background:var(--accent);}
+.brand .cells span:nth-child(2){background:var(--accent-2);}
+.brand .cells span:nth-child(3){background:var(--accent-3);}
+.brand .cells span:nth-child(4){background:var(--accent-4);}
+.brand .bt{font-weight:700; font-size:20px; letter-spacing:.16em;}
+.brand .bt small{color:var(--accent); font-size:12px; letter-spacing:.1em; margin-left:2px;}
+header.hero h1{
+  font-size:clamp(34px,6vw,60px); line-height:1.02; font-weight:700; letter-spacing:-.02em;
+  max-width:16ch;
+}
+header.hero h1 em{font-style:normal; color:var(--accent);}
+header.hero p.lead{margin-top:18px; font-size:17px; color:var(--dim); max-width:60ch;}
+.hero-tag{
+  display:inline-block; margin-bottom:10px; font-family:'IBM Plex Mono',monospace;
+  font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent-ink);
+  background:var(--accent); padding:4px 10px; border-radius:20px;
+}
+
+/* ---------- TOC ---------- */
+nav.toc{position:sticky; top:32px; align-self:start; padding-top:48px;}
+nav.toc .toc-t{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim-2); margin-bottom:12px;}
+nav.toc ol{list-style:none; counter-reset:s;}
+nav.toc li{counter-increment:s; margin:2px 0;}
+nav.toc a{
+  display:flex; gap:10px; align-items:baseline; padding:6px 8px; border-radius:6px;
+  color:var(--dim); font-size:13.5px; border-left:2px solid transparent;
+}
+nav.toc a::before{content:counter(s,decimal-leading-zero); font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--dim-2);}
+nav.toc a:hover{background:var(--panel-2); color:var(--txt);}
+nav.toc a.active{color:var(--accent); border-left-color:var(--accent); background:var(--panel-2);}
+
+/* ---------- Content ---------- */
+main{padding:48px 0 100px; min-width:0;}
+section{margin-bottom:56px; scroll-margin-top:24px;}
+section > h2{
+  font-size:12px; font-family:'IBM Plex Mono',monospace; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--accent); margin-bottom:6px;
+}
+section > h2 .num{color:var(--dim-2); margin-right:10px;}
+section > .st{font-size:27px; font-weight:600; letter-spacing:-.01em; margin-bottom:18px; line-height:1.15;}
+section p{margin-bottom:14px; color:var(--txt);}
+section p.muted{color:var(--dim);}
+h3{font-size:17px; font-weight:600; margin:26px 0 10px;}
+
+/* ---------- Callouts ---------- */
+.note{
+  border:1px solid var(--line); border-left:3px solid var(--accent-3);
+  background:var(--panel); border-radius:0 var(--radius) var(--radius) 0;
+  padding:14px 16px; margin:18px 0; font-size:14px;
+}
+.note.warn{border-left-color:var(--accent-4);}
+.note.stop{border-left-color:var(--danger);}
+.note .nt{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin-bottom:5px;}
+.note.warn .nt{color:var(--accent-4);}
+.note.stop .nt{color:var(--danger);}
+
+/* ---------- Steps ---------- */
+ol.steps{list-style:none; counter-reset:step; margin:8px 0;}
+ol.steps li{counter-increment:step; position:relative; padding:12px 0 12px 46px; border-bottom:1px solid var(--line-soft);}
+ol.steps li:last-child{border-bottom:none;}
+ol.steps li::before{
+  content:counter(step); position:absolute; left:0; top:11px;
+  width:30px; height:30px; border-radius:8px; background:var(--panel-3); color:var(--accent);
+  font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13px;
+  display:flex; align-items:center; justify-content:center; border:1px solid var(--line);
+}
+ol.steps li b{color:var(--accent);}
+
+/* ---------- Feature cards ---------- */
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:14px; margin:10px 0;}
+.card{border:1px solid var(--line); background:var(--panel); border-radius:var(--radius); padding:16px;}
+.card .ci{width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; background:var(--panel-3);}
+.card .ci svg{width:18px; height:18px; stroke:var(--accent); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
+.card h4{font-size:15px; font-weight:600; margin-bottom:4px;}
+.card p{font-size:13px; color:var(--dim); margin:0;}
+.card:nth-child(4n+2) .ci svg{stroke:var(--accent-2);}
+.card:nth-child(4n+3) .ci svg{stroke:var(--accent-3);}
+.card:nth-child(4n+4) .ci svg{stroke:var(--accent-4);}
+
+/* ---------- Tables ---------- */
+table.tbl{width:100%; border-collapse:collapse; font-size:14px; margin:14px 0;}
+table.tbl th{text-align:left; padding:9px 12px; background:var(--panel-2); color:var(--dim); font-weight:500; font-size:12px; letter-spacing:.03em; text-transform:uppercase; border-bottom:1px solid var(--line);}
+table.tbl td{padding:9px 12px; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+table.tbl tr:hover td{background:var(--panel);}
+kbd{
+  font-family:'IBM Plex Mono',monospace; font-size:12px; background:var(--panel-3);
+  border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:2px 8px; color:var(--accent); white-space:nowrap;
+}
+code{font-family:'IBM Plex Mono',monospace; font-size:.88em; background:var(--panel-2); border:1px solid var(--line-soft); padding:1px 6px; border-radius:4px; color:var(--accent-3);}
+
+/* ---------- Panel map ---------- */
+.map{border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin:16px 0; font-family:'IBM Plex Mono',monospace; font-size:11.5px;}
+.map .mrow{display:flex; border-bottom:1px solid var(--line-soft);}
+.map .mrow:last-child{border-bottom:none;}
+.map .mcell{padding:14px 12px; border-right:1px solid var(--line-soft); color:var(--dim);}
+.map .mcell:last-child{border-right:none;}
+.map .mcell b{display:block; color:var(--accent); font-family:'Space Grotesk',sans-serif; font-size:13px; margin-bottom:3px;}
+.map .l{flex:0 0 26%;} .map .c{flex:1;} .map .r{flex:0 0 24%;}
+.map .top,.map .bot{background:var(--panel-2); color:var(--accent-3); padding:10px 12px; text-align:center;}
+
+/* ---------- Details / FAQ ---------- */
+details{border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); margin:8px 0; overflow:hidden;}
+details summary{padding:14px 16px; cursor:pointer; font-weight:500; list-style:none; display:flex; align-items:center; gap:10px;}
+details summary::-webkit-details-marker{display:none;}
+details summary::before{content:'+'; font-family:'IBM Plex Mono',monospace; color:var(--accent); font-size:16px;}
+details[open] summary::before{content:'−';}
+details .db{padding:0 16px 16px 42px; color:var(--dim); font-size:14px;}
+details[open] summary{color:var(--accent);}
+
+footer.foot{border-top:1px solid var(--line); padding:28px 24px; text-align:center; color:var(--dim-2); font-size:12.5px;}
+footer.foot .fb{display:inline-flex; gap:8px; align-items:center; margin-bottom:8px;}
+footer.foot .fb .cells{display:grid; grid-template-columns:repeat(2,6px); gap:2px;}
+footer.foot .fb .cells span{width:6px; height:6px;}
+footer.foot .fb .cells span:nth-child(1){background:var(--accent);} footer.foot .fb .cells span:nth-child(2){background:var(--accent-2);}
+footer.foot .fb .cells span:nth-child(3){background:var(--accent-3);} footer.foot .fb .cells span:nth-child(4){background:var(--accent-4);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="inner">
+    <div class="brand">
+      <span class="cells"><span></span><span></span><span></span><span></span></span>
+      <span class="bt">GUAITA<small>MINDMAP</small></span>
+    </div>
+    <span class="hero-tag">Manual d'ús</span>
+    <h1>Dibuixa i organitza <em>mapes mentals</em> al navegador.</h1>
+    <p class="lead">Guaita Mindmap és un editor de mapes mentals amb nodes, connexions, temes de color, notes, enllaços i pestanyes. Crea l'estructura de les teves idees i exporta-la a imatge, vector, JSON, Word o FreeMind, tot dins del navegador.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="toc">
+    <div class="toc-t">Contingut</div>
+    <ol>
+      <li><a href="#intro">Què és</a></li>
+      <li><a href="#comencar">Com començar</a></li>
+      <li><a href="#interficie">La interfície</a></li>
+      <li><a href="#nodes">Crear i editar nodes</a></li>
+      <li><a href="#connexions">Connexions i grups</a></li>
+      <li><a href="#enriquir">Enriquir els nodes</a></li>
+      <li><a href="#estil">Estil i format</a></li>
+      <li><a href="#pestanyes">Pestanyes i navegació</a></li>
+      <li><a href="#exportar">Importar i exportar</a></li>
+      <li><a href="#tecles">Tecles ràpides</a></li>
+      <li><a href="#problemes">Problemes</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section id="intro">
+      <h2><span class="num">01</span>Introducció</h2>
+      <div class="st">Un editor de mapes mentals en una sola pàgina</div>
+      <p>Guaita Mindmap et permet construir mapes mentals: un node central del qual pengen idees en forma d'arbre, amb branques, agrupacions i fletxes que hi relaciones al teu gust. És un únic fitxer HTML que s'obre a qualsevol navegador modern.</p>
+      <p>Pots donar estil als nodes amb temes de color, afegir-hi caselles de tasca, notes, enllaços, imatges i emoticones, i organitzar diferents mapes en pestanyes dins d'un mateix projecte.</p>
+      <div class="cards">
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M12 3v6M6 15a3 3 0 100 6 3 3 0 000-6zM18 15a3 3 0 100 6 3 3 0 000-6zM12 9L6 15M12 9l6 6"/></svg></div><h4>Estructura d'arbre</h4><p>Arrels, fills i germans amb un clic o una tecla.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h10M4 19h16"/></svg></div><h4>Multipàgina</h4><p>Diversos mapes en pestanyes dins un projecte.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 6H21l-5 4 2 6-6-4-6 4 2-6-5-4h6.5z"/></svg></div><h4>Temes i format</h4><p>Colors, mida de lletra, negreta i alineació.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4M4 21h16"/></svg></div><h4>Exportació rica</h4><p>PNG, SVG, JSON, HTML, Word i FreeMind.</p></div>
+      </div>
+    </section>
+
+    <section id="comencar">
+      <h2><span class="num">02</span>Com començar</h2>
+      <div class="st">Del node en blanc al primer mapa</div>
+      <ol class="steps">
+        <li><b>Posa nom al projecte.</b> A dalt a l'esquerra hi ha un camp de text amb «El Meu Projecte»; canvia'l pel nom que vulguis.</li>
+        <li><b>Crea el primer node.</b> Fes servir <b>Arrel</b> de la barra d'eines per posar un node nou al llenç, o dóna un títol al mapa amb <b>Títol</b>.</li>
+        <li><b>Escriu-hi.</b> Fes doble clic a un node per editar-ne el text; prem <kbd>Enter</kbd> per confirmar (o <kbd>Ctrl</kbd>+<kbd>Enter</kbd> per fer un salt de línia dins el node).</li>
+        <li><b>Fes créixer l'arbre.</b> Amb un node seleccionat, afegeix un <b>Fill</b> (o <kbd>Tab</kbd>) o un <b>Germà</b> (o <kbd>Enter</kbd>).</li>
+      </ol>
+      <div class="note">
+        <div class="nt">Desar la feina</div>
+        Per guardar el mapa, exporta'l a <b>Projecte Complet JSON</b> (vegeu <a href="#exportar">Importar i exportar</a>) i torna'l a importar més endavant per continuar editant.
+      </div>
+    </section>
+
+    <section id="interficie">
+      <h2><span class="num">03</span>La interfície</h2>
+      <div class="st">On és cada cosa</div>
+      <div class="map">
+        <div class="top">A dalt a l'esquerra: nom del projecte + pestanyes · A dalt a la dreta: Cercar · Desfer/Refer · Importar · Exportar</div>
+        <div class="mrow">
+          <div class="mcell l"><b>Barra d'eines lateral</b>Selecció, Títol, Arrel, Fill, Germà, Fletxa, Clau, Núvol, alineació, Tasca, Imatge, Nota, Enllaç, i el panell de Colors/Temes i format de text.</div>
+          <div class="mcell c"><b>Llenç central</b>El mapa. Arrossega el fons per moure't; roda del ratolí o botons de zoom per apropar/allunyar.</div>
+        </div>
+        <div class="bot">A baix a la dreta: controls de zoom (apropar, centrar el mapa, allunyar)</div>
+      </div>
+      <p>Al llenç pots <b>moure't</b> arrossegant una zona buida i <b>fer zoom</b> amb la roda del ratolí. Els botons de la cantonada permeten <b>apropar</b>, <b>centrar el mapa a la vista</b> i <b>allunyar</b>.</p>
+    </section>
+
+    <section id="nodes">
+      <h2><span class="num">04</span>Crear i editar nodes</h2>
+      <div class="st">La barra d'eines i el ratolí</div>
+      <p>Amb l'eina <b>Selecció</b> activa pots triar nodes fent-hi clic; arrossega sobre el fons per seleccionar-ne diversos amb un rectangle, o mantén <kbd>Ctrl</kbd> mentre cliques per afegir-los a la selecció.</p>
+      <table class="tbl">
+        <thead><tr><th>Eina</th><th>Què fa</th></tr></thead>
+        <tbody>
+          <tr><td><b>Títol</b></td><td>Posa (o treu) el títol principal del mapa.</td></tr>
+          <tr><td><b>Arrel</b></td><td>Crea un node arrel nou, independent.</td></tr>
+          <tr><td><b>Fill</b></td><td>Afegeix un node fill al node seleccionat (també amb <kbd>Tab</kbd>).</td></tr>
+          <tr><td><b>Germà</b></td><td>Afegeix un node germà al mateix nivell (també amb <kbd>Enter</kbd>).</td></tr>
+          <tr><td><b>Suprimir</b></td><td>Esborra els nodes seleccionats (també amb <kbd>Supr</kbd>).</td></tr>
+        </tbody>
+      </table>
+      <p>Per <b>editar el text</b>, fes doble clic al node i escriu. Per <b>moure</b> un node, arrossega'l. Pots plegar i desplegar les branques d'un node per amagar-ne els fills.</p>
+      <div class="note">
+        <div class="nt">Alinear diversos nodes</div>
+        Amb diversos nodes seleccionats, els botons d'<b>alineació</b> els alineen tots a l'esquerra o a la dreta.
+      </div>
+    </section>
+
+    <section id="connexions">
+      <h2><span class="num">05</span>Connexions i agrupacions</h2>
+      <div class="st">Relaciona i emmarca idees</div>
+      <p>A banda de l'arbre pare-fill, pots crear relacions i contenidors visuals:</p>
+      <table class="tbl">
+        <thead><tr><th>Eina</th><th>Què fa</th></tr></thead>
+        <tbody>
+          <tr><td><b>Fletxa</b></td><td>Activa el mode enllaç per traçar una fletxa d'un node a un altre i marcar una relació lliure.</td></tr>
+          <tr><td><b>Clau</b></td><td>Agrupa els nodes seleccionats amb una clau (accolada), útil per a llistes de subelements.</td></tr>
+          <tr><td><b>Núvol</b></td><td>Encercla els nodes seleccionats amb un contorn (frontera) que els emmarca com un conjunt.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="enriquir">
+      <h2><span class="num">06</span>Enriquir els nodes</h2>
+      <div class="st">Tasques, notes, enllaços, imatges i emoticones</div>
+      <ul style="margin:0 0 14px 20px; color:var(--txt);">
+        <li><b>Tasca</b> — afegeix o treu una casella de verificació al node, per fer-ne llistes de coses a fer.</li>
+        <li><b>Nota</b> — obre una finestra per escriure informació addicional lligada al node.</li>
+        <li><b>Enllaç</b> — associa una adreça web (<code>https://…</code>) al node; després pots visitar-la.</li>
+        <li><b>Imatge</b> — puja una imatge al node des del disc, o enganxa-la directament amb <kbd>Ctrl</kbd>+<kbd>V</kbd>.</li>
+        <li><b>Emoticones</b> — mentre edites el text, tens un panell d'emojis per categories (cares, símbols, objectes, natura) per inserir-los al node.</li>
+      </ul>
+      <div class="note">
+        <div class="nt">Enganxar imatges</div>
+        No cal passar pel botó Imatge: si tens una imatge al porta-retalls, prem <kbd>Ctrl</kbd>+<kbd>V</kbd> i s'afegeix directament.
+      </div>
+    </section>
+
+    <section id="estil">
+      <h2><span class="num">07</span>Estil i format</h2>
+      <div class="st">Colors i tipografia dels nodes</div>
+      <p>El panell <b>Colors / Temes</b> de la barra lateral ofereix una paleta de temes (Ocean, Forest, Sunset, Berry, Royal, Minimal, Crema, Plom, Núvol, Pedra, Sàlvia, Moca, Rosa Antic, Marí, Argila). Fes clic a un tema per aplicar-lo als nodes.</p>
+      <p>A <b>Format Text</b> pots ajustar la mida de la lletra (<b>A−</b> / <b>A+</b>), posar <b>negreta</b> o <b>cursiva</b>, i alinear el text del node a l'<b>esquerra</b>, al <b>centre</b> o a la <b>dreta</b>.</p>
+    </section>
+
+    <section id="pestanyes">
+      <h2><span class="num">08</span>Pestanyes i navegació</h2>
+      <div class="st">Diversos mapes en un projecte</div>
+      <p>A dalt a l'esquerra, sota el nom del projecte, hi ha les <b>pestanyes</b>. Cada pestanya és un mapa independent dins del mateix projecte. Amb el botó <b>+</b> n'afegeixes una de nova, i fent doble clic al nom d'una pestanya la pots <b>reanomenar</b>.</p>
+      <p>Per <b>cercar</b> dins el mapa, prem <kbd>Ctrl</kbd>+<kbd>F</kbd> o obre el quadre de cerca; escriu-hi el text i s'hi ressalten les coincidències. Tanca la cerca amb <kbd>Esc</kbd> o la creu.</p>
+      <div class="note">
+        <div class="nt">Centrar la vista</div>
+        Si t'has perdut pel llenç, el botó de <b>centrar el mapa a la vista</b> (entre els controls de zoom) enquadra tot el contingut de la pestanya activa.
+      </div>
+    </section>
+
+    <section id="exportar">
+      <h2><span class="num">09</span>Importar i exportar</h2>
+      <div class="st">Treu i torna a portar la teva feina</div>
+      <p>El botó <b>Importar</b> obre fitxers <code>.json</code>, <code>.html</code> i <code>.mm</code> (FreeMind) per continuar treballant amb un mapa existent. El menú <b>Exportar</b> ofereix diversos formats:</p>
+      <table class="tbl">
+        <thead><tr><th>Format</th><th>Per a què serveix</th></tr></thead>
+        <tbody>
+          <tr><td><b>Projecte Complet JSON</b></td><td>Arxiu per desar-ho tot i seguir editant més endavant. És el format recomanat per guardar la feina.</td></tr>
+          <tr><td><b>Editor Interactiu (.html)</b></td><td>Una pàgina web autoeditable amb el mapa incrustat.</td></tr>
+          <tr><td><b>Visor Interactiu (.html)</b></td><td>Una pàgina per compartir el mapa en mode només lectura.</td></tr>
+          <tr><td><b>Esquema Word (.doc)</b></td><td>L'estructura del mapa com a document formatat.</td></tr>
+          <tr><td><b>Imatge (.png)</b></td><td>Imatge de la pestanya activa.</td></tr>
+          <tr><td><b>Vector (.svg)</b></td><td>Gràfic vectorial de la pestanya activa.</td></tr>
+          <tr><td><b>FreeMind (.mm)</b></td><td>La pestanya activa en el format del programa FreeMind.</td></tr>
+        </tbody>
+      </table>
+      <div class="note warn">
+        <div class="nt">Recomanació</div>
+        Exporta sovint a <b>Projecte Complet JSON</b>: és l'únic format que conserva tot el projecte (totes les pestanyes, notes, enllaços i estils) per reprendre l'edició sense pèrdues.
+      </div>
+    </section>
+
+    <section id="tecles">
+      <h2><span class="num">10</span>Tecles ràpides</h2>
+      <div class="st">Treballa més ràpid amb el teclat</div>
+      <table class="tbl">
+        <thead><tr><th>Tecla</th><th>Acció</th></tr></thead>
+        <tbody>
+          <tr><td><kbd>Tab</kbd></td><td>Afegeix un node fill al seleccionat</td></tr>
+          <tr><td><kbd>Enter</kbd></td><td>Afegeix un node germà</td></tr>
+          <tr><td><kbd>Supr</kbd> / <kbd>Retrocés</kbd></td><td>Esborra els nodes seleccionats</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd></td><td>Obre la cerca</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td><td>Desfer</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>Y</kbd></td><td>Refer</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>X</kbd></td><td>Prepara els nodes seleccionats per moure'ls</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>V</kbd></td><td>Enganxa els nodes com a fills del node seleccionat, o enganxa una imatge del porta-retalls</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd></td><td>Salt de línia dins el text del node (mentre s'edita)</td></tr>
+          <tr><td><kbd>Esc</kbd></td><td>Tanca la cerca o cancel·la l'edició del text</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="problemes">
+      <h2><span class="num">11</span>Resolució de problemes</h2>
+      <div class="st">Si alguna cosa no va</div>
+      <details>
+        <summary>He tancat el navegador i he perdut el mapa</summary>
+        <div class="db">Per conservar la feina cal exportar-la explícitament. Fes servir <b>Exportar → Projecte Complet JSON</b> i, quan tornis, <b>Importa</b> aquest fitxer per continuar exactament on eres.</div>
+      </details>
+      <details>
+        <summary>«No pots enganxar fills al títol principal»</summary>
+        <div class="db">El node de títol del mapa no admet nodes fills penjant directament. Enganxa'ls sobre un node normal (arrel o fill).</div>
+      </details>
+      <details>
+        <summary><kbd>Tab</kbd> o <kbd>Enter</kbd> no creen nodes</summary>
+        <div class="db">Aquestes dreceres actuen sobre el node seleccionat quan no estàs editant text ni tens cap finestra oberta. Assegura't d'haver seleccionat un node i d'haver tancat qualsevol quadre de nota, enllaç o pestanya.</div>
+      </details>
+      <details>
+        <summary>El mode Visor no em deixa editar</summary>
+        <div class="db">És el comportament esperat: el <b>Visor Interactiu (.html)</b> és de només lectura, pensat per compartir. Per editar, fes servir l'<b>Editor Interactiu (.html)</b> o importa el JSON del projecte.</div>
+      </details>
+      <details>
+        <summary>La imatge enganxada no apareix</summary>
+        <div class="db">Selecciona primer un node i comprova que el porta-retalls conté realment una imatge. Com a alternativa, fes servir el botó <b>Imatge</b> per pujar-la des del disc.</div>
+      </details>
+    </section>
+  </main>
+</div>
+
+<footer class="foot">
+  <div class="fb"><span class="cells"><span></span><span></span><span></span><span></span></span> <b style="color:var(--txt); font-weight:600; letter-spacing:.1em;">GUAITA MINDMAP</b></div>
+  <div>Editor de mapes mentals · SBS BIM Consulting</div>
+</footer>
+
+<script>
+// Ressaltat de la secció activa a l'índex
+const links=[...document.querySelectorAll('nav.toc a')];
+const map=new Map(links.map(a=>[a.getAttribute('href').slice(1),a]));
+const obs=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){ links.forEach(l=>l.classList.remove('active')); const a=map.get(e.target.id); if(a)a.classList.add('active'); } });
+},{rootMargin:'-20% 0px -70% 0px'});
+document.querySelectorAll('main section').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>
