@@ -48,7 +48,9 @@ Tots els drets reservats sota AGPL-3.0
 Benvingudes! Obri issue primer per a canvis importants.
 
 ## 📞 Contacte
-subiros@gmail.com
+subi2@users.noreplay.github.com
+
+https://github.com/subi2/guaitaApps/issues/new
 
 ---
 **Última actualització:** Juliol 2026
