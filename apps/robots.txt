@@ -1,3 +1,0 @@
-# Guaita Apps — https://subi2.github.io/guaitaApps/
-User-agent: *
-Allow: /
