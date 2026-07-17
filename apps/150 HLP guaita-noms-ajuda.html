@@ -1,0 +1,338 @@
+<!--
+  Guaita Apps - Suite d'eines autònomes per a arquitectura, BIM i documentació.
+  Copyright (c) 2026 Jordi Subirós
+  GNU Affero General Public License v3.0
+  See LICENSE file for details
+-->
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ajuda · Guaita Noms · Validador de nomenclatura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0E0A; --panel:#12160F; --panel-2:#191E12; --panel-3:#232A18;
+  --line:#333D1F; --line-soft:#28301A; --txt:#EAF3D8; --dim:#94A377; --dim-2:#5E6B47;
+  --accent:#C6FF00; --accent-ink:#0A0E00; --accent-2:#FF2ECC; --accent-3:#00E5FF; --accent-4:#FFE500;
+  --danger:#FF4D6D; --radius:8px;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Space Grotesk',system-ui,sans-serif;
+  background:var(--ink); color:var(--txt); line-height:1.6;
+  background-image:linear-gradient(rgba(198,255,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(198,255,0,.03) 1px,transparent 1px);
+  background-size:44px 44px;
+}
+.mono{font-family:'IBM Plex Mono',monospace;}
+a{color:var(--accent-3); text-decoration:none;}
+a:hover{color:var(--accent);}
+
+/* ---------- Layout ---------- */
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px; display:grid; grid-template-columns:230px 1fr; gap:48px;}
+@media(max-width:860px){ .wrap{grid-template-columns:1fr; gap:0;} nav.toc{display:none;} }
+
+/* ---------- Hero ---------- */
+header.hero{
+  border-bottom:1px solid var(--line); background:var(--panel);
+  padding:56px 24px 44px; position:relative; overflow:hidden;
+}
+header.hero .inner{max-width:1180px; margin:0 auto;}
+.brand{display:flex; align-items:center; gap:14px; margin-bottom:22px;}
+.brand .cells{display:grid; grid-template-columns:repeat(2,13px); gap:4px;}
+.brand .cells span{width:13px; height:13px;}
+.brand .cells span:nth-child(1){background:var(--accent);}
+.brand .cells span:nth-child(2){background:var(--accent-2);}
+.brand .cells span:nth-child(3){background:var(--accent-3);}
+.brand .cells span:nth-child(4){background:var(--accent-4);}
+.brand .bt{font-weight:700; font-size:20px; letter-spacing:.16em;}
+.brand .bt small{color:var(--accent); font-size:12px; letter-spacing:.1em; margin-left:2px;}
+header.hero h1{
+  font-size:clamp(34px,6vw,60px); line-height:1.02; font-weight:700; letter-spacing:-.02em;
+  max-width:16ch;
+}
+header.hero h1 em{font-style:normal; color:var(--accent);}
+header.hero p.lead{margin-top:18px; font-size:17px; color:var(--dim); max-width:60ch;}
+.hero-tag{
+  display:inline-block; margin-bottom:10px; font-family:'IBM Plex Mono',monospace;
+  font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent-ink);
+  background:var(--accent); padding:4px 10px; border-radius:20px;
+}
+
+/* ---------- TOC ---------- */
+nav.toc{position:sticky; top:32px; align-self:start; padding-top:48px;}
+nav.toc .toc-t{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim-2); margin-bottom:12px;}
+nav.toc ol{list-style:none; counter-reset:s;}
+nav.toc li{counter-increment:s; margin:2px 0;}
+nav.toc a{
+  display:flex; gap:10px; align-items:baseline; padding:6px 8px; border-radius:6px;
+  color:var(--dim); font-size:13.5px; border-left:2px solid transparent;
+}
+nav.toc a::before{content:counter(s,decimal-leading-zero); font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--dim-2);}
+nav.toc a:hover{background:var(--panel-2); color:var(--txt);}
+nav.toc a.active{color:var(--accent); border-left-color:var(--accent); background:var(--panel-2);}
+
+/* ---------- Content ---------- */
+main{padding:48px 0 100px; min-width:0;}
+section{margin-bottom:56px; scroll-margin-top:24px;}
+section > h2{
+  font-size:12px; font-family:'IBM Plex Mono',monospace; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--accent); margin-bottom:6px;
+}
+section > h2 .num{color:var(--dim-2); margin-right:10px;}
+section > .st{font-size:27px; font-weight:600; letter-spacing:-.01em; margin-bottom:18px; line-height:1.15;}
+section p{margin-bottom:14px; color:var(--txt);}
+section p.muted{color:var(--dim);}
+h3{font-size:17px; font-weight:600; margin:26px 0 10px;}
+
+/* ---------- Callouts ---------- */
+.note{
+  border:1px solid var(--line); border-left:3px solid var(--accent-3);
+  background:var(--panel); border-radius:0 var(--radius) var(--radius) 0;
+  padding:14px 16px; margin:18px 0; font-size:14px;
+}
+.note.warn{border-left-color:var(--accent-4);}
+.note.stop{border-left-color:var(--danger);}
+.note .nt{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin-bottom:5px;}
+.note.warn .nt{color:var(--accent-4);}
+.note.stop .nt{color:var(--danger);}
+
+/* ---------- Steps ---------- */
+ol.steps{list-style:none; counter-reset:step; margin:8px 0;}
+ol.steps li{counter-increment:step; position:relative; padding:12px 0 12px 46px; border-bottom:1px solid var(--line-soft);}
+ol.steps li:last-child{border-bottom:none;}
+ol.steps li::before{
+  content:counter(step); position:absolute; left:0; top:11px;
+  width:30px; height:30px; border-radius:8px; background:var(--panel-3); color:var(--accent);
+  font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13px;
+  display:flex; align-items:center; justify-content:center; border:1px solid var(--line);
+}
+ol.steps li b{color:var(--accent);}
+
+/* ---------- Feature cards ---------- */
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:14px; margin:10px 0;}
+.card{border:1px solid var(--line); background:var(--panel); border-radius:var(--radius); padding:16px;}
+.card .ci{width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; background:var(--panel-3);}
+.card .ci svg{width:18px; height:18px; stroke:var(--accent); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
+.card h4{font-size:15px; font-weight:600; margin-bottom:4px;}
+.card p{font-size:13px; color:var(--dim); margin:0;}
+.card:nth-child(4n+2) .ci svg{stroke:var(--accent-2);}
+.card:nth-child(4n+3) .ci svg{stroke:var(--accent-3);}
+.card:nth-child(4n+4) .ci svg{stroke:var(--accent-4);}
+
+/* ---------- Tables ---------- */
+table.tbl{width:100%; border-collapse:collapse; font-size:14px; margin:14px 0;}
+table.tbl th{text-align:left; padding:9px 12px; background:var(--panel-2); color:var(--dim); font-weight:500; font-size:12px; letter-spacing:.03em; text-transform:uppercase; border-bottom:1px solid var(--line);}
+table.tbl td{padding:9px 12px; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+table.tbl tr:hover td{background:var(--panel);}
+kbd{
+  font-family:'IBM Plex Mono',monospace; font-size:12px; background:var(--panel-3);
+  border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:2px 8px; color:var(--accent); white-space:nowrap;
+}
+code{font-family:'IBM Plex Mono',monospace; font-size:.88em; background:var(--panel-2); border:1px solid var(--line-soft); padding:1px 6px; border-radius:4px; color:var(--accent-3);}
+
+/* ---------- Panel map ---------- */
+.map{border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin:16px 0; font-family:'IBM Plex Mono',monospace; font-size:11.5px;}
+.map .mrow{display:flex; border-bottom:1px solid var(--line-soft);}
+.map .mrow:last-child{border-bottom:none;}
+.map .mcell{padding:14px 12px; border-right:1px solid var(--line-soft); color:var(--dim);}
+.map .mcell:last-child{border-right:none;}
+.map .mcell b{display:block; color:var(--accent); font-family:'Space Grotesk',sans-serif; font-size:13px; margin-bottom:3px;}
+.map .l{flex:0 0 26%;} .map .c{flex:1;} .map .r{flex:0 0 24%;}
+.map .top,.map .bot{background:var(--panel-2); color:var(--accent-3); padding:10px 12px; text-align:center;}
+
+/* ---------- Details / FAQ ---------- */
+details{border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); margin:8px 0; overflow:hidden;}
+details summary{padding:14px 16px; cursor:pointer; font-weight:500; list-style:none; display:flex; align-items:center; gap:10px;}
+details summary::-webkit-details-marker{display:none;}
+details summary::before{content:'+'; font-family:'IBM Plex Mono',monospace; color:var(--accent); font-size:16px;}
+details[open] summary::before{content:'-';}
+details .db{padding:0 16px 16px 42px; color:var(--dim); font-size:14px;}
+details[open] summary{color:var(--accent);}
+
+/* ---------- Footer ---------- */
+footer.foot{border-top:1px solid var(--line); padding:28px 24px 34px; text-align:center; color:var(--dim-2); font-size:12.5px;}
+footer.foot .fb{display:inline-flex; gap:8px; align-items:center; margin-bottom:8px;}
+footer.foot .fb .cells{display:grid; grid-template-columns:repeat(2,6px); gap:2px;}
+footer.foot .fb .cells span{width:6px; height:6px;}
+footer.foot .fb .cells span:nth-child(1){background:var(--accent);} footer.foot .fb .cells span:nth-child(2){background:var(--accent-2);}
+footer.foot .fb .cells span:nth-child(3){background:var(--accent-3);} footer.foot .fb .cells span:nth-child(4){background:var(--accent-4);}
+footer.foot .disclaimer{max-width:74ch; margin:12px auto 0; font-size:11px; line-height:1.6; color:var(--dim-2);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="inner">
+    <div class="brand">
+      <span class="cells"><span></span><span></span><span></span><span></span></span>
+      <span class="bt">GUAITA<small>NOMS</small></span>
+    </div>
+    <span class="hero-tag">Manual d'ús</span>
+    <h1>Valida noms de fitxer <em>al teu ordinador</em>.</h1>
+    <p class="lead">Guaita Noms comprova que els noms dels teus fitxers segueixin una convenció de nomenclatura (ISO 19650 o la teva pròpia). Defineixes els camps, aportes una llista de noms i l'eina et diu, part per part, què compleix i què no. Tot passa dins el navegador: cap fitxer no surt del teu ordinador.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="toc">
+    <div class="toc-t">Contingut</div>
+    <ol>
+      <li><a href="#intro">Què és</a></li>
+      <li><a href="#obrir">Primers passos</a></li>
+      <li><a href="#interficie">La interfície</a></li>
+      <li><a href="#estandards">Definir un estàndard</a></li>
+      <li><a href="#validar">Validar una llista</a></li>
+      <li><a href="#resultats">Resultats i exportacions</a></li>
+      <li><a href="#problemes">Problemes</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <section id="intro">
+      <h2><span class="num">01</span>Què és</h2>
+      <div class="st">Guaita Noms · Validador de nomenclatura</div>
+      <p>És una eina d'un sol fitxer HTML per validar convencions de nomenclatura de fitxers. Treballa amb tres pestanyes: defineixes un o més <strong>estàndards</strong> (els camps del nom i les seves regles), aportes la llista de noms a <strong>Entrada</strong> i obtens el veredicte camp a camp a <strong>Resultats</strong>. Porta un estàndard d'exemple basat en ISO 19650, però pots crear-ne els teus.</p>
+      <div class="cards">
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 10h16M10 10v10"/></svg></div><h4>Estàndards a mida</h4><p>Defineix camps, separador, longituds, majúscules/minúscules i valors permesos.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M12 3l9 5v8l-9 5-9-5V8z"/><path d="M12 3v18M3 8l9 5 9-5"/></svg></div><h4>Entrada flexible</h4><p>Arrossega fitxers, carpetes o llistes .md/.txt, o enganxa text directament.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><h4>Validació camp a camp</h4><p>Cada nom es parteix pel separador i es comprova part per part contra les regles.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M4 4h11l5 5v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg></div><h4>Exporta resultats</h4><p>CSV, informe HTML i llistes .md per compartir amb l'equip.</p></div>
+      </div>
+      <div class="note"><div class="nt">Privadesa</div>Tot el processament es fa al teu ordinador, dins el navegador. Quan arrossegues fitxers o carpetes, se n'agafen només els <strong>noms</strong>; el contingut no es llegeix ni s'envia enlloc.</div>
+    </section>
+
+    <section id="obrir">
+      <h2><span class="num">02</span>Primers passos</h2>
+      <div class="st">De zero a un informe de compliment</div>
+      <ol class="steps">
+        <li>A la pestanya <b>1 · Estàndards</b>, tria l'estàndard actiu al desplegable o crea'n un de nou. Ajusta els camps, el separador i les regles.</li>
+        <li>Ves a <b>2 · Entrada</b> i aporta els noms: arrossega fitxers o carpetes, deixa-hi anar un <code>.md</code>/<code>.txt</code> amb la llista, o enganxa el text directament (un nom per línia).</li>
+        <li>Prem <b>Valida la llista</b>. Saltaràs automàticament a <b>3 · Resultats</b>, on veuràs el resum de compliment i el detall dels incompliments.</li>
+        <li>Filtra, revisa i exporta amb <b>Exporta CSV</b> o <b>Informe HTML</b>.</li>
+      </ol>
+    </section>
+
+    <section id="interficie">
+      <h2><span class="num">03</span>La interfície</h2>
+      <div class="st">Les tres pestanyes</div>
+      <p class="muted">La finestra té una capçalera amb el títol i una barra de pestanyes numerades. Cada pestanya és una etapa del flux de treball.</p>
+      <div class="map">
+        <div class="mrow top">▲ Guaita Noms · barra de pestanyes</div>
+        <div class="mrow">
+          <div class="mcell l"><b>1 · Estàndards</b>Defineixes els camps del nom i les seves regles. Pots tenir-ne diversos i importar/exportar-los en JSON.</div>
+          <div class="mcell c"><b>2 · Entrada</b>Aportes la llista de noms a validar (arrossegant fitxers/carpetes, un .md/.txt o enganxant text).</div>
+          <div class="mcell r"><b>3 · Resultats</b>Resum de compliment, taula filtrable i exportacions.</div>
+        </div>
+        <div class="mrow bot">Flux: definir → entrar → validar → exportar</div>
+      </div>
+    </section>
+
+    <section id="estandards">
+      <h2><span class="num">04</span>Definir un estàndard</h2>
+      <div class="st">Els camps i les seves regles</div>
+      <p>Un estàndard té una capçalera (nom, versió, separador i si s'ignora l'extensió) i una llista de <strong>camps</strong> en l'ordre en què apareixen al nom. El nom es parteix pel <strong>separador</strong> i cada tros s'ha de correspondre amb un camp.</p>
+      <table class="tbl">
+        <thead><tr><th>Propietat</th><th>Què comprova</th></tr></thead>
+        <tbody>
+          <tr><td>Separador</td><td>Caràcter que parteix el nom en parts (per defecte <code>-</code>). El nombre de parts ha de coincidir amb el nombre de camps definits.</td></tr>
+          <tr><td>Ignora l'extensió</td><td>Si està marcat, treu l'extensió final (per exemple <code>.rvt</code>, <code>.pdf</code>) abans de partir el nom.</td></tr>
+          <tr><td>Long. mín / Long. màx</td><td>Cada part ha de tenir com a mínim / màxim aquest nombre de caràcters. Deixa-ho buit per no comprovar-ho.</td></tr>
+          <tr><td>Majús./minús.</td><td><strong>Lliure</strong> (no comprova), <strong>MAJÚSCULES</strong> (la part ha d'anar tota en majúscules) o <strong>minúscules</strong>.</td></tr>
+          <tr><td>Valors permesos</td><td>Llista separada per comes. Si no és buida, la part ha de coincidir exactament amb un dels valors. Buit = valor lliure.</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">A sota de la taula de camps hi ha un exemple de nom vàlid generat automàticament segons l'estàndard actiu, i pots reordenar els camps amb les fletxes <strong>↑ / ↓</strong> o eliminar-los amb <strong>✕</strong>.</p>
+
+      <h3>L'estàndard d'exemple ISO 19650</h3>
+      <p>L'eina arrenca amb un estàndard d'exemple amb aquests set camps i separador <code>-</code>, ignorant l'extensió:</p>
+      <table class="tbl">
+        <thead><tr><th>Camp</th><th>Longitud</th><th>Format</th><th>Valors</th></tr></thead>
+        <tbody>
+          <tr><td>Projecte</td><td>2–6</td><td>MAJÚSCULES</td><td>lliure</td></tr>
+          <tr><td>Originador</td><td>3</td><td>MAJÚSCULES</td><td>lliure</td></tr>
+          <tr><td>Volum/Sistema</td><td>2</td><td>MAJÚSCULES</td><td>lliure</td></tr>
+          <tr><td>Nivell</td><td>2</td><td>MAJÚSCULES</td><td>lliure</td></tr>
+          <tr><td>Tipus</td><td>2</td><td>MAJÚSCULES</td><td>M3, M2, DR, SP, SH, VS, CO, BQ</td></tr>
+          <tr><td>Disciplina</td><td>1</td><td>MAJÚSCULES</td><td>A, S, M, E, P, C, L, Z</td></tr>
+          <tr><td>Número</td><td>4–6</td><td>lliure</td><td>lliure</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">Un nom que hi encaixa: <code>PRJ01-GUA-ZZ-01-M3-A-0001.rvt</code></p>
+
+      <h3>Diversos estàndards i JSON</h3>
+      <p>Amb els botons <strong>+ Nou</strong>, <strong>Duplica</strong> i <strong>Elimina</strong> gestiones diversos estàndards; el desplegable superior tria l'actiu. Amb <strong>Exporta JSON</strong> deses tots els estàndards a un fitxer (<code>guaita-noms-estandards.json</code>) i amb <strong>Importa JSON</strong> els afegeixes de nou (l'eina valida l'estructura abans d'importar-los).</p>
+      <div class="note warn"><div class="nt">Atenció</div>Els estàndards viuen només en aquesta sessió del navegador. Exporta el JSON per guardar-los i compartir-los amb l'equip: si tanques la pestanya sense exportar, es perden.</div>
+    </section>
+
+    <section id="validar">
+      <h2><span class="num">05</span>Validar una llista</h2>
+      <div class="st">Tres maneres d'aportar els noms</div>
+      <p>A la pestanya <b>2 · Entrada</b> pots omplir la llista de tres maneres, que es poden combinar:</p>
+      <table class="tbl">
+        <thead><tr><th>Manera</th><th>Com funciona</th></tr></thead>
+        <tbody>
+          <tr><td>Arrossegar fitxers o carpetes</td><td>Se n'agafen només els <strong>noms</strong> (exploració recursiva de carpetes). També amb els botons <strong>Selecciona una carpeta…</strong> i <strong>Selecciona fitxers…</strong>.</td></tr>
+          <tr><td>Arrossegar un <code>.md</code> / <code>.txt</code></td><td>Si deixes anar un sol fitxer de text o markdown, se'n llegeix el <strong>contingut</strong> com a llista de noms.</td></tr>
+          <tr><td>Enganxar text</td><td>Escriu o enganxa a la caixa de text: un nom per línia.</td></tr>
+        </tbody>
+      </table>
+      <p>En llegir el text, l'eina interpreta markdown de manera tolerant: agafa vinyetes (<code>-</code>, <code>*</code>, <code>+</code>) i numeracions, la primera columna de les taules, i neteja caselles de tasca, enllaços <code>[text](url)</code>, codi en línia i negretes/cursives. Ignora els encapçalaments <code>#</code>, les regles horitzontals, els separadors de taula i capçaleres típiques com «Nom», «Fitxer» o «File».</p>
+      <p class="muted">Quan afegeixes noms des de fitxers, la llista es <strong>deduplica</strong> i s'<strong>ordena</strong> alfabèticament. Amb <strong>Descarrega la llista .md</strong> deses la llista actual; <strong>Neteja</strong> buida la caixa de text.</p>
+      <h3>Com es valida cada nom</h3>
+      <p>En prémer <strong>Valida la llista</strong>, cada nom es parteix pel separador i:</p>
+      <ol class="steps">
+        <li>Si el <b>nombre de parts</b> no coincideix amb el nombre de camps, el nom queda com a incompliment amb el missatge que indica quantes parts té i quantes n'espera l'estàndard.</li>
+        <li>Si coincideix, es comprova cada part contra el seu camp: part buida, longitud mínima/màxima, majúscules/minúscules i valors permesos.</li>
+      </ol>
+      <div class="note"><div class="nt">Consell</div>El missatge d'error més habitual és el de nombre de parts: sovint vol dir que el separador o el nombre de camps de l'estàndard no s'ajusten als noms reals.</div>
+    </section>
+
+    <section id="resultats">
+      <h2><span class="num">06</span>Resultats i exportacions</h2>
+      <div class="st">Llegir i compartir el veredicte</div>
+      <p>La pestanya <b>3 · Resultats</b> mostra quatre indicadors — <strong>Noms</strong>, <strong>Correctes</strong>, <strong>Incompliments</strong> i el percentatge de <strong>Compliment</strong> — amb una barra de progrés. A sota, una taula amb el número, el nom, l'estat (<strong>OK</strong>/<strong>KO</strong>) i el detall de cada incompliment (camp: motiu).</p>
+      <p>Pots afinar la vista amb els filtres <strong>Mostra</strong> (Tots / Només incompliments / Només correctes) i <strong>Cerca</strong> (filtra per nom). La taula es pagina de 100 en 100 amb els botons <strong>‹ Anterior</strong> i <strong>Següent ›</strong>.</p>
+      <table class="tbl">
+        <thead><tr><th>Exportació</th><th>Què conté</th></tr></thead>
+        <tbody>
+          <tr><td>Exporta CSV</td><td><code>guaita-noms-resultats.csv</code> amb columnes nom, estat i incompliments (separador <code>;</code>, amb BOM per obrir-lo bé a Excel).</td></tr>
+          <tr><td>Informe HTML</td><td><code>guaita-noms-informe.html</code>: informe imprimible amb el resum i la taula d'incompliments.</td></tr>
+          <tr><td>Descarrega la llista .md</td><td>(a la pestanya Entrada) la llista de noms actual en format markdown.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="problemes">
+      <h2><span class="num">07</span>Problemes</h2>
+      <div class="st">Resolució de problemes i preguntes freqüents</div>
+      <details><summary>Els meus estàndards han desaparegut en tornar a obrir l'eina</summary><div class="db">És el comportament esperat: els estàndards només viuen dins la sessió del navegador. Fes servir <strong>Exporta JSON</strong> per guardar-los en un fitxer i <strong>Importa JSON</strong> per recuperar-los més endavant.</div></details>
+      <details><summary>Tots els noms surten KO amb «Té X parts i l'estàndard en defineix Y»</summary><div class="db">Vol dir que el nom es parteix en un nombre de trossos diferent del nombre de camps definits. Revisa el <strong>separador</strong> de l'estàndard i que el nombre de camps s'ajusti als noms reals. Recorda que si «Ignora l'extensió» està desmarcat, l'extensió compta com a part del nom.</div></details>
+      <details><summary>Es pugen els meus fitxers a algun servidor?</summary><div class="db">No. Tot el processament és local al navegador. En arrossegar fitxers o carpetes se n'agafa només el nom; el contingut només es llegeix quan deixes anar un únic <code>.md</code> o <code>.txt</code> perquè n'és la llista.</div></details>
+      <details><summary>Quin format ha de tenir el JSON per importar-lo?</summary><div class="db">Un objecte amb una clau <code>estandards</code> (array). Cada estàndard necessita <code>nom</code> i <code>separador</code> i una llista <code>camps</code> no buida; cada camp ha de tenir <code>nom</code>, i si s'indica, <code>valors</code> ha de ser un array i <code>casing</code> ha de ser <code>MAJ</code>, <code>min</code> o <code>lliure</code>. L'eina rebutja el fitxer amb un missatge si no compleix aquestes condicions.</div></details>
+    </section>
+  </main>
+</div>
+
+<footer class="foot">
+  <div class="fb"><span class="cells"><span></span><span></span><span></span><span></span></span> <b style="color:var(--txt); font-weight:600; letter-spacing:.1em;">GUAITA NOMS</b></div>
+  <div>Validador de convencions de nomenclatura de fitxers, sense servidor · SBS BIM Consulting 2026</div>
+  <p class="disclaimer">Guaita Apps es distribueix «tal com és», sense cap garantia. Les eines estan pensades desde la recerca i com a suport tècnic i educatiu; la verificació dels resultats i la responsabilitat derivada del seu ús recauen únicament sobre l'usuari final.</p>
+</footer>
+
+<script>
+// Ressaltat de la secció activa a l'índex
+const links=[...document.querySelectorAll('nav.toc a')];
+const map=new Map(links.map(a=>[a.getAttribute('href').slice(1),a]));
+const obs=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){ links.forEach(l=>l.classList.remove('active')); const a=map.get(e.target.id); if(a)a.classList.add('active'); } });
+},{rootMargin:'-20% 0px -70% 0px'});
+document.querySelectorAll('main section').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

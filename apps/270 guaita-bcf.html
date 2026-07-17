@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guaita BCF — Visor de fitxers BCF</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#161c24; --panel2:#1d2530; --line:#2a3441;
+    --text:#e6edf3; --muted:#8b97a7; --accent:#3fb950; --accent2:#58a6ff;
+    --red:#f85149; --amber:#d29922; --blue:#58a6ff; --grey:#6e7681;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--text);font-size:14px;
+    display:flex;flex-direction:column;height:100vh;overflow:hidden;
+  }
+  header{
+    display:flex;align-items:center;gap:14px;padding:12px 18px;
+    background:var(--panel);border-bottom:1px solid var(--line);flex:0 0 auto;
+  }
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;letter-spacing:.3px}
+  .logo svg{width:26px;height:26px}
+  .logo .sub{font-weight:400;color:var(--muted);font-size:12px}
+  header .spacer{flex:1}
+  .filename{color:var(--muted);font-size:12px;max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  button.btn{
+    background:var(--accent);color:#06210d;border:0;padding:8px 14px;border-radius:7px;
+    font-weight:600;cursor:pointer;font-size:13px;
+  }
+  button.btn:hover{filter:brightness(1.08)}
+  button.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+
+  main{flex:1;display:flex;min-height:0}
+
+  /* Drop / empty state */
+  #drop{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    margin:24px;border:2px dashed var(--line);border-radius:16px;color:var(--muted);text-align:center;padding:40px;
+    transition:.15s;
+  }
+  #drop.over{border-color:var(--accent);background:rgba(63,185,80,.06);color:var(--text)}
+  #drop h2{margin:0;color:var(--text);font-weight:600}
+  #drop .hint{font-size:13px;max-width:420px;line-height:1.5}
+
+  /* Sidebar */
+  #app{flex:1;display:none;min-height:0}
+  #sidebar{
+    width:340px;flex:0 0 340px;background:var(--panel);border-right:1px solid var(--line);
+    display:flex;flex-direction:column;min-height:0;
+  }
+  .filters{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+  .filters input,.filters select{
+    width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);
+    padding:7px 9px;border-radius:6px;font-size:13px;
+  }
+  .frow{display:flex;gap:8px}
+  .counts{font-size:11px;color:var(--muted);padding:2px 2px 0}
+  .topic-list{overflow-y:auto;flex:1}
+  .topic{
+    padding:11px 13px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;gap:10px;align-items:flex-start;
+  }
+  .topic:hover{background:var(--panel2)}
+  .topic.active{background:var(--panel2);box-shadow:inset 3px 0 0 var(--accent)}
+  .topic .thumb{
+    width:54px;height:40px;flex:0 0 54px;border-radius:4px;background:#0b0e12 center/cover;
+    border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--grey);font-size:9px;
+  }
+  .topic .tinfo{min-width:0;flex:1}
+  .topic .ttitle{font-weight:600;font-size:13px;line-height:1.25;margin-bottom:4px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .topic .tmeta{font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .badge{display:inline-block;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:600;
+    border:1px solid var(--line);white-space:nowrap}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:0 0 8px}
+
+  /* Detail */
+  #detail{flex:1;overflow-y:auto;padding:0;min-width:0}
+  .empty-detail{height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+  .d-head{padding:20px 26px 14px;border-bottom:1px solid var(--line)}
+  .d-head h1{margin:0 0 10px;font-size:20px;line-height:1.3}
+  .d-tags{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .d-body{padding:20px 26px;display:grid;grid-template-columns:1fr 320px;gap:26px;align-items:start}
+  @media(max-width:900px){.d-body{grid-template-columns:1fr}}
+  .section{margin-bottom:24px}
+  .section h3{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);
+    margin:0 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .snapshot{width:100%;border-radius:8px;border:1px solid var(--line);cursor:zoom-in;display:block}
+  .desc{line-height:1.55;white-space:pre-wrap;color:var(--text)}
+  .meta-grid{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px}
+  .meta-grid .k{color:var(--muted)}
+  .meta-grid .v{color:var(--text);word-break:break-word}
+
+  .comment{padding:12px 0;border-bottom:1px solid var(--line)}
+  .comment:last-child{border-bottom:0}
+  .comment .chead{display:flex;justify-content:space-between;gap:10px;margin-bottom:5px;font-size:12px}
+  .comment .cauthor{font-weight:600}
+  .comment .cdate{color:var(--muted)}
+  .comment .ctext{line-height:1.5;white-space:pre-wrap}
+  .comment .cvp{font-size:11px;color:var(--accent2);margin-top:5px}
+
+  .vp{border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:12px;background:var(--panel)}
+  .vp img{width:100%;border-radius:6px;border:1px solid var(--line);margin-bottom:10px;cursor:zoom-in}
+  .vp .kv{font-size:12px;display:grid;grid-template-columns:auto 1fr;gap:3px 12px}
+  .vp .kv .k{color:var(--muted)}
+  .vp h4{margin:10px 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  .chips{display:flex;flex-wrap:wrap;gap:5px}
+  .chip{font-size:10px;background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:2px 6px;font-family:monospace;color:var(--muted)}
+
+  .muted{color:var(--muted)}
+  #lightbox{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;z-index:50;cursor:zoom-out}
+  #lightbox img{max-width:94vw;max-height:94vh;border-radius:6px}
+  .err{color:var(--red);padding:20px;text-align:center}
+  .file-meta{font-size:11px;color:var(--muted);padding:8px 13px;border-bottom:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#3fb950" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2L4 6v5c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V6z"/>
+      <circle cx="12" cy="10" r="2.2"/>
+      <path d="M12 12.2v4"/>
+    </svg>
+    <div>Guaita BCF <div class="sub">Visor de fitxers BCF</div></div>
+  </div>
+  <div class="spacer"></div>
+  <div class="filename" id="filename"></div>
+  <button class="btn ghost" id="openBtn" style="display:none">Obrir un altre</button>
+  <input type="file" id="fileInput" accept=".bcf,.bcfzip,.zip" style="display:none">
+</header>
+
+<main>
+  <div id="drop">
+    <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="#3fb950" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2L4 6v5c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V6z"/>
+      <circle cx="12" cy="10" r="2.4"/><path d="M12 12.4v4.2"/>
+    </svg>
+    <h2>Arrossega un fitxer BCF aquí</h2>
+    <div class="hint">O fes clic per seleccionar-lo. S'admeten BCF 2.0, 2.1 i 3.0 (<code>.bcf</code> / <code>.bcfzip</code>). Tot el processament és local al teu navegador — cap fitxer surt del teu ordinador.</div>
+    <button class="btn" id="pickBtn">Seleccionar fitxer</button>
+  </div>
+
+  <div id="app">
+    <div id="sidebar">
+      <div class="filters">
+        <input type="text" id="search" placeholder="Cercar per títol, autor, descripció…">
+        <div class="frow">
+          <select id="fStatus"><option value="">Tots els estats</option></select>
+          <select id="fSort">
+            <option value="created-desc">Més recents</option>
+            <option value="created-asc">Més antics</option>
+            <option value="priority">Per prioritat</option>
+            <option value="title">Per títol</option>
+          </select>
+        </div>
+        <div class="counts" id="counts"></div>
+      </div>
+      <div class="file-meta" id="fileMeta"></div>
+      <div class="topic-list" id="topicList"></div>
+    </div>
+    <div id="detail"><div class="empty-detail">Selecciona un topic per veure'n els detalls</div></div>
+  </div>
+</main>
+
+<div id="lightbox"><img id="lightboxImg" src="" alt=""></div>
+
+<script>
+const STATUS_COLORS = {
+  open:'#58a6ff', active:'#58a6ff', 'in progress':'#d29922', inprogress:'#d29922',
+  resolved:'#3fb950', closed:'#3fb950', verified:'#3fb950', reopened:'#f85149',
+  rejected:'#f85149', error:'#f85149', warning:'#d29922', info:'#58a6ff',
+  unknown:'#6e7681', '':'#6e7681'
+};
+const PRIORITY_COLORS = {
+  critical:'#f85149', high:'#f85149', 'very high':'#f85149', major:'#d29922',
+  medium:'#d29922', normal:'#58a6ff', minor:'#6e7681', low:'#6e7681', 'very low':'#6e7681'
+};
+function colorFor(map, key){
+  if(!key) return '#6e7681';
+  const k = String(key).toLowerCase().trim();
+  return map[k] || '#6e7681';
+}
+
+// ---- XML helpers (namespace-agnostic via localName) ----
+function child(el, name){ return children(el, name)[0] || null; }
+function children(el, name){
+  if(!el) return [];
+  const out=[];
+  for(const c of el.children){ if(c.localName === name) out.push(c); }
+  return out;
+}
+function deepFind(el, name){
+  if(!el) return null;
+  for(const c of el.getElementsByTagName('*')){ if(c.localName === name) return c; }
+  return null;
+}
+function txt(el, name){ const c = child(el, name); return c ? c.textContent.trim() : ''; }
+function attr(el, name){
+  if(!el) return '';
+  for(const a of el.attributes){ if(a.localName === name) return a.value; }
+  return '';
+}
+function parseXml(str){
+  const doc = new DOMParser().parseFromString(str, 'application/xml');
+  if(doc.getElementsByTagName('parsererror').length) return null;
+  return doc;
+}
+
+let STATE = { topics:[], version:'', file:'', selected:null };
+
+async function loadBCF(arrayBuffer, fileName){
+  const zip = await JSZip.loadAsync(arrayBuffer);
+  // version
+  let version='';
+  const vf = zip.file(/bcf\.version$/i)[0];
+  if(vf){ const vx = parseXml(await vf.async('string')); if(vx){ version = attr(vx.documentElement,'VersionId') || txt(vx.documentElement,'DetailedVersion'); } }
+
+  // group markup files by topic folder
+  const markups = zip.file(/markup\.bcf$/i);
+  const topics = [];
+  for(const mf of markups){
+    const folder = mf.name.includes('/') ? mf.name.substring(0, mf.name.lastIndexOf('/')) : '';
+    const doc = parseXml(await mf.async('string'));
+    if(!doc) continue;
+    const t = await parseTopic(doc, folder, zip, version);
+    if(t) topics.push(t);
+  }
+  STATE = { topics, version, file:fileName, selected:null };
+  renderAll();
+}
+
+async function fileInFolder(zip, folder, name){
+  const path = folder ? folder + '/' + name : name;
+  let f = zip.file(path);
+  if(!f){
+    // case-insensitive / nested fallback
+    const re = new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$','i');
+    const cands = zip.file(re).filter(x=> folder ? x.name.startsWith(folder+'/') : true);
+    f = cands[0];
+  }
+  return f || null;
+}
+async function imgData(zip, folder, name){
+  if(!name) return null;
+  const f = await fileInFolder(zip, folder, name);
+  if(!f) return null;
+  const b64 = await f.async('base64');
+  const ext = (name.split('.').pop()||'png').toLowerCase();
+  const mime = ext==='jpg'||ext==='jpeg' ? 'image/jpeg' : 'image/png';
+  return 'data:'+mime+';base64,'+b64;
+}
+
+async function parseTopic(doc, folder, zip, version){
+  const root = doc.documentElement; // Markup
+  const topicEl = deepFind(root, 'Topic');
+  if(!topicEl) return null;
+
+  const t = {
+    guid: attr(topicEl,'Guid') || folder,
+    type: attr(topicEl,'TopicType'),
+    status: attr(topicEl,'TopicStatus') || txt(topicEl,'TopicStatus'),
+    title: txt(topicEl,'Title'),
+    priority: txt(topicEl,'Priority'),
+    description: txt(topicEl,'Description'),
+    creationDate: txt(topicEl,'CreationDate'),
+    creationAuthor: txt(topicEl,'CreationAuthor'),
+    modifiedDate: txt(topicEl,'ModifiedDate'),
+    modifiedAuthor: txt(topicEl,'ModifiedAuthor'),
+    assignedTo: txt(topicEl,'AssignedTo'),
+    dueDate: txt(topicEl,'DueDate'),
+    stage: txt(topicEl,'Stage'),
+    labels: children(topicEl,'Labels').map(l=>l.textContent.trim()).filter(Boolean),
+    comments: [],
+    viewpoints: []
+  };
+  // BCF3 labels can be inside <Labels><Label>..
+  const labelsWrap = child(topicEl,'Labels');
+  if(labelsWrap && labelsWrap.children.length){
+    const inner = children(labelsWrap,'Label').map(l=>l.textContent.trim()).filter(Boolean);
+    if(inner.length) t.labels = inner;
+  }
+
+  // Comments — BCF2: <Comment> siblings of Topic in Markup; BCF3: inside <Topic><Comments><Comment>
+  let commentEls = children(root,'Comment');
+  if(!commentEls.length){
+    const cwrap = child(topicEl,'Comments');
+    if(cwrap) commentEls = children(cwrap,'Comment');
+  }
+  for(const c of commentEls){
+    t.comments.push({
+      guid: attr(c,'Guid'),
+      date: txt(c,'Date'),
+      author: txt(c,'Author'),
+      text: txt(c,'Comment'),
+      modifiedDate: txt(c,'ModifiedDate'),
+      modifiedAuthor: txt(c,'ModifiedAuthor'),
+      viewpointGuid: attr(child(c,'Viewpoint'),'Guid')
+    });
+  }
+  t.comments.sort((a,b)=> (a.date||'').localeCompare(b.date||''));
+
+  // Viewpoints — BCF2: <Viewpoints> siblings in Markup; BCF3: <Topic><Viewpoints><ViewPoint>
+  let vpEls = children(root,'Viewpoints');
+  if(!vpEls.length){
+    const vwrap = child(topicEl,'Viewpoints');
+    if(vwrap) vpEls = children(vwrap,'ViewPoint').concat(children(vwrap,'Viewpoint'));
+  }
+  for(const v of vpEls){
+    const vpFile = txt(v,'Viewpoint');
+    const snapFile = txt(v,'Snapshot');
+    const vp = {
+      guid: attr(v,'Guid'),
+      snapshot: await imgData(zip, folder, snapFile),
+      camera:null, selection:[], clipping:0, visibilityDefault:null
+    };
+    if(vpFile){
+      const f = await fileInFolder(zip, folder, vpFile);
+      if(f){
+        const vdoc = parseXml(await f.async('string'));
+        if(vdoc) parseViewpoint(vdoc.documentElement, vp);
+      }
+    }
+    t.viewpoints.push(vp);
+  }
+  // if no Viewpoints element but a snapshot.png exists in folder, still show it
+  if(!t.viewpoints.length){
+    const snap = await imgData(zip, folder, 'snapshot.png');
+    if(snap) t.viewpoints.push({guid:'', snapshot:snap, camera:null, selection:[], clipping:0, visibilityDefault:null});
+  }
+  // first snapshot as thumb
+  t.thumb = (t.viewpoints.find(v=>v.snapshot)||{}).snapshot || null;
+  return t;
+}
+
+function parseViewpoint(root, vp){
+  // Camera
+  const ortho = deepFind(root,'OrthogonalCamera');
+  const persp = deepFind(root,'PerspectiveCamera');
+  const cam = ortho || persp;
+  if(cam){
+    const vec = (name)=>{ const e = child(cam,name); if(!e) return null;
+      return {x:+txt(e,'X')||0, y:+txt(e,'Y')||0, z:+txt(e,'Z')||0}; };
+    vp.camera = {
+      type: ortho ? 'Ortogonal' : 'Perspectiva',
+      point: vec('CameraViewPoint'),
+      dir: vec('CameraDirection'),
+      up: vec('CameraUpVector'),
+      fov: txt(cam,'FieldOfView'),
+      scale: txt(cam,'ViewToWorldScale')
+    };
+  }
+  // Selection components
+  const comps = deepFind(root,'Components');
+  if(comps){
+    const sel = child(comps,'Selection');
+    const selComps = sel ? children(sel,'Component') : [];
+    vp.selection = selComps.map(c=> attr(c,'IfcGuid') || attr(c,'Guid') || txt(c,'IfcGuid')).filter(Boolean);
+    const vis = child(comps,'Visibility');
+    if(vis){ const dv = attr(vis,'DefaultVisibility'); if(dv!=='') vp.visibilityDefault = dv; }
+  }
+  // Clipping planes
+  const cp = deepFind(root,'ClippingPlanes');
+  if(cp) vp.clipping = children(cp,'ClippingPlane').length;
+}
+
+// ---- Rendering ----
+const $ = s=>document.querySelector(s);
+function fmtDate(s){
+  if(!s) return '';
+  const d = new Date(s);
+  if(isNaN(d)) return s;
+  return d.toLocaleString('ca-ES',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function renderAll(){
+  $('#drop').style.display='none';
+  $('#app').style.display='flex';
+  $('#openBtn').style.display='inline-block';
+  $('#filename').textContent = STATE.file;
+
+  // status filter options
+  const statuses = [...new Set(STATE.topics.map(t=>t.status).filter(Boolean))].sort();
+  const fs = $('#fStatus');
+  fs.innerHTML = '<option value="">Tots els estats</option>' + statuses.map(s=>`<option>${esc(s)}</option>`).join('');
+
+  const vlabel = STATE.version ? 'BCF '+STATE.version : 'BCF';
+  $('#fileMeta').innerHTML = `<strong>${vlabel}</strong> · ${STATE.topics.length} topics`;
+  renderList();
+  // auto-select first
+  if(STATE.topics.length) selectTopic(filteredTopics()[0]?.guid || STATE.topics[0].guid);
+}
+
+function filteredTopics(){
+  const q = $('#search').value.toLowerCase().trim();
+  const st = $('#fStatus').value;
+  const sort = $('#fSort').value;
+  let list = STATE.topics.filter(t=>{
+    if(st && t.status!==st) return false;
+    if(q){
+      const hay = [t.title,t.description,t.creationAuthor,t.assignedTo,...(t.labels||[]),
+        ...t.comments.map(c=>c.text)].join(' ').toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  const prioRank = {critical:0,high:1,'very high':1,major:2,medium:3,normal:3,minor:4,low:5,'very low':6};
+  list.sort((a,b)=>{
+    if(sort==='title') return (a.title||'').localeCompare(b.title||'');
+    if(sort==='priority') return (prioRank[(a.priority||'').toLowerCase()]??9)-(prioRank[(b.priority||'').toLowerCase()]??9);
+    const da=a.creationDate||'', db=b.creationDate||'';
+    return sort==='created-asc' ? da.localeCompare(db) : db.localeCompare(da);
+  });
+  return list;
+}
+
+function renderList(){
+  const list = filteredTopics();
+  $('#counts').textContent = `${list.length} de ${STATE.topics.length} topics`;
+  const el = $('#topicList');
+  if(!list.length){ el.innerHTML = '<div class="muted" style="padding:18px">Cap topic coincideix amb el filtre.</div>'; return; }
+  el.innerHTML = list.map(t=>{
+    const sc = colorFor(STATUS_COLORS, t.status);
+    const thumb = t.thumb ? `style="background-image:url('${t.thumb}')"` : '';
+    const thumbInner = t.thumb ? '' : 'sense<br>imatge';
+    return `<div class="topic ${t.guid===STATE.selected?'active':''}" data-guid="${esc(t.guid)}">
+      <div class="thumb" ${thumb}>${thumbInner}</div>
+      <div class="tinfo">
+        <div class="ttitle">${esc(t.title)||'(sense títol)'}</div>
+        <div class="tmeta">
+          <span class="dot" style="background:${sc}"></span>${esc(t.status)||'—'}
+          ${t.priority?`· <span>${esc(t.priority)}</span>`:''}
+          ${t.comments.length?`· 💬 ${t.comments.length}`:''}
+        </div>
+        <div class="tmeta" style="margin-top:3px">${esc(t.creationAuthor)} · ${fmtDate(t.creationDate)}</div>
+      </div>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.topic').forEach(d=> d.onclick=()=>selectTopic(d.dataset.guid));
+}
+
+function selectTopic(guid){
+  STATE.selected = guid;
+  const t = STATE.topics.find(x=>x.guid===guid);
+  renderList();
+  if(!t){ $('#detail').innerHTML='<div class="empty-detail">Selecciona un topic</div>'; return; }
+
+  const sc = colorFor(STATUS_COLORS, t.status);
+  const pc = colorFor(PRIORITY_COLORS, t.priority);
+  const mainSnap = t.thumb ? `<img class="snapshot" src="${t.thumb}" onclick="zoom(this.src)">` : '';
+
+  const meta = [
+    ['Estat', `<span class="badge" style="border-color:${sc};color:${sc}">${esc(t.status)||'—'}</span>`],
+    ['Prioritat', t.priority?`<span class="badge" style="border-color:${pc};color:${pc}">${esc(t.priority)}</span>`:'—'],
+    ['Tipus', esc(t.type)||'—'],
+    ['Assignat a', esc(t.assignedTo)||'—'],
+    ['Creat per', esc(t.creationAuthor)||'—'],
+    ['Data creació', fmtDate(t.creationDate)||'—'],
+    ['Modificat per', esc(t.modifiedAuthor)||'—'],
+    ['Data modificació', fmtDate(t.modifiedDate)||'—'],
+    ['Venciment', fmtDate(t.dueDate)||'—'],
+    ['Etapa', esc(t.stage)||'—'],
+    ['Etiquetes', t.labels.length? t.labels.map(l=>`<span class="badge">${esc(l)}</span>`).join(' ') : '—'],
+    ['GUID', `<span class="muted" style="font-family:monospace;font-size:11px">${esc(t.guid)}</span>`]
+  ].map(([k,v])=>`<div class="k">${k}</div><div class="v">${v}</div>`).join('');
+
+  const comments = t.comments.length ? t.comments.map(c=>`
+    <div class="comment">
+      <div class="chead"><span class="cauthor">${esc(c.author)||'Anònim'}</span><span class="cdate">${fmtDate(c.date)}</span></div>
+      <div class="ctext">${esc(c.text)||'<span class="muted">(buit)</span>'}</div>
+      ${c.viewpointGuid?`<div class="cvp">↳ vinculat a un viewpoint</div>`:''}
+    </div>`).join('') : '<div class="muted">Sense comentaris.</div>';
+
+  const vps = t.viewpoints.length ? t.viewpoints.map((v,i)=>`
+    <div class="vp">
+      ${v.snapshot?`<img src="${v.snapshot}" onclick="zoom(this.src)">`:'<div class="muted">Sense snapshot</div>'}
+      <div class="kv">
+        ${v.camera?`<div class="k">Càmera</div><div>${v.camera.type}</div>`:''}
+        ${v.camera&&v.camera.point?`<div class="k">Posició</div><div>${fmtVec(v.camera.point)}</div>`:''}
+        ${v.camera&&v.camera.dir?`<div class="k">Direcció</div><div>${fmtVec(v.camera.dir)}</div>`:''}
+        ${v.camera&&v.camera.fov?`<div class="k">Camp visió</div><div>${(+v.camera.fov).toFixed(1)}°</div>`:''}
+        ${v.visibilityDefault!==null?`<div class="k">Visibilitat def.</div><div>${v.visibilityDefault==='true'?'visible':'ocult'}</div>`:''}
+        ${v.clipping?`<div class="k">Plans de tall</div><div>${v.clipping}</div>`:''}
+        <div class="k">Components sel.</div><div>${v.selection.length}</div>
+      </div>
+      ${v.selection.length?`<h4>Components seleccionats</h4><div class="chips">${v.selection.slice(0,40).map(s=>`<span class="chip">${esc(s)}</span>`).join('')}${v.selection.length>40?`<span class="chip">+${v.selection.length-40}</span>`:''}</div>`:''}
+    </div>`).join('') : '<div class="muted">Sense viewpoints.</div>';
+
+  $('#detail').innerHTML = `
+    <div class="d-head">
+      <h1>${esc(t.title)||'(sense títol)'}</h1>
+      <div class="d-tags">
+        <span class="badge" style="border-color:${sc};color:${sc}">${esc(t.status)||'—'}</span>
+        ${t.priority?`<span class="badge" style="border-color:${pc};color:${pc}">Prioritat: ${esc(t.priority)}</span>`:''}
+        ${t.type?`<span class="badge">${esc(t.type)}</span>`:''}
+        ${t.labels.map(l=>`<span class="badge">${esc(l)}</span>`).join('')}
+      </div>
+    </div>
+    <div class="d-body">
+      <div>
+        ${mainSnap?`<div class="section">${mainSnap}</div>`:''}
+        <div class="section">
+          <h3>Descripció</h3>
+          <div class="desc">${esc(t.description)||'<span class="muted">Sense descripció.</span>'}</div>
+        </div>
+        <div class="section">
+          <h3>Comentaris (${t.comments.length})</h3>
+          ${comments}
+        </div>
+      </div>
+      <div>
+        <div class="section">
+          <h3>Detalls</h3>
+          <div class="meta-grid">${meta}</div>
+        </div>
+        <div class="section">
+          <h3>Viewpoints (${t.viewpoints.length})</h3>
+          ${vps}
+        </div>
+      </div>
+    </div>`;
+}
+function fmtVec(v){ return `${v.x.toFixed(2)}, ${v.y.toFixed(2)}, ${v.z.toFixed(2)}`; }
+function zoom(src){ $('#lightboxImg').src=src; $('#lightbox').style.display='flex'; }
+
+// ---- Events ----
+$('#lightbox').onclick=()=>$('#lightbox').style.display='none';
+$('#search').oninput=renderList;
+$('#fStatus').onchange=renderList;
+$('#fSort').onchange=renderList;
+
+const fileInput = $('#fileInput');
+function openPicker(){ fileInput.click(); }
+$('#pickBtn').onclick=openPicker;
+$('#openBtn').onclick=openPicker;
+$('#drop').onclick=(e)=>{ if(e.target.id==='drop'||e.target.tagName==='H2'||e.target.tagName==='svg'||e.target.classList.contains('hint')) openPicker(); };
+fileInput.onchange=e=>{ if(e.target.files[0]) handleFile(e.target.files[0]); };
+
+const drop = $('#drop');
+['dragover','dragenter'].forEach(ev=>document.body.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+['dragleave','drop'].forEach(ev=>document.body.addEventListener(ev,e=>{e.preventDefault();if(ev==='drop'||e.target===document.body)drop.classList.remove('over');}));
+document.body.addEventListener('drop',e=>{ e.preventDefault(); drop.classList.remove('over'); const f=e.dataTransfer.files[0]; if(f) handleFile(f); });
+
+async function handleFile(file){
+  try{
+    const buf = await file.arrayBuffer();
+    await loadBCF(buf, file.name);
+  }catch(err){
+    console.error(err);
+    $('#drop').style.display='flex';
+    $('#app').style.display='none';
+    $('#drop').innerHTML = `<div class="err">No s'ha pogut llegir el fitxer BCF.<br><span class="muted">${esc(err.message)}</span></div><button class="btn" onclick="location.reload()">Tornar-ho a provar</button>`;
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guaita Noms · Validador de nomenclatura</title>
+<style>
+  :root{
+    --tinta:#1b2a33; --fons:#f4f6f5; --panell:#ffffff; --linia:#d8dedd;
+    --petroli:#0f4c5c; --petroli-fosc:#0a3541;
+    --ok:#2e7d5b; --ok-fons:#e6f2ec;
+    --ko:#c1442e; --ko-fons:#f9e9e5;
+    --avis:#a97b00; --avis-fons:#f7efd8;
+    --mut:#5c6b70;
+    --mono:"Cascadia Code","SF Mono",Consolas,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--fons);color:var(--tinta);font-size:15px;line-height:1.45}
+  header{background:var(--petroli);color:#fff;padding:14px 22px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  header h1{font-size:19px;font-weight:650;letter-spacing:.3px}
+  header h1 .torre{color:#ffd76a}
+  header .sub{font-size:13px;opacity:.85}
+  main{max-width:1180px;margin:0 auto;padding:18px 22px 60px}
+  nav.pestanyes{display:flex;gap:2px;margin-bottom:0}
+  nav.pestanyes button{border:1px solid var(--linia);border-bottom:none;background:#e9edec;color:var(--mut);
+    padding:9px 18px;font-size:14px;font-weight:600;cursor:pointer;border-radius:8px 8px 0 0}
+  nav.pestanyes button.activa{background:var(--panell);color:var(--petroli)}
+  nav.pestanyes button:focus-visible{outline:2px solid var(--petroli);outline-offset:-2px}
+  section.panell{background:var(--panell);border:1px solid var(--linia);border-radius:0 10px 10px 10px;padding:20px}
+  section.panell[hidden]{display:none}
+  h2{font-size:16px;color:var(--petroli);margin-bottom:12px}
+  h3{font-size:14px;margin:16px 0 8px}
+  .fila{display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:12px}
+  label.camp{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:600;color:var(--mut)}
+  input[type=text],input[type=number],select,textarea{
+    border:1px solid var(--linia);border-radius:6px;padding:7px 9px;font-size:14px;font-family:inherit;background:#fff;color:var(--tinta)}
+  input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--petroli);outline-offset:1px}
+  textarea{width:100%;font-family:var(--mono);font-size:13px}
+  button.accio{background:var(--petroli);color:#fff;border:none;border-radius:6px;padding:9px 16px;font-size:14px;font-weight:600;cursor:pointer}
+  button.accio:hover{background:var(--petroli-fosc)}
+  button.secundari{background:#fff;color:var(--petroli);border:1px solid var(--petroli)}
+  button.secundari:hover{background:#eef4f3}
+  button.perill{background:#fff;color:var(--ko);border:1px solid var(--ko)}
+  button.mini{padding:4px 9px;font-size:12.5px;border-radius:5px}
+  .zona-drop{border:2px dashed var(--linia);border-radius:8px;padding:22px;text-align:center;color:var(--mut);margin-bottom:12px;transition:border-color .15s,background .15s}
+  .zona-drop.sobre{border-color:var(--petroli);background:#eef4f3}
+  table.camps,table.resultats{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.camps th,table.camps td,table.resultats th,table.resultats td{border-bottom:1px solid var(--linia);padding:7px 8px;text-align:left;vertical-align:middle}
+  table.camps th,table.resultats th{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--mut);background:#f8faf9}
+  table.camps input[type=text]{width:100%}
+  table.camps input.curt{width:64px}
+  td.nomfitxer{font-family:var(--mono);font-size:12.5px;word-break:break-all;max-width:420px}
+  .estat{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700}
+  .estat.ok{background:var(--ok-fons);color:var(--ok)}
+  .estat.ko{background:var(--ko-fons);color:var(--ko)}
+  td.detall{font-size:12.5px;color:var(--ko)}
+  td.detall .peca{display:block}
+  .resum{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0}
+  .targeta{border:1px solid var(--linia);border-radius:8px;padding:10px 16px;min-width:120px}
+  .targeta .num{font-size:26px;font-weight:750;font-variant-numeric:tabular-nums}
+  .targeta .eti{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+  .targeta.ok .num{color:var(--ok)} .targeta.ko .num{color:var(--ko)}
+  .barra-compliment{height:10px;border-radius:999px;background:var(--ko-fons);overflow:hidden;margin:4px 0 18px;max-width:520px}
+  .barra-compliment>div{height:100%;background:var(--ok);border-radius:999px;transition:width .3s}
+  .avis-caixa{background:var(--avis-fons);border:1px solid #e3cf94;color:var(--avis);border-radius:8px;padding:10px 14px;font-size:13.5px;margin-bottom:14px}
+  .buit{color:var(--mut);font-size:14px;padding:26px;text-align:center}
+  .paginacio{display:flex;gap:8px;align-items:center;margin-top:12px;font-size:13.5px}
+  .taula-embolcall{overflow-x:auto}
+  .pill-valors{font-family:var(--mono);font-size:12px;color:var(--mut)}
+  .capsalera-seccio{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+  .nota{font-size:12.5px;color:var(--mut)}
+  code{font-family:var(--mono);font-size:.92em;background:#eef1f0;padding:1px 5px;border-radius:4px}
+  @media (max-width:640px){ main{padding:12px} section.panell{padding:14px} td.nomfitxer{max-width:200px} }
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important} }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="torre">▲</span> Guaita Noms</h1>
+  <span class="sub">Validador de convencions de nomenclatura · ISO 19650 i estàndards propis · sense servidor</span>
+</header>
+<main>
+  <nav class="pestanyes" role="tablist">
+    <button id="pes-std" class="activa" role="tab" aria-selected="true" onclick="mostraPestanya('std')">1 · Estàndards</button>
+    <button id="pes-ent" role="tab" aria-selected="false" onclick="mostraPestanya('ent')">2 · Entrada</button>
+    <button id="pes-res" role="tab" aria-selected="false" onclick="mostraPestanya('res')">3 · Resultats</button>
+  </nav>
+
+  <!-- ══════════ PESTANYA ESTÀNDARDS ══════════ -->
+  <section id="sec-std" class="panell" role="tabpanel">
+    <div class="avis-caixa">Els estàndards viuen només en aquesta sessió. <strong>Exporta el JSON</strong> per guardar-los i compartir-los amb l'equip.</div>
+    <div class="capsalera-seccio">
+      <div class="fila" style="margin:0">
+        <label class="camp">Estàndard actiu
+          <select id="sel-std" onchange="canviaEstandard(this.value)"></select>
+        </label>
+        <button class="accio mini" onclick="nouEstandard()">+ Nou</button>
+        <button class="secundari mini" onclick="duplicaEstandard()">Duplica</button>
+        <button class="perill mini" onclick="eliminaEstandard()">Elimina</button>
+      </div>
+      <div class="fila" style="margin:0">
+        <button class="secundari mini" onclick="document.getElementById('fitxer-json').click()">Importa JSON</button>
+        <input type="file" id="fitxer-json" accept=".json" hidden onchange="importaJSON(this.files[0]); this.value=''">
+        <button class="secundari mini" onclick="exportaJSON()">Exporta JSON</button>
+      </div>
+    </div>
+
+    <div class="fila">
+      <label class="camp">Nom de l'estàndard <input type="text" id="std-nom" oninput="std().nom=this.value; refrescaSelector()"></label>
+      <label class="camp">Versió <input type="text" id="std-versio" style="width:80px" oninput="std().versio=this.value"></label>
+      <label class="camp">Separador <input type="text" id="std-sep" style="width:60px" maxlength="3" oninput="std().separador=this.value"></label>
+      <label class="camp" style="flex-direction:row;align-items:center;gap:8px;padding-bottom:8px">
+        <input type="checkbox" id="std-ext" onchange="std().ignoraExtensio=this.checked"> Ignora l'extensió del fitxer
+      </label>
+    </div>
+
+    <h3>Camps (en ordre d'aparició al nom)</h3>
+    <div class="taula-embolcall">
+    <table class="camps">
+      <thead><tr>
+        <th style="width:34px"></th><th>Camp</th><th>Long. mín</th><th>Long. màx</th><th>Majús./minús.</th>
+        <th>Valors permesos <span class="nota">(separats per comes; buit = lliure)</span></th>
+        <th style="width:120px"></th>
+      </tr></thead>
+      <tbody id="cos-camps"></tbody>
+    </table>
+    </div>
+    <div class="fila" style="margin-top:10px">
+      <button class="secundari mini" onclick="afegeixCamp()">+ Afegeix camp</button>
+      <span class="nota">Exemple de nom vàlid segons l'estàndard actiu: <code id="std-exemple"></code></span>
+    </div>
+  </section>
+
+  <!-- ══════════ PESTANYA ENTRADA ══════════ -->
+  <section id="sec-ent" class="panell" role="tabpanel" hidden>
+    <h2>Llista de noms a validar</h2>
+    <p class="nota" style="margin-bottom:10px">Tres maneres d'entrar noms: arrossega <strong>fitxers o carpetes</strong> (se n'agafen només els noms, res no surt del teu ordinador), arrossega un <strong>.md/.txt</strong> amb la llista (se'n llegeix el contingut), o enganxa text/markdown a sota: un nom per línia, llistes amb <code>-</code>/<code>*</code>, taules (primera columna). Els encapçalaments <code>#</code> s'ignoren.</p>
+    <div class="zona-drop" id="zona-drop">Arrossega aquí <strong>fitxers, carpetes</strong> o un <strong>.md/.txt</strong> amb la llista</div>
+    <div class="fila">
+      <button class="secundari mini" onclick="document.getElementById('sel-carpeta').click()">Selecciona una carpeta…</button>
+      <button class="secundari mini" onclick="document.getElementById('sel-fitxers').click()">Selecciona fitxers…</button>
+      <input type="file" id="sel-carpeta" webkitdirectory hidden onchange="afegeixNoms([...this.files].map(f=>f.name)); this.value=''">
+      <input type="file" id="sel-fitxers" multiple hidden onchange="afegeixNoms([...this.files].map(f=>f.name)); this.value=''">
+    </div>
+    <textarea id="entrada-text" rows="12" placeholder="- PRJ01-GUA-ZZ-01-M3-A-0001.rvt&#10;- PRJ01-GUA-ZZ-XX-DR-S-1200.pdf"></textarea>
+    <div class="fila" style="margin-top:12px">
+      <button class="accio" onclick="valida()">Valida la llista</button>
+      <button class="secundari" onclick="document.getElementById('entrada-text').value=''">Neteja</button>
+      <button class="secundari" onclick="descarregaLlistaMD()">Descarrega la llista .md</button>
+    </div>
+  </section>
+
+  <!-- ══════════ PESTANYA RESULTATS ══════════ -->
+  <section id="sec-res" class="panell" role="tabpanel" hidden>
+    <div id="res-buit" class="buit">Encara no hi ha resultats. Ves a <strong>2 · Entrada</strong> i valida una llista.</div>
+    <div id="res-contingut" hidden>
+      <div class="capsalera-seccio">
+        <h2 id="res-titol" style="margin:0"></h2>
+        <div class="fila" style="margin:0">
+          <button class="secundari mini" onclick="exportaCSV()">Exporta CSV</button>
+          <button class="secundari mini" onclick="exportaInforme()">Informe HTML</button>
+        </div>
+      </div>
+      <div class="resum" id="res-resum"></div>
+      <div class="barra-compliment" aria-hidden="true"><div id="res-barra" style="width:0%"></div></div>
+      <div class="fila">
+        <label class="camp">Mostra
+          <select id="fil-estat" onchange="pagina=1;pintaTaula()">
+            <option value="tots">Tots</option><option value="ko">Només incompliments</option><option value="ok">Només correctes</option>
+          </select>
+        </label>
+        <label class="camp">Cerca <input type="text" id="fil-text" oninput="pagina=1;pintaTaula()" placeholder="filtra per nom…"></label>
+      </div>
+      <div class="taula-embolcall">
+      <table class="resultats">
+        <thead><tr><th style="width:60px">#</th><th>Nom</th><th style="width:90px">Estat</th><th>Incompliments</th></tr></thead>
+        <tbody id="cos-resultats"></tbody>
+      </table>
+      </div>
+      <div class="paginacio">
+        <button class="secundari mini" onclick="pagina=Math.max(1,pagina-1);pintaTaula()">‹ Anterior</button>
+        <span id="pag-info"></span>
+        <button class="secundari mini" onclick="pagina=Math.min(totalPagines(),pagina+1);pintaTaula()">Següent ›</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+/* ═══════════════ NUCLI (funcions pures, sense DOM) ═══════════════ */
+// ===CORE===
+function extreuNoms(text){
+  const noms=[];
+  for(let linia of text.split(/\r?\n/)){
+    linia=linia.trim();
+    if(!linia) continue;
+    if(/^#{1,6}\s/.test(linia)) continue;                 // encapçalaments
+    if(/^\|?[\s:|-]+\|[\s:|-]*$/.test(linia)) continue;   // separadors de taula |---|---|
+    if(/^(---+|\*\*\*+|___+)$/.test(linia)) continue;     // regles horitzontals
+    if(linia.startsWith('|')){                             // fila de taula → 1a cel·la
+      const cel=linia.split('|').map(c=>c.trim()).filter(Boolean)[0]||'';
+      linia=cel;
+    }
+    linia=linia.replace(/^(?:[-*+]|\d+[.)])\s+/,'');       // vinyetes i numeració
+    linia=linia.replace(/^\[( |x|X)?\]\s*/,'');            // caselles de tasca
+    const enllac=linia.match(/^\[([^\]]+)\]\([^)]*\)$/);   // [text](url)
+    if(enllac) linia=enllac[1];
+    linia=linia.replace(/^`(.*)`$/,'$1');                  // codi en línia
+    linia=linia.replace(/^\*\*(.*)\*\*$/,'$1').replace(/^\*(.*)\*$/,'$1');
+    linia=linia.trim();
+    if(!linia) continue;
+    if(/^(Nom|Name|Fitxer|File|Arxiu|Archivo)s?$/i.test(linia)) continue; // capçaleres típiques
+    noms.push(linia);
+  }
+  return noms;
+}
+
+function treuExtensio(nom){
+  const i=nom.lastIndexOf('.');
+  // extensió = punt no inicial seguit d'1–10 alfanumèrics al final
+  if(i>0 && /^[A-Za-z0-9]{1,10}$/.test(nom.slice(i+1))) return nom.slice(0,i);
+  return nom;
+}
+
+function validaNom(nomOriginal, estandard){
+  const sep=estandard.separador||'-';
+  const nom=estandard.ignoraExtensio?treuExtensio(nomOriginal):nomOriginal;
+  const trossos=nom.split(sep);
+  const camps=estandard.camps||[];
+  const errors=[];
+
+  if(trossos.length!==camps.length){
+    errors.push({camp:'*', missatge:`Té ${trossos.length} parts separades per «${sep}» i l'estàndard en defineix ${camps.length}`});
+    return {nom:nomOriginal, ok:false, errors, trossos};
+  }
+  camps.forEach((c,i)=>{
+    const v=trossos[i];
+    if(v===''){ errors.push({camp:c.nom, missatge:'part buida'}); return; }
+    if(c.longMin!=null && c.longMin!=='' && v.length<Number(c.longMin))
+      errors.push({camp:c.nom, missatge:`«${v}» té ${v.length} caràcters; mínim ${c.longMin}`});
+    if(c.longMax!=null && c.longMax!=='' && v.length>Number(c.longMax))
+      errors.push({camp:c.nom, missatge:`«${v}» té ${v.length} caràcters; màxim ${c.longMax}`});
+    if(c.casing==='MAJ' && v!==v.toUpperCase())
+      errors.push({camp:c.nom, missatge:`«${v}» hauria d'anar en majúscules`});
+    if(c.casing==='min' && v!==v.toLowerCase())
+      errors.push({camp:c.nom, missatge:`«${v}» hauria d'anar en minúscules`});
+    const llista=(c.valors||[]).map(x=>x.trim()).filter(Boolean);
+    if(llista.length && !llista.includes(v))
+      errors.push({camp:c.nom, missatge:`«${v}» no és a la llista de valors permesos (${llista.join(', ')})`});
+  });
+  return {nom:nomOriginal, ok:errors.length===0, errors, trossos};
+}
+
+function validaLlista(noms, estandard){
+  const res=noms.map(n=>validaNom(n,estandard));
+  return {resultats:res, total:res.length, correctes:res.filter(r=>r.ok).length};
+}
+
+function exempleDeEstandard(e){
+  return (e.camps||[]).map(c=>{
+    const llista=(c.valors||[]).filter(Boolean);
+    if(llista.length) return llista[0];
+    const n=Number(c.longMin)||Number(c.longMax)||3;
+    let s='X'.repeat(Math.min(n,6));
+    return c.casing==='min'?s.toLowerCase():s;
+  }).join(e.separador||'-') + (e.ignoraExtensio?'.ext':'');
+}
+
+function validaEsquemaImportat(obj){
+  if(!obj || typeof obj!=='object') return 'El JSON no és un objecte.';
+  if(!Array.isArray(obj.estandards)) return 'Falta la clau «estandards» (array).';
+  for(const e of obj.estandards){
+    if(typeof e.nom!=='string' || !e.nom) return 'Cada estàndard necessita un «nom».';
+    if(typeof e.separador!=='string' || !e.separador) return `«${e.nom}»: falta el «separador».`;
+    if(!Array.isArray(e.camps) || !e.camps.length) return `«${e.nom}»: falta la llista «camps».`;
+    for(const c of e.camps){
+      if(typeof c.nom!=='string' || !c.nom) return `«${e.nom}»: tots els camps necessiten «nom».`;
+      if(c.valors!=null && !Array.isArray(c.valors)) return `«${e.nom}» → «${c.nom}»: «valors» ha de ser un array.`;
+      if(c.casing!=null && !['MAJ','min','lliure'].includes(c.casing)) return `«${e.nom}» → «${c.nom}»: «casing» ha de ser MAJ, min o lliure.`;
+    }
+  }
+  return null;
+}
+// ===ENDCORE===
+
+/* ═══════════════ ESTAT ═══════════════ */
+const ISO19650={
+  nom:'ISO 19650 (exemple)', versio:'1.0', separador:'-', ignoraExtensio:true,
+  camps:[
+    {nom:'Projecte',   longMin:2, longMax:6, casing:'MAJ', valors:[]},
+    {nom:'Originador', longMin:3, longMax:3, casing:'MAJ', valors:[]},
+    {nom:'Volum/Sistema', longMin:2, longMax:2, casing:'MAJ', valors:[]},
+    {nom:'Nivell',     longMin:2, longMax:2, casing:'MAJ', valors:[]},
+    {nom:'Tipus',      longMin:2, longMax:2, casing:'MAJ', valors:['M3','M2','DR','SP','SH','VS','CO','BQ']},
+    {nom:'Disciplina', longMin:1, longMax:1, casing:'MAJ', valors:['A','S','M','E','P','C','L','Z']},
+    {nom:'Número',     longMin:4, longMax:6, casing:'lliure', valors:[]}
+  ]
+};
+let dades={estandards:[JSON.parse(JSON.stringify(ISO19650))]};
+let idxActiu=0;
+let resultat=null, nomEstandardUsat='';
+let pagina=1; const PER_PAGINA=100;
+const std=()=>dades.estandards[idxActiu];
+
+/* ═══════════════ UI: pestanyes ═══════════════ */
+function mostraPestanya(id){
+  for(const p of ['std','ent','res']){
+    document.getElementById('sec-'+p).hidden=(p!==id);
+    const b=document.getElementById('pes-'+p);
+    b.classList.toggle('activa',p===id);
+    b.setAttribute('aria-selected',p===id);
+  }
+}
+
+/* ═══════════════ UI: estàndards ═══════════════ */
+function refrescaSelector(){
+  const sel=document.getElementById('sel-std');
+  sel.innerHTML=dades.estandards.map((e,i)=>`<option value="${i}" ${i===idxActiu?'selected':''}>${escapaHTML(e.nom)}</option>`).join('');
+}
+function pintaEstandard(){
+  const e=std();
+  document.getElementById('std-nom').value=e.nom;
+  document.getElementById('std-versio').value=e.versio||'';
+  document.getElementById('std-sep').value=e.separador;
+  document.getElementById('std-ext').checked=!!e.ignoraExtensio;
+  const cos=document.getElementById('cos-camps');
+  cos.innerHTML='';
+  e.camps.forEach((c,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${i+1}</td>
+      <td><input type="text" value="${escapaAtr(c.nom)}" oninput="std().camps[${i}].nom=this.value;pintaExemple()"></td>
+      <td><input type="number" class="curt" min="0" value="${c.longMin??''}" oninput="std().camps[${i}].longMin=this.value;pintaExemple()"></td>
+      <td><input type="number" class="curt" min="0" value="${c.longMax??''}" oninput="std().camps[${i}].longMax=this.value;pintaExemple()"></td>
+      <td><select onchange="std().camps[${i}].casing=this.value">
+        <option value="lliure" ${c.casing==='lliure'?'selected':''}>Lliure</option>
+        <option value="MAJ" ${c.casing==='MAJ'?'selected':''}>MAJÚSCULES</option>
+        <option value="min" ${c.casing==='min'?'selected':''}>minúscules</option>
+      </select></td>
+      <td><input type="text" class="pill-valors" style="width:100%" value="${escapaAtr((c.valors||[]).join(', '))}"
+        oninput="std().camps[${i}].valors=this.value.split(',').map(s=>s.trim()).filter(Boolean);pintaExemple()"></td>
+      <td>
+        <button class="secundari mini" title="Puja" onclick="mouCamp(${i},-1)">↑</button>
+        <button class="secundari mini" title="Baixa" onclick="mouCamp(${i},1)">↓</button>
+        <button class="perill mini" title="Elimina" onclick="std().camps.splice(${i},1);pintaEstandard()">✕</button>
+      </td>`;
+    cos.appendChild(tr);
+  });
+  pintaExemple();
+}
+function pintaExemple(){ document.getElementById('std-exemple').textContent=exempleDeEstandard(std()); }
+function canviaEstandard(i){ idxActiu=Number(i); pintaEstandard(); }
+function nouEstandard(){
+  dades.estandards.push({nom:'Nou estàndard', versio:'1.0', separador:'-', ignoraExtensio:true,
+    camps:[{nom:'Camp 1',longMin:'',longMax:'',casing:'lliure',valors:[]}]});
+  idxActiu=dades.estandards.length-1; refrescaSelector(); pintaEstandard();
+}
+function duplicaEstandard(){
+  const copia=JSON.parse(JSON.stringify(std())); copia.nom+=' (còpia)';
+  dades.estandards.push(copia); idxActiu=dades.estandards.length-1; refrescaSelector(); pintaEstandard();
+}
+function eliminaEstandard(){
+  if(dades.estandards.length===1){ alert('Cal mantenir almenys un estàndard.'); return; }
+  if(!confirm(`Eliminar «${std().nom}»?`)) return;
+  dades.estandards.splice(idxActiu,1); idxActiu=0; refrescaSelector(); pintaEstandard();
+}
+function afegeixCamp(){ std().camps.push({nom:'Camp '+(std().camps.length+1),longMin:'',longMax:'',casing:'lliure',valors:[]}); pintaEstandard(); }
+function mouCamp(i,d){
+  const c=std().camps, j=i+d;
+  if(j<0||j>=c.length) return;
+  [c[i],c[j]]=[c[j],c[i]]; pintaEstandard();
+}
+
+/* ═══════════════ Import / export d'estàndards ═══════════════ */
+function exportaJSON(){
+  descarrega('guaita-noms-estandards.json', JSON.stringify({format:'guaita-noms', versio:1, estandards:dades.estandards}, null, 2), 'application/json');
+}
+function importaJSON(f){
+  if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    let obj;
+    try{ obj=JSON.parse(r.result); }catch(e){ alert('El fitxer no és JSON vàlid: '+e.message); return; }
+    const err=validaEsquemaImportat(obj);
+    if(err){ alert('JSON rebutjat: '+err); return; }
+    obj.estandards.forEach(e=>{ if(e.ignoraExtensio==null) e.ignoraExtensio=true;
+      e.camps.forEach(c=>{ if(!c.casing) c.casing='lliure'; if(!c.valors) c.valors=[]; }); });
+    dades.estandards=dades.estandards.concat(obj.estandards);
+    idxActiu=dades.estandards.length-obj.estandards.length;
+    refrescaSelector(); pintaEstandard();
+    alert(`Importats ${obj.estandards.length} estàndard(s).`);
+  };
+  r.readAsText(f);
+}
+
+/* ═══════════════ Entrada: drop de fitxers, carpetes o .md/.txt ═══════════════ */
+const zona=document.getElementById('zona-drop');
+zona.addEventListener('dragover',e=>{e.preventDefault();zona.classList.add('sobre')});
+zona.addEventListener('dragleave',()=>zona.classList.remove('sobre'));
+zona.addEventListener('drop',async e=>{
+  e.preventDefault(); zona.classList.remove('sobre');
+  const fitxers=[...e.dataTransfer.files];
+  // Cas 1: un sol .md/.txt → llegir-ne el contingut com a llista
+  if(fitxers.length===1 && /\.(md|txt)$/i.test(fitxers[0].name)){
+    const r=new FileReader();
+    r.onload=()=>{ document.getElementById('entrada-text').value=r.result; };
+    r.readAsText(fitxers[0]);
+    return;
+  }
+  // Cas 2: fitxers/carpetes → afegir-ne els NOMS (exploració recursiva)
+  const trobats=[];
+  const entries=[...e.dataTransfer.items].map(i=>i.webkitGetAsEntry&&i.webkitGetAsEntry()).filter(Boolean);
+  if(entries.length){ for(const ent of entries) await recorreEntrada(ent,trobats); }
+  else{ for(const f of fitxers) trobats.push(f.name); }
+  afegeixNoms(trobats);
+});
+
+function recorreEntrada(entry,acum){
+  return new Promise(res=>{
+    if(entry.isFile){ acum.push(entry.name); res(); }
+    else if(entry.isDirectory){
+      const lector=entry.createReader();
+      const llegeix=()=>lector.readEntries(async ents=>{
+        if(!ents.length){ res(); return; }
+        for(const e of ents) await recorreEntrada(e,acum);
+        llegeix(); // readEntries retorna per lots de 100: repetir fins buit
+      },()=>res());
+      llegeix();
+    } else res();
+  });
+}
+
+function afegeixNoms(llista){
+  if(!llista.length) return;
+  const ta=document.getElementById('entrada-text');
+  const actuals=extreuNoms(ta.value);
+  const tots=[...new Set(actuals.concat(llista))].sort((a,b)=>a.localeCompare(b,'ca'));
+  ta.value='# Llista de fitxers ('+new Date().toISOString().slice(0,10)+')\n\n'+tots.map(n=>'- '+n).join('\n')+'\n';
+}
+
+function descarregaLlistaMD(){
+  const noms=extreuNoms(document.getElementById('entrada-text').value);
+  if(!noms.length){ alert('La llista és buida.'); return; }
+  const md='# Llista de fitxers ('+new Date().toISOString().slice(0,10)+')\n\n'+noms.map(n=>'- '+n).join('\n')+'\n';
+  descarrega('llista-fitxers-'+new Date().toISOString().slice(0,10)+'.md', md, 'text/markdown');
+}
+
+function valida(){
+  const text=document.getElementById('entrada-text').value;
+  const noms=extreuNoms(text);
+  if(!noms.length){ alert('No s\'ha trobat cap nom a la llista.'); return; }
+  resultat=validaLlista(noms, std());
+  nomEstandardUsat=std().nom+(std().versio?' v'+std().versio:'');
+  pagina=1;
+  document.getElementById('fil-estat').value='tots';
+  document.getElementById('fil-text').value='';
+  pintaResultats();
+  mostraPestanya('res');
+}
+
+/* ═══════════════ Resultats ═══════════════ */
+function resultatsFiltrats(){
+  const estat=document.getElementById('fil-estat').value;
+  const q=document.getElementById('fil-text').value.toLowerCase();
+  return resultat.resultats.filter(r=>
+    (estat==='tots'||(estat==='ok')===r.ok) && (!q||r.nom.toLowerCase().includes(q)));
+}
+function totalPagines(){ return Math.max(1, Math.ceil(resultatsFiltrats().length/PER_PAGINA)); }
+function pintaResultats(){
+  document.getElementById('res-buit').hidden=true;
+  document.getElementById('res-contingut').hidden=false;
+  document.getElementById('res-titol').textContent='Validació segons «'+nomEstandardUsat+'»';
+  const t=resultat.total, ok=resultat.correctes, ko=t-ok, pct=t?Math.round(ok/t*100):0;
+  document.getElementById('res-resum').innerHTML=`
+    <div class="targeta"><div class="num">${t}</div><div class="eti">Noms</div></div>
+    <div class="targeta ok"><div class="num">${ok}</div><div class="eti">Correctes</div></div>
+    <div class="targeta ko"><div class="num">${ko}</div><div class="eti">Incompliments</div></div>
+    <div class="targeta"><div class="num">${pct}%</div><div class="eti">Compliment</div></div>`;
+  document.getElementById('res-barra').style.width=pct+'%';
+  pintaTaula();
+}
+function pintaTaula(){
+  const filtrats=resultatsFiltrats();
+  const tp=totalPagines(); if(pagina>tp) pagina=tp;
+  const inici=(pagina-1)*PER_PAGINA;
+  const tros=filtrats.slice(inici,inici+PER_PAGINA);
+  const cos=document.getElementById('cos-resultats');
+  cos.innerHTML=tros.map((r,i)=>`
+    <tr>
+      <td>${inici+i+1}</td>
+      <td class="nomfitxer">${escapaHTML(r.nom)}</td>
+      <td><span class="estat ${r.ok?'ok':'ko'}">${r.ok?'OK':'KO'}</span></td>
+      <td class="detall">${r.errors.map(e=>`<span class="peca"><strong>${escapaHTML(e.camp)}</strong>: ${escapaHTML(e.missatge)}</span>`).join('')}</td>
+    </tr>`).join('') || `<tr><td colspan="4" class="buit">Cap resultat amb aquest filtre.</td></tr>`;
+  document.getElementById('pag-info').textContent=`Pàgina ${pagina} de ${tp} · ${filtrats.length} noms`;
+}
+
+/* ═══════════════ Exportacions ═══════════════ */
+function exportaCSV(){
+  const files=[['nom','estat','incompliments']];
+  for(const r of resultat.resultats)
+    files.push([r.nom, r.ok?'OK':'KO', r.errors.map(e=>e.camp+': '+e.missatge).join(' | ')]);
+  const csv=files.map(f=>f.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+  descarrega('guaita-noms-resultats.csv','\uFEFF'+csv,'text/csv');
+}
+function exportaInforme(){
+  const t=resultat.total, ok=resultat.correctes, pct=t?Math.round(ok/t*100):0;
+  const data=new Date().toLocaleString('ca');
+  const filesKO=resultat.resultats.filter(r=>!r.ok);
+  const taula=r=>`<tr><td class="n">${escapaHTML(r.nom)}</td><td>${r.errors.map(e=>'<strong>'+escapaHTML(e.camp)+'</strong>: '+escapaHTML(e.missatge)).join('<br>')}</td></tr>`;
+  const html=`<!DOCTYPE html><html lang="ca"><head><meta charset="UTF-8"><title>Informe Guaita Noms</title>
+<style>body{font-family:system-ui,sans-serif;max-width:960px;margin:30px auto;padding:0 16px;color:#1b2a33}
+h1{color:#0f4c5c}.resum{display:flex;gap:20px;margin:16px 0}.resum div{border:1px solid #d8dedd;border-radius:8px;padding:8px 16px}
+.resum b{font-size:24px;display:block}table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{border-bottom:1px solid #d8dedd;padding:6px 8px;text-align:left;vertical-align:top}
+td.n{font-family:Consolas,monospace;font-size:12.5px;word-break:break-all}
+.peu{margin-top:24px;font-size:12px;color:#5c6b70}</style></head><body>
+<h1>▲ Guaita Noms · Informe de compliment</h1>
+<p>Estàndard: <strong>${escapaHTML(nomEstandardUsat)}</strong> · Data: ${data}</p>
+<div class="resum"><div><b>${t}</b>Noms</div><div><b style="color:#2e7d5b">${ok}</b>Correctes</div>
+<div><b style="color:#c1442e">${t-ok}</b>Incompliments</div><div><b>${pct}%</b>Compliment</div></div>
+<h2>Incompliments (${filesKO.length})</h2>
+${filesKO.length?'<table><thead><tr><th>Nom</th><th>Detall</th></tr></thead><tbody>'+filesKO.map(taula).join('')+'</tbody></table>':'<p>Cap 🎉</p>'}
+<p class="peu">Generat amb Guaita Noms — validador autònom sense servidor.</p></body></html>`;
+  descarrega('guaita-noms-informe.html', html, 'text/html');
+}
+
+/* ═══════════════ Utilitats ═══════════════ */
+function descarrega(nom, contingut, tipus){
+  const blob=new Blob([contingut],{type:tipus+';charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=nom; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+function escapaHTML(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapaAtr(s){ return escapaHTML(s); }
+
+/* ═══════════════ Inici ═══════════════ */
+refrescaSelector(); pintaEstandard();
+</script>
+</body>
+</html>

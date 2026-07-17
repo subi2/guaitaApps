@@ -1,0 +1,338 @@
+<!--
+  Guaita Apps - Suite d'eines autònomes per a arquitectura, BIM i documentació.
+  Copyright (c) 2026 Jordi Subirós
+  GNU Affero General Public License v3.0
+  See LICENSE file for details
+-->
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ajuda · Guaita Historial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0E0A; --panel:#12160F; --panel-2:#191E12; --panel-3:#232A18;
+  --line:#333D1F; --line-soft:#28301A; --txt:#EAF3D8; --dim:#94A377; --dim-2:#5E6B47;
+  --accent:#C6FF00; --accent-ink:#0A0E00; --accent-2:#FF2ECC; --accent-3:#00E5FF; --accent-4:#FFE500;
+  --danger:#FF4D6D; --radius:8px;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Space Grotesk',system-ui,sans-serif;
+  background:var(--ink); color:var(--txt); line-height:1.6;
+  background-image:linear-gradient(rgba(198,255,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(198,255,0,.03) 1px,transparent 1px);
+  background-size:44px 44px;
+}
+.mono{font-family:'IBM Plex Mono',monospace;}
+a{color:var(--accent-3); text-decoration:none;}
+a:hover{color:var(--accent);}
+
+/* ---------- Layout ---------- */
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px; display:grid; grid-template-columns:230px 1fr; gap:48px;}
+@media(max-width:860px){ .wrap{grid-template-columns:1fr; gap:0;} nav.toc{display:none;} }
+
+/* ---------- Hero ---------- */
+header.hero{
+  border-bottom:1px solid var(--line); background:var(--panel);
+  padding:56px 24px 44px; position:relative; overflow:hidden;
+}
+header.hero .inner{max-width:1180px; margin:0 auto;}
+.brand{display:flex; align-items:center; gap:14px; margin-bottom:22px;}
+.brand .cells{display:grid; grid-template-columns:repeat(2,13px); gap:4px;}
+.brand .cells span{width:13px; height:13px;}
+.brand .cells span:nth-child(1){background:var(--accent);}
+.brand .cells span:nth-child(2){background:var(--accent-2);}
+.brand .cells span:nth-child(3){background:var(--accent-3);}
+.brand .cells span:nth-child(4){background:var(--accent-4);}
+.brand .bt{font-weight:700; font-size:20px; letter-spacing:.16em;}
+.brand .bt small{color:var(--accent); font-size:12px; letter-spacing:.1em; margin-left:2px;}
+header.hero h1{
+  font-size:clamp(34px,6vw,60px); line-height:1.02; font-weight:700; letter-spacing:-.02em;
+  max-width:16ch;
+}
+header.hero h1 em{font-style:normal; color:var(--accent);}
+header.hero p.lead{margin-top:18px; font-size:17px; color:var(--dim); max-width:60ch;}
+.hero-tag{
+  display:inline-block; margin-bottom:10px; font-family:'IBM Plex Mono',monospace;
+  font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent-ink);
+  background:var(--accent); padding:4px 10px; border-radius:20px;
+}
+
+/* ---------- TOC ---------- */
+nav.toc{position:sticky; top:32px; align-self:start; padding-top:48px;}
+nav.toc .toc-t{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim-2); margin-bottom:12px;}
+nav.toc ol{list-style:none; counter-reset:s;}
+nav.toc li{counter-increment:s; margin:2px 0;}
+nav.toc a{
+  display:flex; gap:10px; align-items:baseline; padding:6px 8px; border-radius:6px;
+  color:var(--dim); font-size:13.5px; border-left:2px solid transparent;
+}
+nav.toc a::before{content:counter(s,decimal-leading-zero); font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--dim-2);}
+nav.toc a:hover{background:var(--panel-2); color:var(--txt);}
+nav.toc a.active{color:var(--accent); border-left-color:var(--accent); background:var(--panel-2);}
+
+/* ---------- Content ---------- */
+main{padding:48px 0 100px; min-width:0;}
+section{margin-bottom:56px; scroll-margin-top:24px;}
+section > h2{
+  font-size:12px; font-family:'IBM Plex Mono',monospace; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--accent); margin-bottom:6px;
+}
+section > h2 .num{color:var(--dim-2); margin-right:10px;}
+section > .st{font-size:27px; font-weight:600; letter-spacing:-.01em; margin-bottom:18px; line-height:1.15;}
+section p{margin-bottom:14px; color:var(--txt);}
+section p.muted{color:var(--dim);}
+h3{font-size:17px; font-weight:600; margin:26px 0 10px;}
+
+/* ---------- Callouts ---------- */
+.note{
+  border:1px solid var(--line); border-left:3px solid var(--accent-3);
+  background:var(--panel); border-radius:0 var(--radius) var(--radius) 0;
+  padding:14px 16px; margin:18px 0; font-size:14px;
+}
+.note.warn{border-left-color:var(--accent-4);}
+.note.stop{border-left-color:var(--danger);}
+.note .nt{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin-bottom:5px;}
+.note.warn .nt{color:var(--accent-4);}
+.note.stop .nt{color:var(--danger);}
+
+/* ---------- Steps ---------- */
+ol.steps{list-style:none; counter-reset:step; margin:8px 0;}
+ol.steps li{counter-increment:step; position:relative; padding:12px 0 12px 46px; border-bottom:1px solid var(--line-soft);}
+ol.steps li:last-child{border-bottom:none;}
+ol.steps li::before{
+  content:counter(step); position:absolute; left:0; top:11px;
+  width:30px; height:30px; border-radius:8px; background:var(--panel-3); color:var(--accent);
+  font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13px;
+  display:flex; align-items:center; justify-content:center; border:1px solid var(--line);
+}
+ol.steps li b{color:var(--accent);}
+
+/* ---------- Feature cards ---------- */
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:14px; margin:10px 0;}
+.card{border:1px solid var(--line); background:var(--panel); border-radius:var(--radius); padding:16px;}
+.card .ci{width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; background:var(--panel-3);}
+.card .ci svg{width:18px; height:18px; stroke:var(--accent); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
+.card h4{font-size:15px; font-weight:600; margin-bottom:4px;}
+.card p{font-size:13px; color:var(--dim); margin:0;}
+.card:nth-child(4n+2) .ci svg{stroke:var(--accent-2);}
+.card:nth-child(4n+3) .ci svg{stroke:var(--accent-3);}
+.card:nth-child(4n+4) .ci svg{stroke:var(--accent-4);}
+
+/* ---------- Tables ---------- */
+table.tbl{width:100%; border-collapse:collapse; font-size:14px; margin:14px 0;}
+table.tbl th{text-align:left; padding:9px 12px; background:var(--panel-2); color:var(--dim); font-weight:500; font-size:12px; letter-spacing:.03em; text-transform:uppercase; border-bottom:1px solid var(--line);}
+table.tbl td{padding:9px 12px; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+table.tbl tr:hover td{background:var(--panel);}
+kbd{
+  font-family:'IBM Plex Mono',monospace; font-size:12px; background:var(--panel-3);
+  border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:2px 8px; color:var(--accent); white-space:nowrap;
+}
+code{font-family:'IBM Plex Mono',monospace; font-size:.88em; background:var(--panel-2); border:1px solid var(--line-soft); padding:1px 6px; border-radius:4px; color:var(--accent-3);}
+
+/* ---------- Panel map ---------- */
+.map{border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin:16px 0; font-family:'IBM Plex Mono',monospace; font-size:11.5px;}
+.map .mrow{display:flex; border-bottom:1px solid var(--line-soft);}
+.map .mrow:last-child{border-bottom:none;}
+.map .mcell{padding:14px 12px; border-right:1px solid var(--line-soft); color:var(--dim);}
+.map .mcell:last-child{border-right:none;}
+.map .mcell b{display:block; color:var(--accent); font-family:'Space Grotesk',sans-serif; font-size:13px; margin-bottom:3px;}
+.map .l{flex:0 0 26%;} .map .c{flex:1;} .map .r{flex:0 0 24%;}
+.map .top,.map .bot{background:var(--panel-2); color:var(--accent-3); padding:10px 12px; text-align:center;}
+
+/* ---------- Details / FAQ ---------- */
+details{border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); margin:8px 0; overflow:hidden;}
+details summary{padding:14px 16px; cursor:pointer; font-weight:500; list-style:none; display:flex; align-items:center; gap:10px;}
+details summary::-webkit-details-marker{display:none;}
+details summary::before{content:'+'; font-family:'IBM Plex Mono',monospace; color:var(--accent); font-size:16px;}
+details[open] summary::before{content:'−';}
+details .db{padding:0 16px 16px 42px; color:var(--dim); font-size:14px;}
+details[open] summary{color:var(--accent);}
+
+footer.foot{border-top:1px solid var(--line); padding:28px 24px; text-align:center; color:var(--dim-2); font-size:12.5px;}
+footer.foot .fb{display:inline-flex; gap:8px; align-items:center; margin-bottom:8px;}
+footer.foot .fb .cells{display:grid; grid-template-columns:repeat(2,6px); gap:2px;}
+footer.foot .fb .cells span{width:6px; height:6px;}
+footer.foot .fb .cells span:nth-child(1){background:var(--accent);} footer.foot .fb .cells span:nth-child(2){background:var(--accent-2);}
+footer.foot .fb .cells span:nth-child(3){background:var(--accent-3);} footer.foot .fb .cells span:nth-child(4){background:var(--accent-4);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="inner">
+    <div class="brand">
+      <span class="cells"><span></span><span></span><span></span><span></span></span>
+      <span class="bt">GUAITA<small>HISTORIAL</small></span>
+    </div>
+    <span class="hero-tag">Manual d'ús</span>
+    <h1>Qui ha desat i quan cada model <em>Revit</em>, sense obrir Revit.</h1>
+    <p class="lead">Guaita Historial llegeix l'historial de desats de fitxers <code>.rvt</code> i de plantilles <code>.rte</code> —igual que el Project History de Revit— i et diu qui hi ha treballat i quan, per a un fitxer o per a carpetes senceres, tot dins del navegador.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="toc">
+    <div class="toc-t">Contingut</div>
+    <ol>
+      <li><a href="#intro">Què és</a></li>
+      <li><a href="#comencar">Com començar</a></li>
+      <li><a href="#interficie">La interfície</a></li>
+      <li><a href="#taula">La taula de resultats</a></li>
+      <li><a href="#multiusuari">Marcar multiusuari</a></li>
+      <li><a href="#exportar">Exportar a Excel</a></li>
+      <li><a href="#privadesa">Privadesa</a></li>
+      <li><a href="#problemes">Problemes</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section id="intro">
+      <h2><span class="num">01</span>Introducció</h2>
+      <div class="st">Auditoria de l'historial de desats en una sola pàgina</div>
+      <p>Cada fitxer de Revit guarda a dins una taula amb tots els desats del model: en quin ordre, en quin moment i amb quin nom d'usuari. Guaita Historial obre aquesta taula i te la mostra de manera llegible, sense necessitat d'obrir el model a Revit.</p>
+      <p>És un únic fitxer HTML que funciona a qualsevol navegador modern. Serveix per auditar qui ha treballat en un projecte, detectar desats amb usuaris que no toquen i tenir un registre exportable.</p>
+      <p class="muted">Tot el processament és local al navegador; cap fitxer s'envia enlloc. Les hores es mostren en la zona horària local de l'equip.</p>
+      <div class="cards">
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3M12 3a9 9 0 100 18 9 9 0 000-18z"/></svg></div><h4>Historial complet</h4><p>Data, hora i usuari de cada desat del model.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M9 17v-6M12 17V7M15 17v-3M4 4h16v16H4z"/></svg></div><h4>Per usuari</h4><p>Recompte de desats agrupats per persona.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></svg></div><h4>Per lots</h4><p>Diversos fitxers o carpetes senceres alhora.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4M4 21h16"/></svg></div><h4>Exportable</h4><p>Descàrrega TSV llesta per obrir a Excel.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9l-6-6z"/><path d="M14 3v6h6M9 13h6M9 17h4"/></svg></div><h4>Plantilles .rte</h4><p>També extreu l'historial de fitxers de plantilla <code>.rte</code>, no només projectes <code>.rvt</code>.</p></div>
+      </div>
+    </section>
+
+    <section id="comencar">
+      <h2><span class="num">02</span>Com començar</h2>
+      <div class="st">Selecciona fitxers o una carpeta</div>
+      <p>A dalt de tot tens dues opcions de càrrega. Fes servir la que et convingui:</p>
+      <ol class="steps">
+        <li><b>Opció 1 · Fitxers.</b> Tria un o més fitxers <code>.rvt</code> o plantilles <code>.rte</code>. Pots seleccionar-ne diversos amb <kbd>Ctrl</kbd> o <kbd>Cmd</kbd> mentre cliques.</li>
+        <li><b>Opció 2 · Carpeta.</b> Tria una carpeta sencera i l'eina hi buscarà tots els <code>.rvt</code>. La casella <b>subcarpetes</b> (activada per defecte) fa que també miri dins les carpetes internes.</li>
+        <li>L'anàlisi comença sola en seleccionar; a baix veuràs el progrés («Analitzant X de Y…») i, en acabar, la taula plena.</li>
+      </ol>
+      <div class="note">
+        <div class="nt">Fitxers .rvt i .rte</div>
+        L'eina processa projectes <code>.rvt</code> i plantilles <code>.rte</code> —les plantilles guarden el mateix historial de desats que un projecte. Qualsevol altre fitxer de la selecció s'ignora. Si no en troba cap de vàlid, t'ho indica.
+      </div>
+    </section>
+
+    <section id="interficie">
+      <h2><span class="num">03</span>La interfície</h2>
+      <div class="st">On és cada cosa</div>
+      <div class="map">
+        <div class="top">Capçalera · «Guaita Historial» + botó Exportar (TSV per Excel)</div>
+        <div class="mrow">
+          <div class="mcell l"><b>Càrrega</b>Opció 1 (fitxers) i Opció 2 (carpeta + subcarpetes) i botó Netejar.</div>
+          <div class="mcell c"><b>Marcatge</b>Botó «Marcar fitxers amb &gt;1 usuari» i camp «Usuaris excepció».</div>
+          <div class="mcell r"><b>Resum</b>Comptador de fitxers amb més d'un usuari.</div>
+        </div>
+        <div class="bot">Taula de resultats: Fitxer · Carpeta · Desats · Project Info · Desats per usuari · Historial</div>
+      </div>
+      <p>El botó <b>Netejar</b> buida la taula i les seleccions per tornar a començar de zero.</p>
+    </section>
+
+    <section id="taula">
+      <h2><span class="num">04</span>La taula de resultats</h2>
+      <div class="st">Una fila per fitxer analitzat</div>
+      <p>Cada fila resumeix un fitxer amb aquestes columnes:</p>
+      <table class="tbl">
+        <thead><tr><th>Columna</th><th>Què mostra</th></tr></thead>
+        <tbody>
+          <tr><td><b>Fitxer</b></td><td>El nom del fitxer <code>.rvt</code> analitzat.</td></tr>
+          <tr><td><b>Carpeta</b></td><td>La carpeta d'origen (o «Selecció directa» si l'has triat com a fitxer solt).</td></tr>
+          <tr><td><b>Desats</b></td><td>El nombre total de desats trobats a l'historial del fitxer.</td></tr>
+          <tr><td><b>Project Info</b></td><td>Metadades del model llegides de <code>BasicFileInfo</code> (per exemple el build de Revit i altres camps).</td></tr>
+          <tr><td><b>Desats per usuari</b></td><td>Cada usuari amb el nombre de desats que ha fet, ordenats de més a menys.</td></tr>
+          <tr><td><b>Historial</b></td><td>La llista de desats amb data i hora i qui va fer cada modificació.</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <div class="nt">Format de la data</div>
+        Les dates es mostren com <code>dd/mm/aaaa hh:mm:ss</code> en la zona horària local del teu equip.
+      </div>
+    </section>
+
+    <section id="multiusuari">
+      <h2><span class="num">05</span>Marcar fitxers multiusuari</h2>
+      <div class="st">Localitza models desats per més d'una persona</div>
+      <p>En un flux de treball ben organitzat pot interessar-te saber quins models han estat desats per <b>més d'un usuari</b>. Aquesta funció ho ressalta:</p>
+      <ol class="steps">
+        <li>Prem <b>Marcar fitxers amb &gt;1 usuari</b>. Les files que compleixin la condició es pinten de groc i el resum de dalt t'indica quants són.</li>
+        <li>Al camp <b>Usuaris excepció</b> pots escriure noms d'usuari que <b>no s'han de comptar</b> per a aquesta regla (per exemple <code>admin</code>, <code>backup</code> o el teu gestor BIM), separats per comes.</li>
+        <li>El recompte s'actualitza a l'instant: un fitxer només queda marcat si té més d'un usuari <b>un cop descomptades</b> les excepcions.</li>
+      </ol>
+      <div class="note warn">
+        <div class="nt">Per què serveix</div>
+        Ajuda a detectar models on han treballat persones que no hi haurien de constar, o a confirmar que un projecte l'ha gestionat una sola persona (a banda dels comptes d'excepció que hi indiquis).
+      </div>
+    </section>
+
+    <section id="exportar">
+      <h2><span class="num">06</span>Exportar a Excel</h2>
+      <div class="st">Un registre complet en format TSV</div>
+      <p>El botó <b>Exportar (TSV per Excel)</b> de la capçalera —actiu un cop hi ha resultats— descarrega un fitxer de text delimitat per tabuladors. És un format llarg amb <b>una fila per cada desat</b>, ideal per obrir directament a Excel.</p>
+      <p>Les columnes exportades són: Fitxer, Carpeta, Mida (MB), Increment, Data i hora, Modificat per, Total desats (fitxer), Build Revit i Project Info. El fitxer es desa amb un nom com <code>Revit_Historial_aaaa-mm-dd.tsv</code>.</p>
+      <div class="note">
+        <div class="nt">Obrir-lo bé a Excel</div>
+        El TSV inclou la marca de codificació perquè els accents i caràcters especials es vegin correctament en obrir-lo amb Excel.
+      </div>
+    </section>
+
+    <section id="privadesa">
+      <h2><span class="num">07</span>Privadesa</h2>
+      <div class="st">Tot passa al teu equip</div>
+      <div class="note stop">
+        <div class="nt">Sense servidor</div>
+        Tot el processament és <b>local al navegador</b>: cap fitxer ni cap dada d'historial s'envia enlloc. Pots auditar models confidencials amb tranquil·litat, fins i tot sense connexió a internet.
+      </div>
+    </section>
+
+    <section id="problemes">
+      <h2><span class="num">08</span>Resolució de problemes</h2>
+      <div class="st">Si alguna cosa no va</div>
+      <details>
+        <summary>«No s'han trobat fitxers .rvt vàlids segons la selecció»</summary>
+        <div class="db">La selecció no contenia cap fitxer <code>.rvt</code>, o els que hi havia quedaven fora del filtre. Si has triat una carpeta i els fitxers són en subcarpetes, assegura't que la casella <b>subcarpetes</b> està activada.</div>
+      </details>
+      <details>
+        <summary>«No s'ha trobat la taula d'increments»</summary>
+        <div class="db">El fitxer no té historial de desats registrat: pot ser un model no col·laboratiu o desat de manera que no genera aquesta taula. La fila apareix igualment però sense historial.</div>
+      </details>
+      <details>
+        <summary>Una fila surt amb error</summary>
+        <div class="db">El fitxer pot estar malmès, encriptat o no ser un <code>.rvt</code>/<code>.rte</code> vàlid. La resta de fitxers de la selecció es processen igualment; només aquell queda marcat amb el missatge d'error.</div>
+      </details>
+      <details>
+        <summary>«No s'ha trobat Project Info»</summary>
+        <div class="db">El fitxer no exposa metadades a <code>BasicFileInfo</code> que l'eina pugui llegir. L'historial i el recompte per usuari poden mostrar-se igualment si existeixen.</div>
+      </details>
+      <details>
+        <summary>Les hores no quadren</summary>
+        <div class="db">Les dates es mostren en la zona horària local del teu equip. Si el model es va desar en un altre fus horari, tingues-ho en compte en interpretar-les.</div>
+      </details>
+    </section>
+  </main>
+</div>
+
+<footer class="foot">
+  <div class="fb"><span class="cells"><span></span><span></span><span></span><span></span></span> <b style="color:var(--txt); font-weight:600; letter-spacing:.1em;">GUAITA HISTORIAL</b></div>
+  <div>Auditoria de l'historial de desats de fitxers RVT · SBS BIM Consulting</div>
+</footer>
+
+<script>
+// Ressaltat de la secció activa a l'índex
+const links=[...document.querySelectorAll('nav.toc a')];
+const map=new Map(links.map(a=>[a.getAttribute('href').slice(1),a]));
+const obs=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){ links.forEach(l=>l.classList.remove('active')); const a=map.get(e.target.id); if(a)a.classList.add('active'); } });
+},{rootMargin:'-20% 0px -70% 0px'});
+document.querySelectorAll('main section').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ajuda · Dossier COAC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F5F4EF; --card:#FFFFFF; --ink:#22262D; --ink-2:#69707B;
+  --line:#D8D5CC; --line-forta:#B9B5A9;
+  --blau:#1F4E8C; --blau-fosc:#153A6B; --blau-clar:#E8EEF7;
+  --visat:#B3282D; --ok:#2E6B4F; --r:3px;
+  --ui:'Archivo',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--ui);background:var(--paper);color:var(--ink);font-size:14px}
+a{color:var(--blau)}
+:focus-visible{outline:2px solid var(--blau);outline-offset:1px}
+
+header{display:flex;align-items:stretch;border-bottom:1.5px solid var(--ink);background:var(--card)}
+.brand{display:flex;flex-direction:column;justify-content:center;padding:14px 18px;border-right:1px solid var(--line-forta);min-width:180px}
+.brand .b1{font-family:var(--mono);font-weight:600;font-size:15px;letter-spacing:.14em}
+.brand .b2{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--visat);margin-top:2px}
+.brand-tit{flex:1;display:flex;align-items:center;padding:14px 18px;font-variation-settings:'wdth' 110;font-weight:650;font-size:17px}
+
+#cos{display:flex;align-items:flex-start;max-width:1180px;margin:0 auto}
+nav#toc{width:250px;flex:0 0 auto;position:sticky;top:0;max-height:100vh;overflow-y:auto;padding:22px 16px;border-right:1px solid var(--line)}
+nav#toc .etq{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--ink-2);margin-bottom:10px}
+nav#toc a{display:block;font-size:12.5px;color:var(--ink);text-decoration:none;padding:6px 8px;border-radius:var(--r);margin-bottom:1px}
+nav#toc a:hover{background:#F6F5F0}
+nav#toc a.sub{padding-left:18px;color:var(--ink-2);font-size:12px}
+
+main{flex:1;min-width:0;padding:30px 40px 80px}
+h1{font-size:24px;font-weight:650;margin-bottom:6px}
+.subt{color:var(--ink-2);font-size:13.5px;margin-bottom:28px}
+section{margin-bottom:40px;scroll-margin-top:20px}
+h2{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--blau-fosc);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:14px}
+h3{font-size:14.5px;font-weight:650;margin:16px 0 6px}
+p{line-height:1.55;margin-bottom:10px}
+ul,ol{margin:0 0 12px 20px;line-height:1.55}
+li{margin-bottom:4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin-bottom:12px}
+.pas{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px}
+.pas .n{font-family:var(--mono);font-weight:600;font-size:13px;color:#fff;background:var(--blau);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.pas .t{padding-top:1px}
+.tecla{font-family:var(--mono);font-size:11.5px;background:#EFEDE7;border:1px solid var(--line-forta);border-radius:3px;padding:1px 6px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:14px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+th{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ink-2);text-transform:uppercase}
+.punt{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px;vertical-align:middle}
+.avis{background:var(--blau-clar);border:1px solid var(--blau);border-radius:var(--r);padding:10px 12px;font-size:12.5px;color:var(--blau-fosc);margin-bottom:12px}
+.avis.roig{background:#FBF1F1;border-color:#E0B4B6;color:var(--visat)}
+code{font-family:var(--mono);font-size:11.5px;background:#EFEDE7;border-radius:3px;padding:1px 5px}
+
+@media (max-width:820px){
+  #cos{display:block}
+  nav#toc{position:static;width:auto;max-height:none;border-right:none;border-bottom:1px solid var(--line)}
+  main{padding:24px 20px 60px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span class="b1">DOSSIER</span><span class="b2">VISAT · COAC</span></div>
+  <div class="brand-tit">Guia d'ús</div>
+</header>
+
+<div id="cos">
+<nav id="toc">
+  <div class="etq">CONTINGUT</div>
+  <a href="#intro">Què és aquesta eina</a>
+  <a href="#flux">Flux de treball</a>
+  <a href="#fonts">1 · Fonts (PDFs d'origen)</a>
+  <a href="#graella">2 · La graella de pàgines</a>
+  <a href="#multivisor" class="sub">Multivisor de fonts</a>
+  <a href="#dossiers">3 · Dossiers múltiples</a>
+  <a href="#estructura">4 · Estructura i seccions</a>
+  <a href="#projecte">5 · Dades del projecte</a>
+  <a href="#visat">6 · Numeració, segell i checklist</a>
+  <a href="#portada">Portada i índex</a>
+  <a href="#exportar">7 · Exportar</a>
+  <a href="#dreceres">Dreceres de teclat</a>
+  <a href="#tecnic">Notes tècniques</a>
+</nav>
+
+<main>
+  <h1>Com funciona el Dossier COAC</h1>
+  <p class="subt">Eina per muntar, ordenar i exportar el dossier de documentació per a visat a partir de diversos PDFs.</p>
+
+  <section id="intro">
+    <h2>Què és aquesta eina</h2>
+    <p>Permet ajuntar en un sol PDF final els documents que normalment arriben esparsos (memòria, annexos CTE, plànols, pressupost…), reordenar-ne les pàgines lliurement, assignar-los una secció normativa, generar automàticament una portada i un índex, i afegir numeració de pàgines i un segell diagonal (ESBORRANY / PER A VISAT) abans d'exportar.</p>
+    <div class="avis">Es pot muntar més d'un dossier alhora (per exemple, un per l'expedient i un altre per una modificació) i moure pàgines entre ells.</div>
+  </section>
+
+  <section id="flux">
+    <h2>Flux de treball</h2>
+    <div class="pas"><span class="n">1</span><span class="t">Afegeix els PDFs a <b>Fonts</b>.</span></div>
+    <div class="pas"><span class="n">2</span><span class="t">Ordena i tria les pàgines a la graella del dossier actiu (arrossegant-les o amb el multivisor).</span></div>
+    <div class="pas"><span class="n">3</span><span class="t">A <b>Estructura</b>, detecta les seccions automàticament o assigna-les a mà.</span></div>
+    <div class="pas"><span class="n">4</span><span class="t">Omple les dades a <b>Projecte</b> (surten a la portada i al caixetí).</span></div>
+    <div class="pas"><span class="n">5</span><span class="t">Insereix la <b>Portada</b> i l'<b>Índex</b>.</span></div>
+    <div class="pas"><span class="n">6</span><span class="t">A <b>Visat</b>, configura numeració, segell i revisa el checklist.</span></div>
+    <div class="pas"><span class="n">7</span><span class="t">Prem <b>Exportar dossier</b> per descarregar el PDF final.</span></div>
+  </section>
+
+  <section id="fonts">
+    <h2>1 · Fonts (PDFs d'origen)</h2>
+    <p>Els PDFs que carregues (amb <b>+ Afegir PDFs</b>, arrossegant-los a la finestra, o des de l'estat buit) es guarden a la pestanya <b>Fonts</b>, a l'esquerra. Cada font mostra el nombre de pàgines i tres accions:</p>
+    <ul>
+      <li><b>Obrir al visor</b> — l'afegeix al multivisor per triar-ne pàgines soltes.</li>
+      <li><b>＋ tot al dossier</b> — afegeix totes les seves pàgines, en ordre, al final del dossier actiu.</li>
+      <li><b>Treure</b> — elimina la font i totes les seves pàgines de tots els dossiers (demana confirmació).</li>
+    </ul>
+    <p>Amb la casella <b>«En carregar, afegir tot al dossier actiu»</b> marcada (per defecte), cada PDF que carregues s'insereix sencer i automàtic al dossier obert; si la desmarques, el PDF només queda a Fonts i l'has d'obrir al multivisor per triar-ne pàgines.</p>
+  </section>
+
+  <section id="graella">
+    <h2>2 · La graella de pàgines</h2>
+    <p>La zona central mostra les pàgines del dossier actiu com a targetes, amb miniatura, número d'ordre i, si en té, el xip de secció i el nom del document d'origen.</p>
+    <table>
+      <tr><th>Acció</th><th>Efecte</th></tr>
+      <tr><td>Clic</td><td>Selecciona o desselecciona la pàgina</td></tr>
+      <tr><td>Maj + clic</td><td>Selecciona tot l'interval des de l'últim clic</td></tr>
+      <tr><td>Doble clic</td><td>Obre la previsualització a mida gran</td></tr>
+      <tr><td>Arrossegar</td><td>Reordena dins del dossier, o deixa-la anar sobre una pestanya per moure-la a un altre dossier</td></tr>
+    </table>
+    <p>En passar el ratolí per sobre d'una targeta apareixen les eines: <span class="tecla">⟳</span> gira la pàgina 90°, <span class="tecla">✕</span> la treu del dossier (el PDF original no es modifica).</p>
+    <p>Quan hi ha pàgines seleccionades apareix una barra sobre la graella per <b>assignar secció</b>, <b>moure-les a un altre dossier</b>, <b>girar-les</b> o <b>eliminar-les</b> totes de cop.</p>
+  </section>
+
+  <section id="multivisor">
+    <h3>Multivisor de fonts</h3>
+    <p>El botó <b>Multivisor</b> obre un panell a la dreta amb una graella petita per cada PDF d'origen. Un clic sobre una pàgina l'afegeix al final del dossier actiu; arrossegant-la a la graella central es col·loca exactament a la posició on la deixis anar. Serveix per compaginar pàgines soltes de diversos documents sense haver d'afegir-los sencers.</p>
+  </section>
+
+  <section id="dossiers">
+    <h2>3 · Dossiers múltiples</h2>
+    <p>Les pestanyes de sobre de la graella representen dossiers independents (cadascun s'exporta com un PDF a part).</p>
+    <ul>
+      <li><b>+ Nou dossier</b> crea una pestanya buida.</li>
+      <li>Doble clic en una pestanya la reanomena.</li>
+      <li><span class="tecla">✕</span> a la pestanya la tanca (si té pàgines, demana confirmació; els PDFs d'origen no es perden).</li>
+      <li>Es pot arrossegar una pàgina, o la selecció sencera, directament sobre una altra pestanya per moure-la-hi.</li>
+      <li>Amb més d'un dossier obert apareix <b>Exportar tots</b>, que genera un PDF per cadascun.</li>
+    </ul>
+  </section>
+
+  <section id="estructura">
+    <h2>4 · Estructura i seccions</h2>
+    <p>El botó <b>⚡ Detectar seccions i generar índex</b> llegeix el text de cada pàgina del dossier actiu, hi busca encapçalaments coneguts (memòria descriptiva, DB-SI, DB-SUA, amidaments…) i assigna la secció corresponent, arrossegant la mateixa secció a les pàgines següents fins trobar-ne una altra. Si detecta alguna secció, insereix també l'índex automàticament.</p>
+    <div class="avis roig">Si el PDF és escanejat sense text (només imatge), la detecció no hi pot trobar cap encapçalament: caldrà assignar les seccions a mà.</div>
+    <p>Per assignar seccions manualment: selecciona pàgines a la graella i tria la secció al desplegable de la barra de selecció. La llista de seccions d'aquesta pestanya mostra quantes pàgines té cadascuna; fent-hi clic, se seleccionen totes les pàgines d'aquella secció a la graella.</p>
+    <h3>Seccions disponibles</h3>
+    <table>
+      <tr><th>Codi</th><th>Secció</th></tr>
+      <tr><td><span class="punt" style="background:#8A6D1F"></span>DG</td><td>Dades generals i agents</td></tr>
+      <tr><td><span class="punt" style="background:#1F4E8C"></span>MD</td><td>Memòria descriptiva</td></tr>
+      <tr><td><span class="punt" style="background:#2E6B4F"></span>MC</td><td>Memòria constructiva</td></tr>
+      <tr><td><span class="punt" style="background:#B3282D"></span>SI</td><td>CTE DB-SI · Seguretat en cas d'incendi</td></tr>
+      <tr><td><span class="punt" style="background:#C05621"></span>SU</td><td>CTE DB-SUA · Seguretat d'utilització</td></tr>
+      <tr><td><span class="punt" style="background:#3E7C3E"></span>HE</td><td>CTE DB-HE · Estalvi d'energia</td></tr>
+      <tr><td><span class="punt" style="background:#6B4E8C"></span>HR</td><td>CTE DB-HR · Protecció contra el soroll</td></tr>
+      <tr><td><span class="punt" style="background:#2C7A7B"></span>HS</td><td>CTE DB-HS · Salubritat</td></tr>
+      <tr><td><span class="punt" style="background:#946B2D"></span>HA</td><td>Habitabilitat (D. 141/2012)</td></tr>
+      <tr><td><span class="punt" style="background:#7B5E3B"></span>NU</td><td>Normativa urbanística</td></tr>
+      <tr><td><span class="punt" style="background:#A63F6B"></span>SS</td><td>Estudi de seguretat i salut</td></tr>
+      <tr><td><span class="punt" style="background:#557B2F"></span>GR</td><td>Gestió de residus</td></tr>
+      <tr><td><span class="punt" style="background:#3B6E8C"></span>CQ</td><td>Programa de control de qualitat</td></tr>
+      <tr><td><span class="punt" style="background:#7A4EA8"></span>AM</td><td>Amidaments i pressupost</td></tr>
+      <tr><td><span class="punt" style="background:#4E6E58"></span>PC</td><td>Plec de condicions</td></tr>
+      <tr><td><span class="punt" style="background:#807A6B"></span>AN</td><td>Annexos</td></tr>
+      <tr><td><span class="punt" style="background:#1D6FA5"></span>PL</td><td>Plànols</td></tr>
+    </table>
+  </section>
+
+  <section id="projecte">
+    <h2>5 · Dades del projecte</h2>
+    <p>Títol, tipus d'intervenció, fase, emplaçament, municipi, referència cadastral, promotor, arquitecte/a, número de col·legiat i data. Aquestes dades omplen la <b>portada</b> generada i el caixetí de la capçalera; s'actualitzen en temps real a mesura que escrius.</p>
+  </section>
+
+  <section id="visat">
+    <h2>6 · Numeració, segell i checklist</h2>
+    <h3>Numeració de pàgines</h3>
+    <p>Es pot activar o desactivar, triar el format (<code>Pàg. 3 de 24</code>, <code>3 / 24</code> o només <code>3</code>), la posició (peu dreta o centre) i excloure la portada de la numeració.</p>
+    <h3>Segell diagonal</h3>
+    <p>Estampa en diagonal, en vermell semitransparent, sobre totes les pàgines exportades: sense segell, <code>ESBORRANY</code>, <code>PER A VISAT</code>, o un text personalitzat.</p>
+    <h3>Checklist de documentació</h3>
+    <p>Llista de comprovació dels documents del dossier de visat, <b>filtrada segons la fase</b> triada al camp «Fase» de la pestanya Projecte. Cada fitxa porta un distintiu:</p>
+    <ul>
+      <li><span class="tecla">B</span> — exigible ja al <b>Projecte bàsic</b>: dades generals, memòria descriptiva, justificació urbanística, DB-SI/SUA/HR/HS, habitabilitat, bases de càlcul estructural, classificació climàtica i valors límit DB-HE, plànols generals i de DB-SI, pressupost estimatiu.</li>
+      <li><span class="tecla">E</span> — pròpia del <b>Projecte executiu</b>: memòria constructiva completa, justificació definitiva del DB-HE i certificació energètica, plànols de detall i instal·lacions, seguretat i salut, gestió de residus, control de qualitat, amidaments detallats i plec de condicions.</li>
+      <li><span class="tecla">B·E</span> — exigible a totes dues fases.</li>
+    </ul>
+    <p>Amb la fase «Projecte bàsic i executiu» es mostren totes les fitxes; en triar «Projecte bàsic» o «Projecte executiu» la llista es filtra i la barra de progrés només compta els documents d'aquella fase. La distribució segueix l'estructura del «Guió del contingut del projecte» (COAC/OCT) i l'Annex I del CTE; per a un projecte concret, verifica-ho sempre a la zona privada de l'OCT a <a href="https://www.arquitectes.cat/ca/oct" target="_blank" rel="noopener">arquitectes.cat/oct</a>, ja que el document oficial es pot actualitzar. És només una ajuda de seguiment: marcar-la no afegeix ni treu pàgines del PDF.</p>
+  </section>
+
+  <section id="portada">
+    <h3>Portada i índex</h3>
+    <p>El botó <b>Portada</b> insereix una primera pàgina generada amb les dades del projecte i la taula de dades bàsiques; es manté sempre actualitzada. El botó <b>Índex</b> insereix una pàgina amb la llista de seccions detectades i el número de pàgina on comença cadascuna; es recalcula automàticament abans d'exportar, així que no cal tornar-lo a generar si canvies l'ordre de les pàgines.</p>
+  </section>
+
+  <section id="exportar">
+    <h2>7 · Exportar</h2>
+    <p><b>Exportar dossier</b> genera el PDF final del dossier actiu (portada + índex + totes les pàgines, amb rotacions, numeració i segell aplicats) i el descarrega directament al navegador. Si hi ha més d'un dossier obert, <b>Exportar tots</b> els genera un rere l'altre.</p>
+  </section>
+
+  <section id="dreceres">
+    <h2>Dreceres de teclat</h2>
+    <table>
+      <tr><td><span class="tecla">Esc</span></td><td>Tanca la previsualització; si no n'hi ha cap d'oberta, buida la selecció</td></tr>
+      <tr><td><span class="tecla">Supr</span></td><td>Elimina les pàgines seleccionades del dossier</td></tr>
+    </table>
+  </section>
+
+  <section id="tecnic">
+    <h2>Notes tècniques</h2>
+    <ul>
+      <li>Tot el procés (lectura, muntatge i exportació dels PDFs) es fa localment al navegador; cap fitxer surt del dispositiu.</li>
+      <li>Treure una pàgina o un dossier no modifica els PDFs originals carregats a Fonts.</li>
+      <li>La detecció automàtica de seccions depèn que el PDF tingui text seleccionable (no serveix amb documents escanejats sense OCR).</li>
+    </ul>
+  </section>
+
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,583 @@
+<!--
+  Guaita Apps - Suite d'eines autònomes per a arquitectura, BIM i documentació.
+  Copyright (c) 2026 Jordi Subirós
+  GNU Affero General Public License v3.0
+  See LICENSE file for details
+-->
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guaita DXF — Ajuda</title>
+<style>
+  * { box-sizing: border-box; }
+  html,body { height:100%; margin:0; }
+  body {
+    font-family: Tahoma, "MS Sans Serif", Geneva, Verdana, sans-serif;
+    font-size: 12px; color:#000; background:#808080;
+    -webkit-font-smoothing: none;
+  }
+  /* ---- marc de la finestra d'ajuda ---- */
+  #help {
+    position:absolute; inset:6px; display:flex; flex-direction:column;
+    background:#d4d0c8; border:1px solid #fff; border-right-color:#404040; border-bottom-color:#404040;
+    box-shadow: inset -1px -1px #808080, inset 1px 1px #f4f2ee;
+  }
+  /* ---- barra de menú simulada ---- */
+  #menubar { display:flex; gap:2px; padding:2px 4px; background:#d4d0c8; border-bottom:1px solid #b8b4ac; }
+  #menubar span { padding:2px 8px; }
+  #menubar span:hover { background:#0a246a; color:#fff; }
+  /* ---- barra d'eines ---- */
+  #toolbar { display:flex; align-items:center; gap:3px; padding:4px 6px; background:#d4d0c8; border-bottom:1px solid #808080; box-shadow:0 1px 0 #fff; }
+  .tbtn {
+    font-family:inherit; font-size:12px; color:#000; background:#d4d0c8; cursor:default;
+    padding:3px 9px 4px; min-width:24px; user-select:none;
+    border:1px solid; border-color:#fff #808080 #808080 #fff;
+    box-shadow: inset -1px -1px #808080, inset 1px 1px #f4f2ee;
+  }
+  .tbtn:hover { border-color:#fff #404040 #404040 #fff; }
+  .tbtn:active, .tbtn.down { border-color:#808080 #fff #fff #808080; box-shadow: inset 1px 1px #808080; padding:4px 8px 3px 10px; }
+  .tbtn[disabled] { color:#808080; text-shadow:1px 1px #fff; pointer-events:none; }
+  .tbsep { width:2px; height:22px; margin:0 3px; border-left:1px solid #808080; border-right:1px solid #fff; }
+  /* ---- cos: TOC + contingut ---- */
+  #body { flex:1; display:flex; min-height:0; padding:3px; gap:3px; }
+  #nav { width:266px; display:flex; flex-direction:column; flex-shrink:0; background:#d4d0c8; }
+  #nav.hidden { display:none; }
+  /* pestanyes */
+  #tabs { display:flex; gap:2px; padding-left:2px; }
+  .tab {
+    padding:4px 12px 5px; background:#d4d0c8; cursor:default; position:relative; top:1px;
+    border:1px solid #808080; border-bottom:none; border-top-color:#fff; border-left-color:#fff;
+    border-radius:3px 3px 0 0; font-size:11px;
+  }
+  .tab.active { background:#fff; z-index:2; padding-bottom:6px; }
+  /* caixa interior amb relleu enfonsat */
+  .sunken { background:#fff; border:1px solid; border-color:#808080 #fff #fff #808080; box-shadow: inset 1px 1px #404040; }
+  #tocWrap { flex:1; min-height:0; display:flex; }
+  #toc, #idx, #srch { flex:1; overflow:auto; padding:4px 2px; display:none; }
+  #toc.active, #idx.active, #srch.active { display:block; }
+  /* arbre */
+  .node { white-space:nowrap; user-select:none; line-height:18px; }
+  .row { display:flex; align-items:center; cursor:default; padding:1px 4px 1px 0; }
+  .row:hover .lbl { }
+  .twisty { width:16px; text-align:center; color:#000; font-family:"Courier New",monospace; font-size:11px; flex-shrink:0; cursor:default; }
+  .lbl { padding:0 4px; cursor:default; }
+  .row.sel .lbl { background:#0a246a; color:#fff; }
+  .children { display:none; padding-left:16px; }
+  .node.open > .children { display:block; }
+  /* icones */
+  .ico { display:inline-block; flex-shrink:0; vertical-align:middle; margin-right:2px; }
+  .ico-book { width:17px; height:13px; background:#f7d33b; border:1px solid #8a6d00; border-left-width:3px; border-radius:1px 2px 2px 1px; }
+  .node.open > .row .ico-book { background:#ffe680; }
+  .ico-page { width:12px; height:15px; background:#fff; border:1px solid #707070; position:relative; }
+  .ico-page::after { content:"?"; position:absolute; left:0; right:1px; top:-1px; text-align:center; font-size:10px; font-weight:bold; color:#16458c; font-family:Tahoma,sans-serif; }
+  /* índex */
+  #idx .ix { padding:2px 6px; cursor:default; }
+  #idx .ix:hover { background:#0a246a; color:#fff; }
+  #idx .ixhdr { font-weight:bold; padding:6px 6px 2px; color:#404040; }
+  /* cerca */
+  #srch .srow { display:flex; gap:4px; padding:4px; }
+  #srch input { flex:1; font-family:inherit; font-size:12px; padding:2px 4px; border:1px solid; border-color:#808080 #fff #fff #808080; }
+  #srch .res { padding:3px 6px; cursor:default; color:#16458c; text-decoration:underline; }
+  #srch .res:hover { background:#0a246a; color:#fff; }
+  #srch .resn { padding:6px; color:#606060; }
+  /* contingut */
+  #content { flex:1; min-height:0; overflow:auto; background:#fff; padding:18px 24px 40px;
+             border:1px solid; border-color:#808080 #fff #fff #808080; box-shadow: inset 1px 1px #404040; }
+  .topic { display:none; max-width:720px; }
+  .topic.active { display:block; }
+  #content h1 { font-size:19px; color:#fff; background:#16458c; margin:0 0 14px; padding:7px 12px; border:1px solid #0a2a5c; font-weight:bold; }
+  #content h2 { font-size:14px; color:#16458c; margin:20px 0 6px; border-bottom:1px solid #c0c0c0; padding-bottom:3px; }
+  #content h3 { font-size:12.5px; color:#000; margin:14px 0 4px; }
+  #content p, #content li { font-size:12.5px; line-height:1.55; color:#202020; }
+  #content ul, #content ol { margin:6px 0 6px 4px; padding-left:22px; }
+  #content li { margin:3px 0; }
+  #content a.xref { color:#0000ee; text-decoration:underline; cursor:default; }
+  #content a.xref:hover { color:#cc0000; }
+  code, kbd { font-family:"Courier New",monospace; font-size:12px; }
+  kbd { background:#f0f0f0; border:1px solid; border-color:#fff #808080 #808080 #fff; padding:0 5px; border-radius:2px; box-shadow:1px 1px 0 #808080; white-space:nowrap; }
+  table.helptab { border-collapse:collapse; margin:10px 0; width:100%; }
+  table.helptab th, table.helptab td { border:1px solid #a0a0a0; padding:4px 9px; text-align:left; font-size:12px; vertical-align:top; }
+  table.helptab th { background:#e8e8e8; color:#16458c; }
+  table.helptab tr:nth-child(even) td { background:#f6f6f6; }
+  .note, .tip, .warn { margin:12px 0; padding:8px 10px 8px 12px; font-size:12px; line-height:1.5; border:1px solid; }
+  .note { background:#fffbe6; border-color:#e0c860; }
+  .tip  { background:#eaf4ff; border-color:#9cc0e8; }
+  .warn { background:#ffeeee; border-color:#e0a0a0; }
+  .note b, .tip b, .warn b { display:inline-block; margin-right:4px; }
+  .seealso { margin-top:22px; padding-top:8px; border-top:1px solid #c0c0c0; font-size:11.5px; color:#404040; }
+  .crumb { font-size:11px; color:#707070; margin-bottom:10px; }
+  /* barra d'estat */
+  #status { display:flex; align-items:center; padding:2px 8px; font-size:11px; color:#303030; background:#d4d0c8; border-top:1px solid #fff; }
+  #status .sgrip { margin-left:auto; width:16px; height:14px;
+    background: repeating-linear-gradient(135deg,#808080 0 1px,transparent 1px 3px,#fff 3px 4px,transparent 4px 6px); }
+</style>
+</head>
+<body>
+<div id="help">
+  <div id="menubar"><span>Fitxer</span><span>Edita</span><span>Visualitza</span><span>Adreces d'interès</span><span>Opcions</span><span>Ajuda</span></div>
+  <div id="toolbar">
+    <div class="tbtn" id="btnHide">Amaga</div>
+    <div class="tbsep"></div>
+    <div class="tbtn" id="btnBack" disabled>&laquo; Enrere</div>
+    <div class="tbtn" id="btnFwd" disabled>Endavant &raquo;</div>
+    <div class="tbsep"></div>
+    <div class="tbtn" id="btnHome">Inici</div>
+    <div class="tbtn" id="btnPrint">Imprimeix</div>
+    <div class="tbsep"></div>
+    <div class="tbtn" id="btnExpand">Desplega-ho tot</div>
+  </div>
+  <div id="body">
+    <div id="nav">
+      <div id="tabs">
+        <div class="tab active" data-pane="toc">Contingut</div>
+        <div class="tab" data-pane="idx">Índex</div>
+        <div class="tab" data-pane="srch">Cerca</div>
+      </div>
+      <div id="tocWrap" class="sunken">
+        <div id="toc" class="active"></div>
+        <div id="idx"></div>
+        <div id="srch">
+          <div class="srow"><input type="text" id="srchInput" placeholder="Escriu i prem Cerca"><div class="tbtn" id="srchGo">Cerca</div></div>
+          <div id="srchRes"><div class="resn">Escriu un terme i prem <b>Cerca</b> per trobar-lo als temes de l'ajuda.</div></div>
+        </div>
+      </div>
+    </div>
+    <div id="content"></div>
+  </div>
+  <div id="status"><span id="statusText">Llest</span><span class="sgrip"></span></div>
+</div>
+<div id="topicSrc" style="display:none">
+
+<div class="topic" id="t-intro">
+  <h1>Guaita DXF</h1>
+  <p><b>Guaita DXF</b> és un visor de fitxers DXF (Drawing Exchange Format) que funciona completament dins el navegador, sense connexió ni instal·lació. Forma part del conjunt d'eines <b>Guaita</b> per a visualització BIM/CAD i anàlisi urbanística.</p>
+  <p>Permet obrir un dibuix de CAD, recórrer-lo en 2D i en 3D, explorar-ne les capes, els tipus d'entitats i els blocs, fer mesures, talls de secció, anotacions i consultes assistides, tot en una sola finestra.</p>
+  <div class="tip"><b>Suggeriment:</b> per començar, consulta <a class="xref" data-go="t-open">Obrir un dibuix DXF</a>.</div>
+  <div class="seealso"><b>Vegeu també:</b> <a class="xref" data-go="t-feat">Característiques principals</a> · <a class="xref" data-go="t-window">La finestra del programa</a></div>
+</div>
+
+<div class="topic" id="t-feat">
+  <h1>Característiques principals</h1>
+  <ul>
+    <li><b>Lectura nativa de DXF</b> — línies, polilínies, cercles, arcs, el·lipses, textos, cares 3D, sòlids, blocs (INSERT) i cotes.</li>
+    <li><b>2D i 3D</b> — detecció automàtica i commutació entre vista ortogonal de CAD i vista en perspectiva.</li>
+    <li><b>Estructura del dibuix</b> — panells de capes, tipus d'entitats i blocs amb control de visibilitat.</li>
+    <li><b>Eines de mesura i secció</b> — distàncies amb ajust a vèrtexs i caixa de tall per eixos.</li>
+    <li><b>Múltiples vistes</b> — divisió de la finestra en 2, 3 o 4 panells simultanis.</li>
+    <li><b>Notes</b> — captures amb punt de vista i exportació a una pàgina HTML.</li>
+    <li><b>La Guia</b> — assistent que respon sobre el dibuix, en mode local o connectat a Claude.</li>
+  </ul>
+  <div class="seealso"><b>Vegeu també:</b> <a class="xref" data-go="t-intro">Guaita DXF</a></div>
+</div>
+
+<div class="topic" id="t-window">
+  <h1>La finestra del programa</h1>
+  <p>La finestra s'organitza en quatre zones:</p>
+  <table class="helptab">
+    <tr><th>Zona</th><th>Descripció</th></tr>
+    <tr><td>Capçalera</td><td>Conté el nom de l'aplicació, la barra de menús, l'indicador de mode <b>2D/3D</b> i la barra d'eines ràpida (enquadrar, mode, aïllar, mostrar-ho tot, mesura).</td></tr>
+    <tr><td>Panell esquerre</td><td>Pestanyes <b>Guia</b>, <b>Capes</b>, <b>Tipus</b>, <b>Blocs</b>, <b>Vistes</b> i <b>Notes</b>.</td></tr>
+    <tr><td>Àrea de dibuix</td><td>La vista del model, amb el cub de navegació i el gizmo d'eixos. És on es fa òrbita, mesura i selecció.</td></tr>
+    <tr><td>Panell dret</td><td>Propietats de l'entitat seleccionada.</td></tr>
+  </table>
+  <p>A baix de tot, la barra d'estat mostra el fitxer carregat i el recompte d'entitats. La <b>taula d'entitats</b> es pot obrir com a tauler inferior.</p>
+  <div class="seealso"><b>Vegeu també:</b> <a class="xref" data-go="t-table">La taula d'entitats</a> · <a class="xref" data-go="t-menus">Menús</a></div>
+</div>
+
+<div class="topic" id="t-open">
+  <h1>Obrir un dibuix DXF</h1>
+  <p>Hi ha tres maneres d'obrir un fitxer <code>.dxf</code>:</p>
+  <ol>
+    <li>Menú <b>Fitxer &rsaquo; Obre DXF…</b> i tria el fitxer.</li>
+    <li><b>Arrossega</b> el fitxer des de l'escriptori i deixa'l anar sobre l'àrea de dibuix.</li>
+    <li>Prem la tecla <kbd>O</kbd>.</li>
+  </ol>
+  <p>En obrir-se, el dibuix s'enquadra automàticament i es mostra el cub de navegació. El nom del fitxer apareix a la barra d'estat.</p>
+  <div class="note"><b>Nota:</b> tot el processament es fa al teu ordinador. El fitxer no s'envia enlloc.</div>
+  <div class="seealso"><b>Vegeu també:</b> <a class="xref" data-go="t-23d">Detecció 2D / 3D</a></div>
+</div>
+
+<div class="topic" id="t-23d">
+  <h1>Detecció 2D / 3D</h1>
+  <p>En carregar el dibuix, Guaita DXF decideix si és <b>2D</b> (pla) o <b>3D</b> segons si conté entitats tridimensionals o variació d'alçada significativa.</p>
+  <ul>
+    <li>En <b>2D</b> la càmera és ortogonal i la rotació està desactivada (vista de planta de CAD).</li>
+    <li>En <b>3D</b> la càmera és en perspectiva i pots orbitar lliurement.</li>
+  </ul>
+  <p>Pots canviar de mode en qualsevol moment amb el botó <b>2D/3D</b> de la barra d'eines o amb la tecla <kbd>P</kbd>.</p>
+  <div class="tip"><b>Convenció:</b> l'eix <b>Z</b> és el vertical del dibuix, com en CAD.</div>
+  <div class="seealso"><b>Vegeu també:</b> <a class="xref" data-go="t-views">Vistes ortogonals i axonometria</a></div>
+</div>
+
+<div class="topic" id="t-orbit">
+  <h1>Òrbita, panoràmica i zoom</h1>
+  <table class="helptab">
+    <tr><th>Acció</th><th>Ratolí</th></tr>
+    <tr><td>Orbitar (només en 3D)</td><td>Arrossega amb el botó esquerre.</td></tr>
+    <tr><td>Desplaçar (panoràmica)</td><td>Arrossega amb el botó dret.</td></tr>
+    <tr><td>Ampliar / reduir</td><td>Roda del ratolí.</td></tr>
+  </table>
+  <p>En mode 2D la rotació està bloquejada: el botó esquerre no gira la vista, de manera que el dibuix es manté pla.</p>
+  <div class="seealso"><b>Vegeu també:</b> <a class="xref" data-go="t-navcube">El cub de navegació</a> · <a class="xref" data-go="t-fit">Enquadrar el dibuix</a></div>
+</div>
+
+<div class="topic" id="t-navcube">
+  <h1>El cub de navegació</h1>
+  <p>El cub de navegació és el tauler que s'obre des del <b>logotip</b> de l'àrea de dibuix. Reuneix els controls de punt de vista:</p>
+  <ul>
+    <li><b>Vistes</b> — planta, alçats (nord, sud, est, oest) i axonometria.</li>
+    <li><b>Enquadra</b> i <b>2D/3D</b>.</li>
+    <li><b>Caixa de secció</b>.</li>
+    <li><b>Vistes</b> múltiples — 1, 2, 3 o 4 panells.</li>
+    <li><b>Fons</b> — clar, gris o negre.</li>
+  </ul>
+  <div class="seealso"><b>Vegeu també:</b> <a class="xref" data-go="t-multi">Múltiples vistes</a> · <a class="xref" data-go="t-section">La caixa de secció</a></div>
+</div>
+
+<div class="topic" id="t-views">
+  <h1>Vistes ortogonals i axonometria</h1>
+  <p>Des del cub de navegació o el menú <b>Vista</b> pots situar la càmera en posicions predefinides:</p>
+  <table class="helptab">
+    <tr><th>Vista</th><th>Orientació</th></tr>
+    <tr><td>Planta</td><td>Des de dalt, mirant avall (eix Z).</td></tr>
+    <tr><td>Alçat nord / sud</td><td>Frontal segons l'eix Y.</td></tr>
+    <tr><td>Alçat est / oest</td><td>Lateral segons l'eix X.</td></tr>
+    <tr><td>Axonometria</td><td>Vista 3D en perspectiva.</td></tr>
+  </table>
+  <p>Triar planta o un alçat activa el mode 2D; triar axonometria activa el 3D.</p>
+  <div class="seealso"><b>Vegeu també:</b> <a class="xref" data-go="t-23d">Detecció 2D / 3D</a></div>
+</div>
+
+<div class="topic" id="t-fit">
+  <h1>Enquadrar el dibuix</h1>
+  <p><b>Enquadrar</b> reajusta la càmera perquè tot el dibuix càpiga a la vista. És útil quan t'has perdut navegant o acabes de canviar de vista.</p>
+  <p>Disponible al botó d'enquadrar de la barra d'eines, al cub de navegació o amb la tecla <kbd>F</kbd>. En mode de múltiples vistes, enquadra tots els panells alhora.</p>
+</div>
+
+<div class="topic" id="t-gizmo">
+  <h1>El gizmo d'eixos</h1>
+  <p>A la cantonada inferior esquerra de l'àrea de dibuix hi ha un petit indicador amb els tres eixos: <b>X</b> (vermell), <b>Y</b> (verd) i <b>Z</b> (blau, vertical). Gira en temps real amb la càmera per ajudar-te a orientar-te.</p>
+  <div class="note"><b>Nota:</b> en mode de múltiples vistes el gizmo s'amaga, perquè cada panell té la seva pròpia càmera.</div>
+</div>
+
+<div class="topic" id="t-multi">
+  <h1>Múltiples vistes</h1>
+  <p>La fila <b>Vistes</b> del cub de navegació divideix la finestra en diversos panells simultanis:</p>
+  <table class="helptab">
+    <tr><th>Disposició</th><th>Panells</th></tr>
+    <tr><td>Una vista</td><td>Vista única (mode normal).</td></tr>
+    <tr><td>Dues vistes</td><td>Planta + axonometria.</td></tr>
+    <tr><td>Tres vistes</td><td>Planta (gran) + alçat nord + alçat est.</td></tr>
+    <tr><td>Quatre vistes</td><td>Planta + alçat nord + alçat est + axonometria.</td></tr>
+  </table>
+  <p>Cada panell té navegació <b>independent</b>: el panell que hi ha sota el cursor és l'actiu, i s'hi pot orbitar, desplaçar o ampliar sense afectar els altres. La <a class="xref" data-go="t-select">selecció</a> i la <a class="xref" data-go="t-measure">mesura</a> també funcionen al panell sota el cursor.</p>
+  <p>Per tornar a una sola vista, tria <b>Una vista</b>, prem el botó <b>2D/3D</b> o selecciona una vista concreta.</p>
+</div>
+
+<div class="topic" id="t-layers">
+  <h1>Capes</h1>
+  <p>La pestanya <b>Capes</b> llista totes les capes amb contingut del dibuix i el nombre d'entitats de cadascuna.</p>
+  <ul>
+    <li><b>Visibilitat</b> — fes clic a la icona d'ull per mostrar o amagar una capa.</li>
+    <li><b>Aïllar</b> — mostra només una capa i amaga la resta.</li>
+    <li><b>Mostra-ho tot</b> — torna a fer visibles totes les capes (tecla <kbd>X</kbd>).</li>
+  </ul>
+  <p>Cada capa conserva el seu color del DXF (per índex ACI o color veritable).</p>
+  <div class="seealso"><b>Vegeu també:</b> <a class="xref" data-go="t-color">Acolorir per capa o tipus</a></div>
+</div>
+
+<div class="topic" id="t-types">
+  <h1>Tipus d'entitats</h1>
+  <p>La pestanya <b>Tipus</b> agrupa el dibuix per tipus d'entitat (LINE, LWPOLYLINE, CIRCLE, ARC, TEXT, INSERT, 3DFACE…) amb el recompte de cadascun. Pots mostrar o amagar tot un tipus alhora, independentment de la capa.</p>
+</div>
+
+<div class="topic" id="t-blocks">
+  <h1>Blocs</h1>
+  <p>La pestanya <b>Blocs</b> llista les definicions de bloc del dibuix i quantes vegades s'insereixen (entitats INSERT). Els blocs es dibuixen amb la seva transformació de posició, escala i rotació, de manera recursiva.</p>
+</div>
+
+<div class="topic" id="t-select">
+  <h1>Selecció i propietats</h1>
+  <p>Fes <b>clic</b> sobre una entitat de l'àrea de dibuix per seleccionar-la; es ressalta en color d'accent i les seves dades apareixen al <b>panell de propietats</b> (dreta): capa, tipus, color i atributs propis.</p>
+  <ul>
+    <li><b>Aïllar la selecció</b> — amaga tota la resta i deixa només l'entitat seleccionada (tecla <kbd>I</kbd>).</li>
+    <li>Fes clic en una zona buida o prem <kbd>Esc</kbd> per desseleccionar.</li>
+  </ul>
+  <div class="seealso"><b>Vegeu també:</b> <a class="xref" data-go="t-table">La taula d'entitats</a></div>
+</div>
+
+<div class="topic" id="t-table">
+  <h1>La taula d'entitats</h1>
+  <p>La taula d'entitats és un tauler inferior amb totes les entitats del dibuix en forma de llista (capa, tipus i dades). Permet revisar el contingut de manera tabular i exportar-lo.</p>
+  <div class="seealso"><b>Vegeu també:</b> <a class="xref" data-go="t-export">Exportació i formats</a></div>
+</div>
+
+<div class="topic" id="t-measure">
+  <h1>Mesurar distàncies</h1>
+  <p>Activa la <b>mesura</b> amb el botó del regle, el menú <b>Vista &rsaquo; Mesura distàncies</b> o la tecla <kbd>M</kbd>. A continuació:</p>
+  <ol>
+    <li>Fes clic en el <b>primer punt</b>.</li>
+    <li>Fes clic en el <b>segon punt</b>. La distància apareix sobre el segment.</li>
+    <li>Pots encadenar més mesures fent més clics.</li>
+  </ol>
+  <p>La mesura fa <b>ajust automàtic (snap)</b> al vèrtex o extrem més proper, de manera que les distàncies surten exactes entre cantonades reals.</p>
+  <div class="tip"><b>Suggeriment:</b> prem <kbd>Esc</kbd> per sortir del mode mesura, o fes servir el botó <b>Esborra</b> per netejar les mesures.</div>
+</div>
+
+<div class="topic" id="t-section">
+  <h1>La caixa de secció</h1>
+  <p>La <b>caixa de secció</b> talla el dibuix amb plans per cada eix, útil per veure l'interior d'un model 3D. Obre-la des del cub de navegació o el menú <b>Vista &rsaquo; Caixa de secció</b>.</p>
+  <ul>
+    <li>Marca <b>Activa</b> per encendre el tall.</li>
+    <li>Ajusta els controls lliscants <b>X</b>, <b>Y</b> i <b>Z</b> (mínim i màxim, en percentatge) per definir la caixa visible.</li>
+  </ul>
+  <p>Desmarca <b>Activa</b> o tanca el tauler per veure de nou el dibuix sencer.</p>
+</div>
+
+<div class="topic" id="t-color">
+  <h1>Acolorir per capa o tipus</h1>
+  <p>A la pestanya <b>Vistes</b> pots canviar com es pinta el dibuix:</p>
+  <ul>
+    <li><b>Color per capa</b> — cada entitat amb el color de la seva capa (per defecte).</li>
+    <li><b>Color per tipus</b> — un color per cada tipus d'entitat, per distingir línies, polilínies, cercles, etc.</li>
+  </ul>
+  <div class="seealso"><b>Vegeu també:</b> <a class="xref" data-go="t-saved">Desar i recuperar vistes</a></div>
+</div>
+
+<div class="topic" id="t-saved">
+  <h1>Desar i recuperar vistes</h1>
+  <p>Una <b>vista desada</b> recorda quines capes són visibles, el punt de vista de la càmera i el mode. A la pestanya <b>Vistes</b>:</p>
+  <ol>
+    <li>Prepara el dibuix com el vols (capes, càmera).</li>
+    <li>Prem <b>+ Desa la vista actual</b> i posa-li un nom.</li>
+    <li>Fes clic sobre una vista de la llista per recuperar-la, o sobre la creu per eliminar-la.</li>
+  </ol>
+  <div class="note"><b>Nota:</b> les vistes desades es guarden al navegador per a cada fitxer; en tornar a obrir el mateix dibuix, hi tornen a ser.</div>
+</div>
+
+<div class="topic" id="t-notes">
+  <h1>Notes</h1>
+  <p>Les <b>notes</b> capturen una imatge de la vista actual amb el seu punt de vista i un text. A la pestanya <b>Notes</b>:</p>
+  <ul>
+    <li><b>+ Nova nota</b> — captura la vista i demana un text.</li>
+    <li>Fes clic sobre la <b>miniatura</b> per tornar a situar la càmera com era.</li>
+    <li><b>Exporta HTML</b> — desa totes les notes en una pàgina HTML independent amb les imatges incloses.</li>
+  </ul>
+  <div class="note"><b>Nota:</b> les notes es guarden al navegador per a cada fitxer. Si les imatges superen la capacitat d'emmagatzematge del navegador, la nota es manté durant la sessió però pot no conservar-se en tancar.</div>
+</div>
+
+<div class="topic" id="t-guide">
+  <h1>La Guia (mode local)</h1>
+  <p>La pestanya <b>Guia</b> és un assistent que respon preguntes sobre el dibuix. Sense cap configuració funciona en <b>mode local</b> i respon sobre:</p>
+  <ul>
+    <li>Quantes <b>capes</b> hi ha i quines.</li>
+    <li>Els <b>tipus d'entitats</b> i el seu recompte.</li>
+    <li>Els <b>blocs</b> i les seves insercions.</li>
+    <li>Un <b>resum</b> general i el mode 2D/3D.</li>
+  </ul>
+  <p>Escriu la pregunta i prem <b>Envia</b> (o <kbd>Retorn</kbd>). Els suggeriments inicials són un bon punt de partida.</p>
+  <div class="seealso"><b>Vegeu també:</b> <a class="xref" data-go="t-guide-api">Connectar la Guia amb Claude</a></div>
+</div>
+
+<div class="topic" id="t-guide-api">
+  <h1>Connectar la Guia amb Claude</h1>
+  <p>Amb una clau de l'API d'Anthropic, la Guia pot respondre <b>preguntes obertes</b> amb Claude, fent servir un resum del dibuix com a context. Fes clic a l'engranatge <b>⚙</b> de la pestanya Guia:</p>
+  <ol>
+    <li>Enganxa la teva <b>clau API</b> (x-api-key).</li>
+    <li>Opcionalment, ajusta el <b>model</b>.</li>
+    <li>Prem <b>Desa</b>. A partir d'ara les preguntes van a Claude.</li>
+  </ol>
+  <p>Per esborrar la connexió i tornar al mode local, prem <b>Esborra la clau</b>.</p>
+  <div class="warn"><b>Privadesa:</b> la clau es desa només al teu navegador. En cada consulta s'envien a l'API d'Anthropic la pregunta i un resum del dibuix (capes, entitats, blocs i dimensions).</div>
+  <div class="note"><b>Important:</b> si obres el fitxer com a <code>file://</code>, alguns navegadors bloquegen la connexió. Vegeu <a class="xref" data-go="t-trouble">Resolució de problemes</a>.</div>
+</div>
+
+<div class="topic" id="t-menus">
+  <h1>Menús</h1>
+  <table class="helptab">
+    <tr><th>Menú</th><th>Ordres</th></tr>
+    <tr><td>Fitxer</td><td>Obre DXF… · Tanca el dibuix · Exporta entitats (CSV)</td></tr>
+    <tr><td>Vista</td><td>Mode 2D/3D · Enquadra · Planta · Alçats (N/S/E/O) · Axonometria · Mesura distàncies · Caixa de secció · Fons clar/gris/negre</td></tr>
+    <tr><td>Capes</td><td>Mostra-ho tot · Aïlla la capa de la selecció</td></tr>
+    <tr><td>Ajuda</td><td>Informació sobre el programa</td></tr>
+  </table>
+</div>
+
+<div class="topic" id="t-keys">
+  <h1>Dreceres de teclat</h1>
+  <table class="helptab">
+    <tr><th>Tecla</th><th>Acció</th></tr>
+    <tr><td><kbd>O</kbd></td><td>Obre un fitxer DXF</td></tr>
+    <tr><td><kbd>F</kbd></td><td>Enquadra el dibuix</td></tr>
+    <tr><td><kbd>P</kbd></td><td>Alterna entre 2D i 3D</td></tr>
+    <tr><td><kbd>M</kbd></td><td>Activa o desactiva la mesura</td></tr>
+    <tr><td><kbd>I</kbd></td><td>Aïlla l'entitat seleccionada</td></tr>
+    <tr><td><kbd>X</kbd></td><td>Mostra totes les capes</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>Surt de la mesura o desselecciona</td></tr>
+  </table>
+</div>
+
+<div class="topic" id="t-export">
+  <h1>Exportació i formats</h1>
+  <p><b>Format d'entrada:</b> fitxers DXF (ASCII) amb entitats LINE, LWPOLYLINE, POLYLINE, CIRCLE, ARC, ELLIPSE, TEXT, MTEXT, INSERT, 3DFACE, SOLID i DIMENSION.</p>
+  <p><b>Exportacions:</b></p>
+  <ul>
+    <li><b>CSV d'entitats</b> — des de <b>Fitxer &rsaquo; Exporta entitats (CSV)</b>.</li>
+    <li><b>Notes a HTML</b> — des de la pestanya Notes.</li>
+  </ul>
+</div>
+
+<div class="topic" id="t-trouble">
+  <h1>Resolució de problemes</h1>
+  <h2>La Guia no es connecta amb Claude</h2>
+  <p>Si has obert el fitxer fent doble clic (adreça <code>file://</code>), molts navegadors bloquegen les connexions de xarxa per seguretat. La solució és servir el fitxer per http; per exemple, des de la carpeta del fitxer:</p>
+  <p><code>python3 -m http.server</code></p>
+  <p>i obrir després <code>http://localhost:8000</code>. Comprova també que la clau API i el nom del model siguin correctes (errors 401 i 404 respectivament).</p>
+  <h2>El dibuix no apareix</h2>
+  <ul>
+    <li>Prem <b>Enquadra</b> (<kbd>F</kbd>): potser la càmera ha quedat fora del dibuix.</li>
+    <li>Comprova a la pestanya <b>Capes</b> que no estiguin totes amagades; prem <kbd>X</kbd> per mostrar-ho tot.</li>
+    <li>Assegura't que el fitxer és DXF en text (ASCII).</li>
+  </ul>
+  <h2>Preguntes freqüents</h2>
+  <p><b>Es desa res als servidors?</b> No. El dibuix es processa al navegador. Només les consultes a la Guia connectada amb Claude surten cap a l'API d'Anthropic.</p>
+  <p><b>On es guarden les vistes i les notes?</b> Al magatzem local del navegador, per a cada fitxer.</p>
+</div>
+
+</div>
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  // estructura de continguts (capítol -> temes)
+  var TREE=[
+    {t:"Guaita DXF", open:true, k:[["t-intro","Guaita DXF"],["t-feat","Característiques principals"],["t-window","La finestra del programa"]]},
+    {t:"Primers passos", k:[["t-open","Obrir un dibuix DXF"],["t-23d","Detecció 2D / 3D"]]},
+    {t:"Navegació i càmera", k:[["t-orbit","Òrbita, panoràmica i zoom"],["t-navcube","El cub de navegació"],["t-views","Vistes ortogonals i axonometria"],["t-fit","Enquadrar el dibuix"],["t-gizmo","El gizmo d'eixos"]]},
+    {t:"Múltiples vistes", k:[["t-multi","Múltiples vistes"]]},
+    {t:"Estructura del dibuix", k:[["t-layers","Capes"],["t-types","Tipus d'entitats"],["t-blocks","Blocs"]]},
+    {t:"Selecció", k:[["t-select","Selecció i propietats"],["t-table","La taula d'entitats"]]},
+    {t:"Mesura i secció", k:[["t-measure","Mesurar distàncies"],["t-section","La caixa de secció"]]},
+    {t:"Vistes i colors", k:[["t-color","Acolorir per capa o tipus"],["t-saved","Desar i recuperar vistes"]]},
+    {t:"Notes", k:[["t-notes","Notes"]]},
+    {t:"La Guia", k:[["t-guide","La Guia (mode local)"],["t-guide-api","Connectar la Guia amb Claude"]]},
+    {t:"Referència", k:[["t-menus","Menús"],["t-keys","Dreceres de teclat"],["t-export","Exportació i formats"]]},
+    {t:"Resolució de problemes", k:[["t-trouble","Resolució de problemes"]]}
+  ];
+  var INDEX=[
+    ["Aïllar capa","t-layers"],["Aïllar selecció","t-select"],["API (Claude)","t-guide-api"],["Arrossegar fitxer","t-open"],
+    ["Axonometria","t-views"],["Blocs","t-blocks"],["Caixa de secció","t-section"],["Capes","t-layers"],
+    ["Claude","t-guide-api"],["Clau API","t-guide-api"],["Color per capa","t-color"],["Color per tipus","t-color"],
+    ["Cotes (DIMENSION)","t-export"],["CSV (exportar)","t-export"],["Cub de navegació","t-navcube"],
+    ["Dreceres de teclat","t-keys"],["Eixos (gizmo)","t-gizmo"],["Enquadrar","t-fit"],["Exportació","t-export"],
+    ["Fons (color)","t-navcube"],["Guia","t-guide"],["Mesura","t-measure"],["Mode 2D / 3D","t-23d"],
+    ["Múltiples vistes","t-multi"],["Notes","t-notes"],["Obrir DXF","t-open"],["Panoràmica","t-orbit"],
+    ["Planta","t-views"],["Privadesa","t-guide-api"],["Propietats","t-select"],["Resolució de problemes","t-trouble"],
+    ["Secció","t-section"],["Selecció","t-select"],["Snap (ajust)","t-measure"],["Taula d'entitats","t-table"],
+    ["Tipus d'entitats","t-types"],["Vistes desades","t-saved"],["Vistes ortogonals","t-views"],["Zoom","t-orbit"]
+  ];
+
+  // injecta el contingut font dins el panell
+  $('content').innerHTML=$('topicSrc').innerHTML; $('topicSrc').remove();
+
+  var hist=[], hi=-1, expanded=false;
+
+  function buildTree(){
+    var toc=$('toc'); toc.innerHTML='';
+    TREE.forEach(function(ch){
+      var node=document.createElement('div'); node.className='node'+(ch.open?' open':'');
+      var row=document.createElement('div'); row.className='row';
+      row.innerHTML='<span class="twisty">'+(ch.open?'−':'+')+'</span><span class="ico ico-book"></span><span class="lbl">'+ch.t+'</span>';
+      var kids=document.createElement('div'); kids.className='children';
+      ch.k.forEach(function(p){
+        var leaf=document.createElement('div'); leaf.className='node';
+        var lr=document.createElement('div'); lr.className='row'; lr.setAttribute('data-id',p[0]);
+        lr.innerHTML='<span class="twisty"></span><span class="ico ico-page"></span><span class="lbl">'+p[1]+'</span>';
+        lr.addEventListener('click',function(){ show(p[0]); });
+        leaf.appendChild(lr); kids.appendChild(leaf);
+      });
+      node.appendChild(row); node.appendChild(kids);
+      var tw=row.querySelector('.twisty');
+      function toggle(){ node.classList.toggle('open'); tw.textContent=node.classList.contains('open')?'−':'+'; }
+      tw.addEventListener('click',function(e){ e.stopPropagation(); toggle(); });
+      row.addEventListener('click',toggle);
+      toc.appendChild(node);
+    });
+  }
+
+  function buildIndex(){
+    var idx=$('idx'); var arr=INDEX.slice().sort(function(a,b){return a[0].localeCompare(b[0],'ca');});
+    var html='', cur='';
+    arr.forEach(function(p){ var L=p[0].charAt(0).toUpperCase(); if(L!==cur){cur=L; html+='<div class="ixhdr">'+L+'</div>';}
+      html+='<div class="ix" data-id="'+p[1]+'">'+p[0]+'</div>'; });
+    idx.innerHTML=html;
+    Array.prototype.forEach.call(idx.querySelectorAll('.ix'),function(e){ e.addEventListener('click',function(){ show(e.getAttribute('data-id')); }); });
+  }
+
+  function show(id, fromNav){
+    var tp=$(id); if(!tp) return;
+    Array.prototype.forEach.call(document.querySelectorAll('#content .topic'),function(t){ t.classList.remove('active'); });
+    tp.classList.add('active'); $('content').scrollTop=0;
+    Array.prototype.forEach.call(document.querySelectorAll('#toc .row'),function(r){ r.classList.remove('sel'); });
+    var row=document.querySelector('#toc .row[data-id="'+id+'"]');
+    if(row){ row.classList.add('sel');
+      var kidsBox=row.parentNode.parentNode; // .children
+      if(kidsBox && kidsBox.classList.contains('children')){ var pn=kidsBox.parentNode; if(pn && !pn.classList.contains('open')){ pn.classList.add('open'); var tw=pn.querySelector('.twisty'); if(tw) tw.textContent='−'; } }
+      row.scrollIntoView({block:'nearest'});
+    }
+    var h1=tp.querySelector('h1'); $('statusText').textContent=h1?h1.textContent:'';
+    if(!fromNav){ hist=hist.slice(0,hi+1); hist.push(id); hi=hist.length-1; }
+    updateNav();
+  }
+  function updateNav(){ $('btnBack').toggleAttribute('disabled', hi<=0); $('btnFwd').toggleAttribute('disabled', hi>=hist.length-1); }
+
+  function connectXrefs(){ Array.prototype.forEach.call(document.querySelectorAll('#content a.xref'),function(a){ a.addEventListener('click',function(e){ e.preventDefault(); show(a.getAttribute('data-go')); }); }); }
+
+  function doSearch(){
+    var q=$('srchInput').value.trim().toLowerCase(); var box=$('srchRes');
+    if(!q){ box.innerHTML='<div class="resn">Escriu un terme i prem <b>Cerca</b>.</div>'; return; }
+    var hits=[];
+    Array.prototype.forEach.call(document.querySelectorAll('#content .topic'),function(tp){
+      if(tp.textContent.toLowerCase().indexOf(q)>=0){ var h=tp.querySelector('h1'); hits.push([tp.id, h?h.textContent:tp.id]); }
+    });
+    if(!hits.length){ box.innerHTML='<div class="resn">Cap resultat per a «'+q+'».</div>'; return; }
+    box.innerHTML=hits.map(function(p){ return '<div class="res" data-id="'+p[0]+'">'+p[1]+'</div>'; }).join('');
+    Array.prototype.forEach.call(box.querySelectorAll('.res'),function(e){ e.addEventListener('click',function(){ show(e.getAttribute('data-id')); }); });
+  }
+
+  // pestanyes
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(tab){
+    tab.addEventListener('click',function(){
+      Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(t){ t.classList.remove('active'); });
+      tab.classList.add('active'); var pane=tab.getAttribute('data-pane');
+      ['toc','idx','srch'].forEach(function(p){ $(p).classList.toggle('active',p===pane); });
+      if(pane==='srch') $('srchInput').focus();
+    });
+  });
+
+  // barra d'eines
+  $('btnBack').addEventListener('click',function(){ if(hi>0){ hi--; show(hist[hi],true); } });
+  $('btnFwd').addEventListener('click',function(){ if(hi<hist.length-1){ hi++; show(hist[hi],true); } });
+  $('btnHome').addEventListener('click',function(){ show('t-intro'); });
+  $('btnPrint').addEventListener('click',function(){ window.print(); });
+  $('btnHide').addEventListener('click',function(){ var h=$('nav').classList.toggle('hidden'); $('btnHide').textContent=h?'Mostra':'Amaga'; });
+  $('btnExpand').addEventListener('click',function(){
+    expanded=!expanded;
+    Array.prototype.forEach.call(document.querySelectorAll('#toc > .node'),function(n){ n.classList.toggle('open',expanded); var tw=n.querySelector('.twisty'); if(tw) tw.textContent=expanded?'−':'+'; });
+    $('btnExpand').textContent=expanded?'Plega-ho tot':'Desplega-ho tot';
+  });
+  $('srchGo').addEventListener('click',doSearch);
+  $('srchInput').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); doSearch(); } });
+
+  // estil d'impressió (només el tema actiu)
+  var ps=document.createElement('style');
+  ps.textContent='@media print{ #menubar,#toolbar,#nav,#status,.sgrip{display:none!important} #help{position:static;inset:auto;border:none;box-shadow:none;background:#fff} #body{padding:0} #content{border:none;box-shadow:none;overflow:visible;padding:0} .topic{display:none} .topic.active{display:block} }';
+  document.head.appendChild(ps);
+
+  buildTree(); buildIndex(); connectXrefs();
+  show('t-intro');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,350 @@
+<!--
+  Guaita Apps - Suite d'eines autònomes per a arquitectura, BIM i documentació.
+  Copyright (c) 2026 Jordi Subirós
+  GNU Affero General Public License v3.0
+  See LICENSE file for details
+-->
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ajuda · GuaitaHTMLeditor · Caixetí UI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0E0A; --panel:#12160F; --panel-2:#191E12; --panel-3:#232A18;
+  --line:#333D1F; --line-soft:#28301A; --txt:#EAF3D8; --dim:#94A377; --dim-2:#5E6B47;
+  --accent:#C6FF00; --accent-ink:#0A0E00; --accent-2:#FF2ECC; --accent-3:#00E5FF; --accent-4:#FFE500;
+  --danger:#FF4D6D; --radius:8px;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Space Grotesk',system-ui,sans-serif;
+  background:var(--ink); color:var(--txt); line-height:1.6;
+  background-image:linear-gradient(rgba(198,255,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(198,255,0,.03) 1px,transparent 1px);
+  background-size:44px 44px;
+}
+.mono{font-family:'IBM Plex Mono',monospace;}
+a{color:var(--accent-3); text-decoration:none;}
+a:hover{color:var(--accent);}
+
+/* ---------- Layout ---------- */
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px; display:grid; grid-template-columns:230px 1fr; gap:48px;}
+@media(max-width:860px){ .wrap{grid-template-columns:1fr; gap:0;} nav.toc{display:none;} }
+
+/* ---------- Hero ---------- */
+header.hero{
+  border-bottom:1px solid var(--line); background:var(--panel);
+  padding:56px 24px 44px; position:relative; overflow:hidden;
+}
+header.hero .inner{max-width:1180px; margin:0 auto;}
+.brand{display:flex; align-items:center; gap:14px; margin-bottom:22px;}
+.brand .cells{display:grid; grid-template-columns:repeat(2,13px); gap:4px;}
+.brand .cells span{width:13px; height:13px;}
+.brand .cells span:nth-child(1){background:var(--accent);}
+.brand .cells span:nth-child(2){background:var(--accent-2);}
+.brand .cells span:nth-child(3){background:var(--accent-3);}
+.brand .cells span:nth-child(4){background:var(--accent-4);}
+.brand .bt{font-weight:700; font-size:20px; letter-spacing:.16em;}
+.brand .bt small{color:var(--accent); font-size:12px; letter-spacing:.1em; margin-left:2px;}
+header.hero h1{
+  font-size:clamp(34px,6vw,60px); line-height:1.02; font-weight:700; letter-spacing:-.02em;
+  max-width:16ch;
+}
+header.hero h1 em{font-style:normal; color:var(--accent);}
+header.hero p.lead{margin-top:18px; font-size:17px; color:var(--dim); max-width:60ch;}
+.hero-tag{
+  display:inline-block; margin-bottom:10px; font-family:'IBM Plex Mono',monospace;
+  font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent-ink);
+  background:var(--accent); padding:4px 10px; border-radius:20px;
+}
+
+/* ---------- TOC ---------- */
+nav.toc{position:sticky; top:32px; align-self:start; padding-top:48px;}
+nav.toc .toc-t{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim-2); margin-bottom:12px;}
+nav.toc ol{list-style:none; counter-reset:s;}
+nav.toc li{counter-increment:s; margin:2px 0;}
+nav.toc a{
+  display:flex; gap:10px; align-items:baseline; padding:6px 8px; border-radius:6px;
+  color:var(--dim); font-size:13.5px; border-left:2px solid transparent;
+}
+nav.toc a::before{content:counter(s,decimal-leading-zero); font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--dim-2);}
+nav.toc a:hover{background:var(--panel-2); color:var(--txt);}
+nav.toc a.active{color:var(--accent); border-left-color:var(--accent); background:var(--panel-2);}
+
+/* ---------- Content ---------- */
+main{padding:48px 0 100px; min-width:0;}
+section{margin-bottom:56px; scroll-margin-top:24px;}
+section > h2{
+  font-size:12px; font-family:'IBM Plex Mono',monospace; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--accent); margin-bottom:6px;
+}
+section > h2 .num{color:var(--dim-2); margin-right:10px;}
+section > .st{font-size:27px; font-weight:600; letter-spacing:-.01em; margin-bottom:18px; line-height:1.15;}
+section p{margin-bottom:14px; color:var(--txt);}
+section p.muted{color:var(--dim);}
+h3{font-size:17px; font-weight:600; margin:26px 0 10px;}
+
+/* ---------- Callouts ---------- */
+.note{
+  border:1px solid var(--line); border-left:3px solid var(--accent-3);
+  background:var(--panel); border-radius:0 var(--radius) var(--radius) 0;
+  padding:14px 16px; margin:18px 0; font-size:14px;
+}
+.note.warn{border-left-color:var(--accent-4);}
+.note.stop{border-left-color:var(--danger);}
+.note .nt{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin-bottom:5px;}
+.note.warn .nt{color:var(--accent-4);}
+.note.stop .nt{color:var(--danger);}
+
+/* ---------- Steps ---------- */
+ol.steps{list-style:none; counter-reset:step; margin:8px 0;}
+ol.steps li{counter-increment:step; position:relative; padding:12px 0 12px 46px; border-bottom:1px solid var(--line-soft);}
+ol.steps li:last-child{border-bottom:none;}
+ol.steps li::before{
+  content:counter(step); position:absolute; left:0; top:11px;
+  width:30px; height:30px; border-radius:8px; background:var(--panel-3); color:var(--accent);
+  font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13px;
+  display:flex; align-items:center; justify-content:center; border:1px solid var(--line);
+}
+ol.steps li b{color:var(--accent);}
+
+/* ---------- Feature cards ---------- */
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:14px; margin:10px 0;}
+.card{border:1px solid var(--line); background:var(--panel); border-radius:var(--radius); padding:16px;}
+.card .ci{width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; background:var(--panel-3);}
+.card .ci svg{width:18px; height:18px; stroke:var(--accent); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
+.card h4{font-size:15px; font-weight:600; margin-bottom:4px;}
+.card p{font-size:13px; color:var(--dim); margin:0;}
+.card:nth-child(4n+2) .ci svg{stroke:var(--accent-2);}
+.card:nth-child(4n+3) .ci svg{stroke:var(--accent-3);}
+.card:nth-child(4n+4) .ci svg{stroke:var(--accent-4);}
+
+/* ---------- Tables ---------- */
+table.tbl{width:100%; border-collapse:collapse; font-size:14px; margin:14px 0;}
+table.tbl th{text-align:left; padding:9px 12px; background:var(--panel-2); color:var(--dim); font-weight:500; font-size:12px; letter-spacing:.03em; text-transform:uppercase; border-bottom:1px solid var(--line);}
+table.tbl td{padding:9px 12px; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+table.tbl tr:hover td{background:var(--panel);}
+kbd{
+  font-family:'IBM Plex Mono',monospace; font-size:12px; background:var(--panel-3);
+  border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:2px 8px; color:var(--accent); white-space:nowrap;
+}
+code{font-family:'IBM Plex Mono',monospace; font-size:.88em; background:var(--panel-2); border:1px solid var(--line-soft); padding:1px 6px; border-radius:4px; color:var(--accent-3);}
+
+/* ---------- Panel map ---------- */
+.map{border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin:16px 0; font-family:'IBM Plex Mono',monospace; font-size:11.5px;}
+.map .mrow{display:flex; border-bottom:1px solid var(--line-soft);}
+.map .mrow:last-child{border-bottom:none;}
+.map .mcell{padding:14px 12px; border-right:1px solid var(--line-soft); color:var(--dim);}
+.map .mcell:last-child{border-right:none;}
+.map .mcell b{display:block; color:var(--accent); font-family:'Space Grotesk',sans-serif; font-size:13px; margin-bottom:3px;}
+.map .l{flex:0 0 26%;} .map .c{flex:1;} .map .r{flex:0 0 24%;}
+.map .top,.map .bot{background:var(--panel-2); color:var(--accent-3); padding:10px 12px; text-align:center;}
+
+/* ---------- Details / FAQ ---------- */
+details{border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); margin:8px 0; overflow:hidden;}
+details summary{padding:14px 16px; cursor:pointer; font-weight:500; list-style:none; display:flex; align-items:center; gap:10px;}
+details summary::-webkit-details-marker{display:none;}
+details summary::before{content:'+'; font-family:'IBM Plex Mono',monospace; color:var(--accent); font-size:16px;}
+details[open] summary::before{content:'-';}
+details .db{padding:0 16px 16px 42px; color:var(--dim); font-size:14px;}
+details[open] summary{color:var(--accent);}
+
+/* ---------- Footer ---------- */
+footer.foot{border-top:1px solid var(--line); padding:28px 24px 34px; text-align:center; color:var(--dim-2); font-size:12.5px;}
+footer.foot .fb{display:inline-flex; gap:8px; align-items:center; margin-bottom:8px;}
+footer.foot .fb .cells{display:grid; grid-template-columns:repeat(2,6px); gap:2px;}
+footer.foot .fb .cells span{width:6px; height:6px;}
+footer.foot .fb .cells span:nth-child(1){background:var(--accent);} footer.foot .fb .cells span:nth-child(2){background:var(--accent-2);}
+footer.foot .fb .cells span:nth-child(3){background:var(--accent-3);} footer.foot .fb .cells span:nth-child(4){background:var(--accent-4);}
+footer.foot .disclaimer{max-width:74ch; margin:12px auto 0; font-size:11px; line-height:1.6; color:var(--dim-2);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="inner">
+    <div class="brand">
+      <span class="cells"><span></span><span></span><span></span><span></span></span>
+      <span class="bt">GUAITA<small>HTML EDITOR</small></span>
+    </div>
+    <span class="hero-tag">Manual d'ús</span>
+    <h1>Escriu, ressalta i previsualitza HTML al <em>navegador</em>.</h1>
+    <p class="lead">Un editor HTML lleuger amb ressaltat de sintaxi, previsualització en viu, cerca amb regex, caràcters, snippets i verificació d'etiquetes. Treballa amb diversos documents en pestanyes i desa directament al disc. Tot funciona dins el mateix navegador.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="toc">
+    <div class="toc-t">Contingut</div>
+    <ol>
+      <li><a href="#intro">Què és</a></li>
+      <li><a href="#obrir">Primers passos</a></li>
+      <li><a href="#interficie">La interfície</a></li>
+      <li><a href="#editar">Editar i inserir</a></li>
+      <li><a href="#preview">Previsualització en viu</a></li>
+      <li><a href="#cerca">Cerca i substitució</a></li>
+      <li><a href="#documents">Documents i desat</a></li>
+      <li><a href="#tecles">Tecles ràpides</a></li>
+      <li><a href="#problemes">Problemes</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <section id="intro">
+      <h2><span class="num">01</span>Què és</h2>
+      <div class="st">GuaitaHTMLeditor</div>
+      <p>GuaitaHTMLeditor és un <b>editor d'HTML</b> amb previsualització en viu que funciona íntegrament dins el navegador. Escrius el codi al panell esquerre amb ressaltat de sintaxi i el veus renderitzat al panell dret, al moment. Inclou eines d'inserció ràpida, cerca amb regex, verificació d'etiquetes i gestió de diversos documents en pestanyes.</p>
+      <div class="cards">
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M8 6l-5 6 5 6M16 6l5 6-5 6"/></svg></div><h4>Editor amb ressaltat</h4><p>Ressaltat de sintaxi HTML, CSS i JS, numeració de línies i explicacions (TIPS) del codi sota el ratolí.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM12 4v16"/></svg></div><h4>Previsualització en viu</h4><p>Panell dividit amb render automàtic dins un iframe segur i scroll sincronitzat.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><h4>Cerca potent</h4><p>Cerca i substitueix amb regex, paraula sencera, majúscules/minúscules i accents.</p></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M4 4h11l5 5v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg></div><h4>Multidocument</h4><p>Diverses pestanyes; la sessió es guarda sola (IndexedDB) i pots desar directament al disc.</p></div>
+      </div>
+      <div class="note"><div class="nt">Privadesa</div>Tot el processament es fa al teu ordinador, dins el navegador. Els fitxers no s'envien enlloc.</div>
+    </section>
+
+    <section id="obrir">
+      <h2><span class="num">02</span>Primers passos</h2>
+      <div class="st">Del document buit al primer desat</div>
+      <ol class="steps">
+        <li>Obre l'HTML al navegador. Comences amb un document buit, o hi obres fitxers existents: <b>Obrir…</b> (<kbd>Ctrl</kbd>+<kbd>O</kbd>) o arrossega-hi <code>.html</code>, <code>.htm</code>, <code>.xhtml</code> o <code>.txt</code> (accepta <b>diversos alhora</b>).</li>
+        <li>Escriu al panell de codi. El <b>ressaltat</b> i la <b>previsualització</b> s'actualitzen sols; al peu veus la posició (Ln, Col) i el nombre de caràcters.</li>
+        <li>Desa amb <b>Desar</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) o <b>Desar com…</b> (<kbd>Ctrl</kbd>+<kbd>Maj</kbd>+<kbd>S</kbd>). Si el navegador ho permet, es desa directe al disc; si no, es descarrega el fitxer.</li>
+      </ol>
+    </section>
+
+    <section id="interficie">
+      <h2><span class="num">03</span>La interfície</h2>
+      <div class="st">Les zones de la finestra</div>
+      <div class="map">
+        <div class="mrow top">Caixetí superior: marca GUAITA HTML EDITOR · document actiu (títol i estat) · Obrir… · Desar · Desar com… — i, a sota, les pestanyes de documents oberts</div>
+        <div class="mrow">
+          <div class="mcell l"><b>Panell de codi</b>Numeració de línies i editor amb ressaltat de sintaxi. És on escrius.</div>
+          <div class="mcell c"><b>Divisor</b>Arrossega'l per repartir l'amplada entre el codi i la previsualització.</div>
+          <div class="mcell r"><b>Previsualització</b>Render en viu dins un iframe (SYNC, AUTO, Refrescar i obrir en finestra ↗).</div>
+        </div>
+        <div class="mrow bot">Barra d'eines (sobre el panell): Desfés/Refés · CARÀCTERS · EMBOLCALLA · SNIPPETS · CERCA · COLOR · TIPS · A−/A+ · VERIFICA — Peu: Ln/Col, caràcters i estat de desat</div>
+      </div>
+    </section>
+
+    <section id="editar">
+      <h2><span class="num">04</span>Editar i inserir</h2>
+      <div class="st">Escriure, embolcallar i inserir</div>
+      <p>La barra d'eines superior agrupa les insercions ràpides i les ajudes d'edició. La selecció actual és el que s'embolcalla o se substitueix.</p>
+      <table class="tbl">
+        <thead><tr><th>Eina</th><th>Què fa</th></tr></thead>
+        <tbody>
+          <tr><td><b>CARÀCTERS</b></td><td>Insereix símbols habituals: <code>—</code> <code>–</code> <code>·</code> <code>«</code> <code>»</code> <code>…</code> <code>©</code> <code>→</code> <code>€</code> i entitats <code>&amp;nbsp;</code> <code>&amp;amp;</code> <code>&amp;lt;</code> <code>&amp;gt;</code>.</td></tr>
+          <tr><td><b>EMBOLCALLA</b></td><td>Envolta la selecció amb una etiqueta: B, I, U, H2, H3, P, A, DIV, SPAN, CODE, PRE.</td></tr>
+          <tr><td><b>SNIPPETS</b></td><td>Insereix blocs sencers: plantilla HTML5, paràgraf, enllaç, imatge, llistes, taula 3×3, figura, formulari, secció, CSS enllaçat, script, meta viewport, comentari, vídeo, detalls plegables…</td></tr>
+          <tr><td><b>COLOR</b></td><td>Activa o desactiva el ressaltat de sintaxi.</td></tr>
+          <tr><td><b>TIPS</b></td><td>Mostra una explicació del token (etiqueta, atribut, propietat CSS, paraula JS…) quan hi passes el ratolí per sobre.</td></tr>
+          <tr><td><b>✓ VERIFICA</b></td><td>Comprova les etiquetes desaparellades i porta el cursor al primer problema.</td></tr>
+          <tr><td><b>A− / A+</b></td><td>Redueix o augmenta la mida de la lletra de l'editor.</td></tr>
+        </tbody>
+      </table>
+      <div class="note"><div class="nt">Ajudes en escriure</div>Auto-tancament d'etiquetes (escriu <code>/</code> just després de <code>&lt;</code>), auto-indentació en prémer <kbd>Enter</kbd>, comentar amb <kbd>Ctrl</kbd>+<kbd>/</kbd>, duplicar línia amb <kbd>Ctrl</kbd>+<kbd>D</kbd> i moure-la amb <kbd>Alt</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd>.</div>
+    </section>
+
+    <section id="preview">
+      <h2><span class="num">05</span>Previsualització en viu</h2>
+      <div class="st">El panell de previsualització</div>
+      <p>El document es renderitza dins un <code>iframe</code> aïllat (<code>sandbox="allow-scripts"</code>), de manera que pots provar-hi codi sense afectar l'editor. Els controls del capçal de la previsualització:</p>
+      <table class="tbl">
+        <thead><tr><th>Control</th><th>Acció</th></tr></thead>
+        <tbody>
+          <tr><td><b>AUTO</b></td><td>Renderitza automàticament a mesura que escrius. Si el desactives, actualitzes manualment.</td></tr>
+          <tr><td><b>Refrescar</b></td><td>Força un render immediat de la previsualització.</td></tr>
+          <tr><td><b>SYNC</b></td><td>Sincronitza el desplaçament entre el codi i la previsualització.</td></tr>
+          <tr><td><b>↗</b></td><td>Obre el document renderitzat en una finestra nova.</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">Arrossega el divisor central per donar més amplada al codi o a la previsualització segons et convingui.</p>
+    </section>
+
+    <section id="cerca">
+      <h2><span class="num">06</span>Cerca i substitució</h2>
+      <div class="st">Cercar i substituir</div>
+      <p>Prem <kbd>Ctrl</kbd>+<kbd>F</kbd> (o el botó <b>🔍 CERCA</b>) per obrir la barra de cerca. Escrius el text a buscar i, opcionalment, el text de substitució.</p>
+      <table class="tbl">
+        <thead><tr><th>Opció / botó</th><th>Efecte</th></tr></thead>
+        <tbody>
+          <tr><td><b>regex</b></td><td>Interpreta la cerca com a expressió regular.</td></tr>
+          <tr><td><b>paraula</b></td><td>Només coincidències de paraula sencera.</td></tr>
+          <tr><td><b>Aa</b></td><td>Distingeix majúscules i minúscules.</td></tr>
+          <tr><td><b>àé</b></td><td>Té en compte els accents (si es desactiva, els ignora).</td></tr>
+          <tr><td><b>‹ ›</b> · <kbd>F3</kbd>/<kbd>Maj</kbd>+<kbd>F3</kbd></td><td>Coincidència anterior / següent; el comptador mostra quantes n'hi ha.</td></tr>
+          <tr><td><b>Substituir</b> · <b>Tot</b></td><td>Substitueix la coincidència actual o totes de cop.</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">Tanca la barra amb <kbd>Esc</kbd> o el botó <b>✕</b>.</p>
+    </section>
+
+    <section id="documents">
+      <h2><span class="num">07</span>Documents i desat</h2>
+      <div class="st">Pestanyes, sessió i desat al disc</div>
+      <p>Pots tenir <b>diversos documents oberts</b> a la vegada, cadascun a la seva pestanya. Crea'n un de nou amb <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>N</kbd>. Els documents amb canvis sense desar es marquen, i s'avisa si tanques la finestra amb feina pendent.</p>
+      <div class="note"><div class="nt">Sessió automàtica</div>Els noms i el contingut dels documents es desen sols a la caché local del navegador (IndexedDB) i es recuperen la propera vegada que obris l'editor al mateix navegador.</div>
+      <div class="note warn"><div class="nt">Desar al disc</div>Amb navegadors compatibles (File System Access), <b>Desar</b> escriu directament al fitxer del disc i <b>Desar com…</b> et deixa triar-ne la ubicació. Si el navegador no ho admet, <b>Desar</b> descarrega el fitxer; el peu indica quin mode tens actiu.</div>
+    </section>
+
+    <section id="tecles">
+      <h2><span class="num">08</span>Tecles ràpides</h2>
+      <div class="st">Dreceres de teclat</div>
+      <table class="tbl">
+        <thead><tr><th>Tecla</th><th>Acció</th></tr></thead>
+        <tbody>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Desar</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>Maj</kbd>+<kbd>S</kbd></td><td>Desar com…</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Obrir fitxers</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>N</kbd></td><td>Nou document</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td><td>Desfés</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>Y</kbd> · <kbd>Ctrl</kbd>+<kbd>Maj</kbd>+<kbd>Z</kbd></td><td>Refés</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd></td><td>Cerca</td></tr>
+          <tr><td><kbd>F3</kbd> · <kbd>Maj</kbd>+<kbd>F3</kbd></td><td>Coincidència següent / anterior</td></tr>
+          <tr><td><kbd>Esc</kbd></td><td>Tanca la barra de cerca</td></tr>
+          <tr><td><kbd>Tab</kbd> · <kbd>Maj</kbd>+<kbd>Tab</kbd></td><td>Indenta / desindenta</td></tr>
+          <tr><td><kbd>Enter</kbd></td><td>Nova línia amb indentació automàtica</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>D</kbd></td><td>Duplica la línia</td></tr>
+          <tr><td><kbd>Alt</kbd>+<kbd>↑</kbd> · <kbd>Alt</kbd>+<kbd>↓</kbd></td><td>Mou la línia amunt / avall</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>/</kbd></td><td>Comenta / descomenta</td></tr>
+          <tr><td><kbd>/</kbd> després de <kbd>&lt;</kbd></td><td>Tanca automàticament l'última etiqueta oberta</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="problemes">
+      <h2><span class="num">09</span>Problemes</h2>
+      <div class="st">Resolució de problemes i preguntes freqüents</div>
+      <details><summary>En desar em descarrega el fitxer en comptes de guardar-lo al mateix lloc</summary><div class="db">El teu navegador no té File System Access; el peu de la finestra ho indica. Fes servir un navegador basat en Chromium per desar directament al disc; amb la resta, «Desar» descarrega el fitxer.</div></details>
+      <details><summary>He tancat l'editor i he perdut el text?</summary><div class="db">No. La sessió (noms i contingut dels documents) es guarda a IndexedDB i es restaura en tornar a obrir l'editor al mateix navegador.</div></details>
+      <details><summary>VERIFICA marca errors però el codi sembla correcte</summary><div class="db">Comprova si hi ha etiquetes obertes sense tancar o tancaments sobrers; el missatge indica la línia del primer problema i hi porta el cursor. El validador ignora comentaris i el contingut de <code>&lt;script&gt;</code> i <code>&lt;style&gt;</code>.</div></details>
+      <details><summary>La previsualització no s'actualitza</summary><div class="db">Comprova que <b>AUTO</b> estigui activat o prem <b>Refrescar</b>. L'iframe és aïllat (sandbox), de manera que pot bloquejar alguns recursos externs.</div></details>
+    </section>
+
+  </main>
+</div>
+
+<footer class="foot">
+  <div class="fb"><span class="cells"><span></span><span></span><span></span><span></span></span> <b style="color:var(--txt); font-weight:600; letter-spacing:.1em;">GUAITA HTML EDITOR</b></div>
+  <div>Editor d'HTML amb previsualització en viu al navegador · SBS BIM Consulting 2026</div>
+  <p class="disclaimer">Guaita Apps es distribueix «tal com és», sense cap garantia. Les eines estan pensades desde la recerca i com a suport tècnic i educatiu; la verificació dels resultats i la responsabilitat derivada del seu ús recauen únicament sobre l'usuari final.</p>
+</footer>
+
+<script>
+// Ressaltat de la secció activa a l'índex
+const links=[...document.querySelectorAll('nav.toc a')];
+const map=new Map(links.map(a=>[a.getAttribute('href').slice(1),a]));
+const obs=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){ links.forEach(l=>l.classList.remove('active')); const a=map.get(e.target.id); if(a)a.classList.add('active'); } });
+},{rootMargin:'-20% 0px -70% 0px'});
+document.querySelectorAll('main section').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>
