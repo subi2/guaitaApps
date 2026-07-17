@@ -187,6 +187,7 @@ footer.foot .fb .cells span:nth-child(3){background:var(--accent-3);} footer.foo
       <li><a href="#escala">Escala i unitats</a></li>
       <li><a href="#calibra">Calibrar amb 2 punts</a></li>
       <li><a href="#corbes">Corbes i neteja</a></li>
+      <li><a href="#raster">Raster → línia</a></li>
       <li><a href="#exportar">Convertir i baixar</a></li>
       <li><a href="#tecles">Tecles ràpides</a></li>
       <li><a href="#problemes">Problemes</a></li>
@@ -205,6 +206,7 @@ footer.foot .fb .cells span:nth-child(3){background:var(--accent-3);} footer.foo
         <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M12 20V10M6 20V4M18 20v-6"/></svg></div><h4>A escala</h4><p>Posa l'escala del plànol o calibra amb 2 punts.</p></div>
         <div class="card"><div class="ci"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></div><h4>DXF editable</h4><p>El resultat s'obre a AutoCAD i altres CAD.</p></div>
       </div>
+      <p class="muted">A més, un mode opcional <b>Raster → línia mitja</b> permet extreure també un traçat aproximat de les imatges incrustades al PDF (vegeu la secció 08).</p>
     </section>
 
     <section id="formats">
@@ -214,13 +216,13 @@ footer.foot .fb .cells span:nth-child(3){background:var(--accent-3);} footer.foo
       <table class="tbl">
         <thead><tr><th>Tipus de PDF</th><th>Resultat</th></tr></thead>
         <tbody>
-          <tr><td><b>PDF vectorial</b> (plànol exportat des d'un CAD)</td><td style="color:var(--accent)">Es converteix bé</td></tr>
-          <tr><td><b>PDF escanejat</b> (imatge d'un paper)</td><td style="color:var(--danger)">No té geometria: no en surt res útil</td></tr>
+          <tr><td><b>PDF vectorial</b> (plànol exportat des d'un CAD)</td><td style="color:var(--accent)">Es converteix bé, amb línies, polilínies, corbes i text reals</td></tr>
+          <tr><td><b>PDF escanejat</b> (imatge d'un paper)</td><td style="color:var(--accent-4)">Sense geometria pròpia: activa <b>Raster → línia mitja</b> (secció 08) per obtenir-ne un traçat aproximat</td></tr>
         </tbody>
       </table>
       <div class="note">
         <div class="nt">Com saber si és vectorial</div>
-        Amplia molt el PDF al teu lector: si les línies es mantenen nítides, és vectorial. Si es pixelen o es veuen borroses, és una imatge escanejada i aquesta eina no la podrà convertir.
+        Amplia molt el PDF al teu lector: si les línies es mantenen nítides, és vectorial. Si es pixelen o es veuen borroses, és una imatge escanejada; llavors el resultat depèn del mode <b>Raster → línia mitja</b>, no de la conversió vectorial habitual.
       </div>
     </section>
 
@@ -242,7 +244,7 @@ footer.foot .fb .cells span:nth-child(3){background:var(--accent-3);} footer.foo
         <div class="top">Capçalera · GUAITA PDF → DXF · «conversor vectorial · offline»</div>
         <div class="mrow">
           <div class="mcell c"><b>Previsualització</b>La pàgina del PDF. Aquí es dibuixen els punts quan calibres.</div>
-          <div class="mcell r"><b>Panell dret</b>Document · Escala i unitats · Corbes · Exporta (amb estadístiques).</div>
+          <div class="mcell r"><b>Panell dret</b>Document · Escala i unitats · Corbes · Raster → línia mitja · Exporta (amb estadístiques).</div>
         </div>
         <div class="bot">Peu · estat del procés («Llest · el PDF es processa localment al navegador»)</div>
       </div>
@@ -286,8 +288,30 @@ footer.foot .fb .cells span:nth-child(3){background:var(--accent-3);} footer.foo
       </table>
     </section>
 
+    <section id="raster">
+      <h2><span class="num">08</span>Raster → línia mitja</h2>
+      <div class="st">Vectoritza les imatges incrustades al PDF</div>
+      <p>Si el PDF conté <b>imatges raster</b> (per exemple un plànol escanejat inserit com a imatge), activa <b>Vectoritza capes raster</b> a la secció «Raster → línia mitja» del panell dret. L'eina extreu cada imatge, en calcula l'<b>esquelet</b> (la línia central de cada traç) i el desa com a polilínies en una capa pròpia del DXF: <code>RASTER_CL</code>. És <b>desactivat per defecte</b>: si no l'actives, la conversió es comporta exactament com abans.</p>
+      <table class="tbl">
+        <thead><tr><th>Opció</th><th>Què fa</th></tr></thead>
+        <tbody>
+          <tr><td><b>Vectoritza capes raster</b></td><td>Activa o desactiva l'extracció de línia mitja de les imatges del PDF.</td></tr>
+          <tr><td><b>Llindar (0–255)</b></td><td>Nivell de gris a partir del qual un píxel es considera «tinta» (traç) o «fons». Baixa'l si es perden traços clars; puja'l si hi ha massa soroll.</td></tr>
+          <tr><td><b>Inverteix tons</b></td><td>Activa-ho si la imatge té fons fosc i traç clar.</td></tr>
+          <tr><td><b>Resolució màx (px)</b></td><td>Mida màxima de treball de la imatge. Més alta = més detall i més temps de procés.</td></tr>
+          <tr><td><b>Simplifica (px)</b></td><td>Redueix el nombre de vèrtexs de cada línia sense canviar-ne la forma general.</td></tr>
+          <tr><td><b>Omet cadenes &lt; (px)</b></td><td>Descarta els traços curts (soroll de les unions) per netejar el resultat.</td></tr>
+        </tbody>
+      </table>
+      <div class="note warn">
+        <div class="nt">Què esperar-ne</div>
+        La línia mitja és un traçat aproximat: a les cantonades i interseccions pot sortir fragmentat en diversos trams en lloc d'una sola polilínia contínua, i el text o les trames del plànol es poden confondre amb traços. Funciona millor amb escanejats nets, de línia — no fotografies ni trames de grisos denses.
+      </div>
+      <p class="muted">El nombre de polilínies generades es mostra a <b>Exporta</b> com a «Raster (línia)». Amb el mode actiu, la conversió pot trigar uns segons més segons la mida i el nombre d'imatges.</p>
+    </section>
+
     <section id="exportar">
-      <h2><span class="num">08</span>Convertir i baixar</h2>
+      <h2><span class="num">09</span>Convertir i baixar</h2>
       <div class="st">Del PDF al DXF en un clic</div>
       <p>Quan tinguis l'escala, les unitats i les corbes a punt, prem <b>Converteix i baixa DXF</b>. L'eina processa la pàgina i et descarrega el fitxer <code>.dxf</code>. A la secció <b>Exporta</b> veuràs les estadístiques del que ha generat:</p>
       <table class="tbl">
@@ -296,6 +320,7 @@ footer.foot .fb .cells span:nth-child(3){background:var(--accent-3);} footer.foo
           <tr><td>Línies</td><td>Segments rectes simples</td></tr>
           <tr><td>Polilínies</td><td>Cadenes de segments i corbes</td></tr>
           <tr><td>Textos</td><td>Cadenes de text detectades</td></tr>
+          <tr><td>Raster (línia)</td><td>Polilínies de línia mitja generades a partir de les imatges (capa <code>RASTER_CL</code>), si el mode raster és actiu</td></tr>
           <tr><td>Capes (per color)</td><td>Capes creades, una per cada color del dibuix</td></tr>
         </tbody>
       </table>
@@ -303,7 +328,7 @@ footer.foot .fb .cells span:nth-child(3){background:var(--accent-3);} footer.foo
     </section>
 
     <section id="tecles">
-      <h2><span class="num">09</span>Tecles ràpides</h2>
+      <h2><span class="num">10</span>Tecles ràpides</h2>
       <div class="st">Drecera de teclat</div>
       <table class="tbl">
         <thead><tr><th>Tecla</th><th>Acció</th></tr></thead>
@@ -314,11 +339,15 @@ footer.foot .fb .cells span:nth-child(3){background:var(--accent-3);} footer.foo
     </section>
 
     <section id="problemes">
-      <h2><span class="num">10</span>Resolució de problemes</h2>
+      <h2><span class="num">11</span>Resolució de problemes</h2>
       <div class="st">Si alguna cosa no va</div>
       <details>
         <summary>El DXF surt buit o gairebé buit</summary>
-        <div class="db">El PDF probablement és una <b>imatge escanejada</b> i no conté geometria vectorial. Aquesta eina no pot vectoritzar imatges: necessites un PDF vectorial (generat des d'un CAD o programa de dibuix).</div>
+        <div class="db">El PDF probablement és una <b>imatge escanejada</b> i no conté geometria vectorial pròpia. Activa <b>Vectoritza capes raster</b> (secció 08) per obtenir-ne un traçat de línia mitja; si segueix sortint buit, revisa el <b>llindar</b> i prova <b>Inverteix tons</b>.</div>
+      </details>
+      <details>
+        <summary>La línia mitja del raster surt trencada en molts trossos</summary>
+        <div class="db">És normal a les interseccions i cantonades: el traçat de línia mitja separa els trams al node d'unió. Si hi ha massa fragments petits, apuja <b>Omet cadenes &lt; (px)</b>.</div>
       </details>
       <details>
         <summary>Les mides del DXF no coincideixen amb la realitat</summary>
@@ -342,7 +371,9 @@ footer.foot .fb .cells span:nth-child(3){background:var(--accent-3);} footer.foo
 
 <footer class="foot">
   <div class="fb"><span class="cells"><span></span><span></span><span></span><span></span></span> <b style="color:var(--txt); font-weight:600; letter-spacing:.1em;">GUAITA PDF → DXF</b></div>
-  <div>Conversor vectorial de PDF a DXF · SBS BIM</div>
+  <div>Conversor vectorial de PDF a DXF</div>
+  <p style="max-width:520px; margin:14px auto 10px; font-size:11.5px; line-height:1.5;">Guaita Apps es distribueix «tal com és», sense cap garantia. Les eines estan pensades desde la recerca i com a suport tècnic i educatiu; la verificació dels resultats i la responsabilitat derivada del seu ús recauen únicament sobre l'usuari final.</p>
+  <div>SBS BIM Consulting 2026</div>
 </footer>
 
 <script>

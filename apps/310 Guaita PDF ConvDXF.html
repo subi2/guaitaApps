@@ -108,11 +108,22 @@
         <div class="note">Més segments = corbes més suaus i fitxer més gran. El filtre elimina micro-segments de soroll.</div>
       </div>
       <div class="sec">
+        <h3>Raster → línia mitja</h3>
+        <div class="row"><label>Vectoritza capes raster</label><div class="seg" id="segRaster" style="width:110px"><button data-r="off" class="on">off</button><button data-r="on">on</button></div></div>
+        <div class="row"><label>Llindar (0–255)</label><input type="number" id="inThr" value="128" min="0" max="255" step="1"></div>
+        <div class="row"><label>Inverteix tons</label><div class="seg" id="segInv" style="width:110px"><button data-i="off" class="on">off</button><button data-i="on">on</button></div></div>
+        <div class="row"><label>Resolució màx (px)</label><input type="number" id="inMaxDim" value="2000" min="256" max="6000" step="100"></div>
+        <div class="row"><label>Simplifica (px)</label><input type="number" id="inSimp" value="1.2" min="0" max="10" step="0.1"></div>
+        <div class="row"><label>Omet cadenes &lt; (px)</label><input type="number" id="inMinChain" value="6" min="0" step="1"></div>
+        <div class="note">Extreu les imatges incrustades del PDF, n'obté l'<b>esquelet</b> (línia central) i el desa com a polilínies a la capa <b>RASTER_CL</b>. Pensat per a plànols escanejats de línies. Pot trigar uns segons segons la mida.</div>
+      </div>
+      <div class="sec">
         <h3>Exporta</h3>
         <div id="stats" style="display:none">
           <div class="stat"><span>Línies</span><b id="stLines">0</b></div>
           <div class="stat"><span>Polilínies</span><b id="stPl">0</b></div>
           <div class="stat"><span>Textos</span><b id="stTxt">0</b></div>
+          <div class="stat"><span>Raster (línia)</span><b id="stRas">0</b></div>
           <div class="stat"><span>Capes (per color)</span><b id="stLay">0</b></div>
         </div>
         <button class="btn" id="btnConv">Converteix i baixa DXF</button>
@@ -129,7 +140,7 @@ import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';
 const $=id=>document.getElementById(id);
 const OPS=pdfjsLib.OPS;
-let doc=null, pdfName='dibuix', curN=1, curPage=null, curVp=null, calPts=[], calMode=false, units='mm';
+let doc=null, pdfName='dibuix', curN=1, curPage=null, curVp=null, calPts=[], calMode=false, units='mm', rasterOn=false, invOn=false;
 
 /* ---------- Conversor: pàgina PDF -> DXF (codi validat) ---------- */
 const mul=(A,B)=>[A[0]*B[0]+A[2]*B[1],A[1]*B[0]+A[3]*B[1],A[0]*B[2]+A[2]*B[3],A[1]*B[2]+A[3]*B[3],A[0]*B[4]+A[2]*B[5]+A[4],A[1]*B[4]+A[3]*B[5]+A[5]];
@@ -139,7 +150,7 @@ const hx=n=>('0'+Math.max(0,Math.min(255,Math.round(n))).toString(16)).slice(-2)
 async function pageToDxf(page, opts){
   const scale=opts.scale||1, k=(opts.units==='pt'?1:25.4/72)*scale, steps=opts.tessSteps||10, minLen=(opts.minLen||0);
   const ops=await page.getOperatorList();
-  const layers=new Map(), ents=[];
+  const layers=new Map(), ents=[]; const imgOps=[];
   let ctm=[1,0,0,1,0,0]; const stack=[]; let sc=[0,0,0], fc=[0,0,0]; let path=[];
   const colHex=c=>hx(c[0]*255)+hx(c[1]*255)+hx(c[2]*255);
   const layerFor=c=>{ const h=colHex(c); if(!layers.has(h)) layers.set(h,{rgb:(Math.round(c[0]*255)<<16)|(Math.round(c[1]*255)<<8)|Math.round(c[2]*255)}); return 'COL_'+h; };
@@ -172,16 +183,29 @@ async function pageToDxf(page, opts){
     else if(fn===OPS.stroke||fn===OPS.closeStroke){ emit(sc); path=[]; }
     else if(fn===OPS.fill||fn===OPS.eoFill||fn===OPS.fillStroke||fn===OPS.eoFillStroke||fn===OPS.closeFillStroke){ emit(fc); path=[]; }
     else if(fn===OPS.endPath) path=[];
+    else if(opts.raster && (fn===OPS.paintImageXObject||fn===OPS.paintImageMaskXObject||fn===OPS.paintInlineImage)) imgOps.push({src:a[0], ctm:ctm.slice()});
   }
   const tc=await page.getTextContent();
   let hasText=false;
   for(const it of tc.items){ if(!it.str||!it.str.trim())continue; hasText=true; const t=it.transform;
     ents.push({type:'TEXT',layer:'PDF_TEXT',x:t[4],y:t[5],h:(Math.hypot(t[2],t[3])||it.height||1),rot:Math.atan2(t[1],t[0])*180/Math.PI,text:it.str}); }
+  let hasRaster=false;
+  if(opts.raster && imgOps.length){ try{
+    for(const io of imgOps){
+      const img = (io.src && typeof io.src==='object') ? io.src : await getObj(page, io.src);
+      if(!img || !img.width || !img.height) continue;
+      const chains = await rasterCenterline(img, opts);
+      if(!chains.length) continue;
+      hasRaster=true;
+      for(const ch of chains){ ents.push({type:'PL', layer:'RASTER_CL', pts:ch.map(([u,v])=>ap(io.ctm,u,v)), closed:false}); }
+    }
+  }catch(e){ console.warn('Raster:', e); } }
   const L=[]; const w=(c,v)=>{L.push(c);L.push(String(v));};
   w(0,'SECTION');w(2,'HEADER');w(9,'$ACADVER');w(1,'AC1015');w(9,'$INSUNITS');w(70,opts.units==='pt'?0:4);w(0,'ENDSEC');
-  w(0,'SECTION');w(2,'TABLES');w(0,'TABLE');w(2,'LAYER');w(70,layers.size+ (hasText?1:0));
+  w(0,'SECTION');w(2,'TABLES');w(0,'TABLE');w(2,'LAYER');w(70,layers.size+ (hasText?1:0) + (hasRaster?1:0));
   for(const [h,info] of layers){ w(0,'LAYER');w(2,'COL_'+h);w(70,0);w(62,7);w(420,info.rgb);w(6,'CONTINUOUS'); }
   if(hasText){ w(0,'LAYER');w(2,'PDF_TEXT');w(70,0);w(62,7);w(6,'CONTINUOUS'); }
+  if(hasRaster){ w(0,'LAYER');w(2,'RASTER_CL');w(70,0);w(62,7);w(420,0x00AEEF);w(6,'CONTINUOUS'); }
   w(0,'ENDTAB');w(0,'ENDSEC');
   w(0,'SECTION');w(2,'ENTITIES');
   for(const e of ents){
@@ -190,7 +214,109 @@ async function pageToDxf(page, opts){
     else if(e.type==='TEXT'){ w(0,'TEXT');w(8,e.layer);w(10,e.x*k);w(20,e.y*k);w(30,0);w(40,e.h*k);w(1,e.text); if(e.rot) w(50,e.rot); }
   }
   w(0,'ENDSEC');w(0,'EOF');
-  return { dxf:L.join('\n')+'\n', stats:{ lines:ents.filter(e=>e.type==='LINE').length, plines:ents.filter(e=>e.type==='PL').length, texts:ents.filter(e=>e.type==='TEXT').length, layers:layers.size } };
+  return { dxf:L.join('\n')+'\n', stats:{ lines:ents.filter(e=>e.type==='LINE').length, plines:ents.filter(e=>e.type==='PL'&&e.layer!=='RASTER_CL').length, texts:ents.filter(e=>e.type==='TEXT').length, rasterPl:ents.filter(e=>e.layer==='RASTER_CL').length, layers:layers.size } };
+}
+
+/* ---------- Raster -> línia mitja (esquelet) ---------- */
+function getObj(page,id){ return new Promise(res=>{ let done=false; const fin=v=>{ if(!done){done=true;res(v);} };
+  try{ const o=page.objs; if(o&&o.has&&o.has(id)) return fin(o.get(id)); if(o&&o.get){ o.get(id,fin); } else return fin(null);
+    setTimeout(()=>fin(null),8000);
+  }catch(e){ fin(null); } }); }
+function imgToCanvas(img){
+  const w=img.width, h=img.height; const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const ctx=c.getContext('2d',{willReadFrequently:true});
+  if(img.bitmap){ ctx.drawImage(img.bitmap,0,0); return c; }
+  const data=img.data; const out=new Uint8ClampedArray(w*h*4); const kind=img.kind;
+  if(data && kind===3){ out.set(data.subarray(0,w*h*4)); }
+  else if(data && kind===2){ for(let i=0,j=0;i<w*h;i++){ out[j++]=data[i*3];out[j++]=data[i*3+1];out[j++]=data[i*3+2];out[j++]=255; } }
+  else if(data && kind===1){ const rb=(w+7)>>3; for(let y=0;y<h;y++){ for(let x=0;x<w;x++){ const v=((data[y*rb+(x>>3)]>>(7-(x&7)))&1)?255:0; const p=(y*w+x)*4; out[p]=out[p+1]=out[p+2]=v; out[p+3]=255; } } }
+  else if(data && data.length===w*h){ for(let i=0;i<w*h;i++){ out[i*4]=out[i*4+1]=out[i*4+2]=data[i]; out[i*4+3]=255; } }
+  else if(data){ out.set(data.subarray(0,Math.min(data.length,w*h*4))); for(let i=3;i<w*h*4;i+=4) if(!out[i]) out[i]=255; }
+  ctx.putImageData(new ImageData(out,w,h),0,0); return c;
+}
+function imageToGrid(img, maxDim, thr, invert){
+  const nw=img.width, nh=img.height, m=Math.max(nw,nh);
+  const sc=(maxDim>0&&m>maxDim)?maxDim/m:1;
+  const cw=Math.max(1,Math.round(nw*sc)), ch=Math.max(1,Math.round(nh*sc));
+  const oc=document.createElement('canvas'); oc.width=cw; oc.height=ch; const octx=oc.getContext('2d',{willReadFrequently:true});
+  const src = img.bitmap ? img.bitmap : imgToCanvas(img);
+  octx.imageSmoothingEnabled = sc<1; octx.drawImage(src,0,0,cw,ch);
+  const d=octx.getImageData(0,0,cw,ch).data; const bin=new Uint8Array(cw*ch);
+  for(let i=0,p=0;i<cw*ch;i++,p+=4){ let ink; if(d[p+3]<8){ ink=false; } else { ink=(0.299*d[p]+0.587*d[p+1]+0.114*d[p+2])<thr; } if(invert)ink=!ink; bin[i]=ink?1:0; }
+  return {bin,w:cw,h:ch};
+}
+function thin(bin,w,h){
+  const g=Uint8Array.from(bin); const rm=new Int32Array(w*h);
+  let iter=0, changed=true;
+  while(changed && iter<120){ changed=false; iter++;
+    for(let step=0;step<2;step++){ let cnt=0;
+      for(let y=1;y<h-1;y++){ const row=y*w;
+        for(let x=1;x<w-1;x++){ const i=row+x; if(!g[i])continue;
+          const p2=g[i-w],p3=g[i-w+1],p4=g[i+1],p5=g[i+w+1],p6=g[i+w],p7=g[i+w-1],p8=g[i-1],p9=g[i-w-1];
+          const B=p2+p3+p4+p5+p6+p7+p8+p9; if(B<2||B>6)continue;
+          let A=0; if(!p2&&p3)A++; if(!p3&&p4)A++; if(!p4&&p5)A++; if(!p5&&p6)A++; if(!p6&&p7)A++; if(!p7&&p8)A++; if(!p8&&p9)A++; if(!p9&&p2)A++;
+          if(A!==1)continue;
+          if(step===0){ if(p2&&p4&&p6)continue; if(p4&&p6&&p8)continue; }
+          else { if(p2&&p4&&p8)continue; if(p2&&p6&&p8)continue; }
+          rm[cnt++]=i;
+        } }
+      if(cnt){ changed=true; for(let j=0;j<cnt;j++)g[rm[j]]=0; }
+    } }
+  return g;
+}
+const NB8=[[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
+function traceSkeleton(sk,w,h){
+  const idx=(x,y)=>y*w+x; const deg=new Uint8Array(w*h);
+  const nbrs=(x,y)=>{ const r=[]; for(const[dx,dy]of NB8){ const nx=x+dx,ny=y+dy; if(nx>=0&&ny>=0&&nx<w&&ny<h&&sk[idx(nx,ny)])r.push([nx,ny]); } return r; };
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){ if(sk[idx(x,y)]) deg[idx(x,y)]=nbrs(x,y).length; }
+  const used=new Uint8Array(w*h); const polys=[];
+  function walk(sx,sy,fx,fy){ const pts=[[sx,sy]]; let px=sx,py=sy,cx=fx,cy=fy;
+    while(true){ pts.push([cx,cy]); if(deg[idx(cx,cy)]!==2) break; used[idx(cx,cy)]=1;
+      const ns=nbrs(cx,cy).filter(([nx,ny])=>!(nx===px&&ny===py) && !(deg[idx(nx,ny)]===2 && used[idx(nx,ny)]));
+      if(!ns.length) break; px=cx;py=cy;cx=ns[0][0];cy=ns[0][1];
+    } return pts; }
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){ const i=idx(x,y); if(!sk[i]||deg[i]===2)continue;
+    for(const[nx,ny]of nbrs(x,y)){ const j=idx(nx,ny);
+      if(deg[j]!==2){ if(i<j) polys.push([[x,y],[nx,ny]]); continue; }
+      if(used[j])continue; polys.push(walk(x,y,nx,ny));
+    } }
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){ const i=idx(x,y); if(!sk[i]||used[i]||deg[i]!==2)continue;
+    const pts=[[x,y]]; used[i]=1; let px=x,py=y,cur=nbrs(x,y)[0];
+    while(cur){ const[cx,cy]=cur; if(used[idx(cx,cy)])break; pts.push([cx,cy]); used[idx(cx,cy)]=1;
+      const ns=nbrs(cx,cy).filter(([nx,ny])=>!(nx===px&&ny===py)); px=cx;py=cy;cur=ns[0]; }
+    pts.push([x,y]); polys.push(pts);
+  }
+  return polys;
+}
+function rdp(points, eps){
+  const n=points.length; if(n<3||eps<=0)return points.slice();
+  const keep=new Uint8Array(n); keep[0]=keep[n-1]=1; const stack=[[0,n-1]];
+  while(stack.length){ const [a,b]=stack.pop(); const ax=points[a][0],ay=points[a][1],bx=points[b][0],by=points[b][1];
+    const dx=bx-ax,dy=by-ay, len=Math.hypot(dx,dy)||1; let dmax=0,mi=-1;
+    for(let i=a+1;i<b;i++){ const d=Math.abs((points[i][1]-ay)*dx-(points[i][0]-ax)*dy)/len; if(d>dmax){dmax=d;mi=i;} }
+    if(dmax>eps && mi>-1){ keep[mi]=1; stack.push([a,mi]); stack.push([mi,b]); }
+  }
+  const out=[]; for(let i=0;i<n;i++)if(keep[i])out.push(points[i]); return out;
+}
+function simplify(pts, eps){
+  if(pts.length<3||eps<=0)return pts.slice();
+  const closed = pts[0][0]===pts[pts.length-1][0] && pts[0][1]===pts[pts.length-1][1];
+  if(!closed) return rdp(pts, eps);
+  let fi=1, fd=-1; for(let i=1;i<pts.length-1;i++){ const d=Math.hypot(pts[i][0]-pts[0][0], pts[i][1]-pts[0][1]); if(d>fd){fd=d;fi=i;} }
+  const a=rdp(pts.slice(0,fi+1), eps), b=rdp(pts.slice(fi), eps);
+  return a.slice(0,-1).concat(b);
+}
+function rasterCenterline(img, opts){
+  const {bin,w,h}=imageToGrid(img, opts.rMaxDim||2000, opts.rThr==null?128:opts.rThr, !!opts.rInv);
+  const sk=thin(bin,w,h); const chains=traceSkeleton(sk,w,h);
+  const eps=opts.rSimp||0, minC=opts.rMinChain||0, out=[];
+  for(const ch of chains){ if(ch.length<2)continue;
+    let L=0; for(let i=1;i<ch.length;i++)L+=Math.hypot(ch[i][0]-ch[i-1][0],ch[i][1]-ch[i-1][1]);
+    if(minC>0 && L<minC)continue;
+    const s=simplify(ch,eps);
+    out.push(s.map(([x,y])=>[ (x+0.5)/w, 1-(y+0.5)/h ]));
+  }
+  return out;
 }
 
 /* ---------- UI ---------- */
@@ -230,15 +356,18 @@ async function convert(){
   ovl(true,'Convertint la geometria…');
   await new Promise(r=>setTimeout(r,30));
   try{
-    const opts={ units, scale:parseFloat($('inScale').value)||1, tessSteps:parseInt($('inTess').value,10)||10, minLen:parseFloat($('inMinLen').value)||0 };
+    const opts={ units, scale:parseFloat($('inScale').value)||1, tessSteps:parseInt($('inTess').value,10)||10, minLen:parseFloat($('inMinLen').value)||0,
+      raster:rasterOn, rThr:parseInt($('inThr').value,10)||128, rInv:invOn,
+      rMaxDim:parseInt($('inMaxDim').value,10)||2000, rSimp:parseFloat($('inSimp').value)||0, rMinChain:parseFloat($('inMinChain').value)||0 };
+    if(rasterOn) ovl(true,'Vectoritzant el raster (línia mitja)…');
     const {dxf,stats}=await pageToDxf(curPage, opts);
     $('stLines').textContent=stats.lines.toLocaleString(); $('stPl').textContent=stats.plines.toLocaleString();
-    $('stTxt').textContent=stats.texts.toLocaleString(); $('stLay').textContent=stats.layers;
+    $('stTxt').textContent=stats.texts.toLocaleString(); $('stRas').textContent=(stats.rasterPl||0).toLocaleString(); $('stLay').textContent=stats.layers;
     $('stats').style.display='block';
     const blob=new Blob([dxf],{type:'application/dxf'}); const url=URL.createObjectURL(blob);
     const a=document.createElement('a'); a.href=url; a.download=pdfName+(doc.numPages>1?'_p'+curN:'')+'.dxf'; a.click();
     setTimeout(()=>URL.revokeObjectURL(url),4000);
-    foot('DXF generat · '+(dxf.length/1048576).toFixed(1)+' MB · '+stats.lines+' línies, '+stats.plines+' polilínies, '+stats.texts+' textos');
+    foot('DXF generat · '+(dxf.length/1048576).toFixed(1)+' MB · '+stats.lines+' línies, '+stats.plines+' polilínies, '+stats.texts+' textos'+(stats.rasterPl?', '+stats.rasterPl+' raster':''));
   }catch(e){ console.error(e); alert('Error en la conversió.\n'+(e.message||e)); }
   ovl(false);
 }
@@ -276,6 +405,8 @@ $('btnCal').addEventListener('click',toggleCal);
 $('pgPrev').addEventListener('click',()=>{ if(curN>1) renderPage(curN-1); });
 $('pgNext').addEventListener('click',()=>{ if(curN<doc.numPages) renderPage(curN+1); });
 document.querySelectorAll('#segUnits button').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('#segUnits button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); units=b.dataset.u; }));
+document.querySelectorAll('#segRaster button').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('#segRaster button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); rasterOn=b.dataset.r==='on'; }));
+document.querySelectorAll('#segInv button').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('#segInv button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); invOn=b.dataset.i==='on'; }));
 addEventListener('keydown',e=>{ if(e.key==='o'&&!doc&&!/INPUT|TEXTAREA/.test(e.target.tagName)){ e.preventDefault(); fi.click(); } });
 </script>
 <a href="HLP%20Guaita%20PDF%20ConvDXF-ajuda.html" target="_blank" rel="noopener" class="guaita-help-fab" title="Obre l'ajuda d'aquesta aplicació" style="position:fixed;right:18px;bottom:18px;z-index:2147483000;display:inline-flex;align-items:center;gap:8px;background:#C6FF00;color:#0A0E00;font-family:'Space Grotesk',system-ui,-apple-system,sans-serif;font-weight:600;font-size:14px;line-height:1;text-decoration:none;padding:11px 16px;border-radius:24px;box-shadow:0 4px 14px rgba(0,0,0,.35);border:1px solid #0A0E00;"><span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:700;">?</span>Ajuda</a>

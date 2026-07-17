@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guaita 19650 · Gestió d'informació ISO 19650 · SBS BIM Consulting</title>
+<style>
+:root{
+  --bg:#0F4B45; --bg2:#0B3833; --bg3:#082A26; --panel:#113F3A;
+  --acid:#CDF500; --cyan:#39E6D0; --magenta:#FF5CA8; --ink:#EAF7EF;
+  --dim:#9DBEB4; --line:#1E5C54; --danger:#FF6B6B;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",system-ui,sans-serif}
+code,.mono,input.code,td.name{font-family:"Cascadia Code",Consolas,monospace}
+header{display:flex;align-items:center;gap:14px;padding:10px 18px;background:var(--bg3);border-bottom:2px solid var(--acid)}
+header h1{font-size:18px;letter-spacing:.06em;color:var(--acid);font-weight:700}
+header h1 span{color:var(--ink);font-weight:300}
+header .sig{margin-left:auto;font-size:11px;color:var(--dim)}
+nav{display:flex;gap:4px;padding:8px 18px 0;background:var(--bg3)}
+nav button{background:var(--bg2);color:var(--dim);border:1px solid var(--line);border-bottom:none;
+  padding:8px 18px;cursor:pointer;font-size:13px;border-radius:6px 6px 0 0}
+nav button.on{background:var(--bg);color:var(--acid);font-weight:600;border-color:var(--acid)}
+main{padding:16px 18px 40px;max-width:1280px;margin:0 auto}
+section.tab{display:none}
+section.tab.on{display:block}
+h2{font-size:15px;color:var(--acid);margin:18px 0 8px;letter-spacing:.04em;text-transform:uppercase}
+h2:first-child{margin-top:0}
+h3{font-size:13px;color:var(--cyan);margin:12px 0 6px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}}
+label{display:block;font-size:11px;color:var(--dim);margin:8px 0 2px;text-transform:uppercase;letter-spacing:.05em}
+input,select,textarea{width:100%;background:var(--bg2);color:var(--ink);border:1px solid var(--line);
+  border-radius:5px;padding:6px 8px;font-size:13px;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--acid);outline-offset:-1px}
+textarea{min-height:70px;resize:vertical}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{color:var(--cyan);text-align:left;padding:5px 6px;border-bottom:1px solid var(--acid);font-size:11px;
+  text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+td input,td select{padding:4px 6px;font-size:12.5px}
+td.name{color:var(--acid);white-space:nowrap}
+button.btn{background:var(--acid);color:#08302B;border:none;border-radius:5px;padding:7px 14px;
+  font-size:13px;font-weight:600;cursor:pointer;margin:4px 6px 4px 0}
+button.btn:hover{filter:brightness(1.1)}
+button.btn.sec{background:var(--bg2);color:var(--cyan);border:1px solid var(--cyan)}
+button.btn.mag{background:var(--bg2);color:var(--magenta);border:1px solid var(--magenta)}
+button.x{background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;padding:2px 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:2px 10px;font-size:11.5px;color:var(--dim)}
+.chip b{color:var(--acid)}
+pre.tree{background:var(--bg3);border:1px solid var(--line);border-radius:6px;padding:10px 12px;
+  font-size:12.5px;line-height:1.5;overflow-x:auto;color:var(--cyan)}
+svg.gantt{width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:6px}
+.hint{font-size:11.5px;color:var(--dim);margin:4px 0}
+.pattern{font-size:15px;letter-spacing:.03em;color:var(--acid);background:var(--bg3);
+  border:1px dashed var(--acid);border-radius:6px;padding:8px 12px;display:inline-block;margin:6px 0}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-bottom:8px}
+.toolbar .sp{flex:1}
+footer{padding:14px 18px;color:var(--dim);font-size:11px;border-top:1px solid var(--line);text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <h1>GUAITA <span>19650</span></h1>
+  <div class="sig">Gestió d'informació ISO 19650 · SBS BIM Consulting</div>
+</header>
+<nav id="nav">
+  <button data-tab="prj" class="on">Projecte</button>
+  <button data-tab="midp">MIDP / TIDP</button>
+  <button data-tab="bep">BEP</button>
+  <button data-tab="cde">CDE</button>
+</nav>
+<main>
+  <section class="tab on" id="tab-prj"></section>
+  <section class="tab" id="tab-midp"></section>
+  <section class="tab" id="tab-bep"></section>
+  <section class="tab" id="tab-cde"></section>
+</main>
+<footer>Guaita 19650 · dades desades localment al navegador (IndexedDB) · SBS BIM Consulting</footer>
+<script>
+"use strict";
+/* ================= Model ================= */
+const DEF = () => ({
+  code:"PRJ1", name:"", client:"", appointed:"SBS BIM Consulting", version:"1.0",
+  originators:[{code:"SBS",name:"SBS BIM Consulting"},{code:"EST",name:"Consultor d'estructura"},{code:"INS",name:"Consultor d'instal·lacions"}],
+  volumes:[{code:"ZZ",name:"Tot el projecte"},{code:"01",name:"Edifici principal"}],
+  levels:[{code:"ZZ",name:"Tots els nivells"},{code:"00",name:"Planta baixa"},{code:"01",name:"Planta primera"}],
+  types:[{code:"M3",name:"Model 3D"},{code:"DR",name:"Plànol 2D"},{code:"SP",name:"Especificació"},{code:"RP",name:"Informe"},{code:"SH",name:"Llistat / programació"},{code:"CA",name:"Càlcul"}],
+  disciplines:[{code:"A",name:"Arquitectura"},{code:"S",name:"Estructura"},{code:"M",name:"Inst. mecàniques"},{code:"E",name:"Inst. elèctriques"},{code:"C",name:"Civil / urbanització"},{code:"Z",name:"General"}],
+  states:[{code:"S0",name:"WIP"},{code:"S1",name:"Compartit per coordinació"},{code:"S2",name:"Compartit per informació"},{code:"S3",name:"Compartit per revisió"},{code:"S4",name:"Apte per aprovació de fase"},{code:"A1",name:"Publicat / autoritzat"},{code:"B1",name:"Publicat parcialment"}],
+  milestones:[{code:"F1",name:"Avantprojecte",date:""},{code:"F2",name:"Projecte bàsic",date:""},{code:"F3",name:"Projecte executiu",date:""},{code:"F4",name:"Construcció",date:""},{code:"F5",name:"As-built / AIM",date:""}],
+  containers:[],
+  bep:{eir:"",objectives:"",federation:"",infoStd:"",cdeDesc:"",
+    software:[{name:"Revit",ver:"2026",use:"Modelatge arquitectura"},{name:"IFC (esquema 4)",ver:"4.0",use:"Intercanvi obert"}],
+    raci:[{task:"Producció del model d'arquitectura",r:"SBS",a:"Director BIM",c:"EST, INS",i:"Client"},
+          {task:"Coordinació i detecció d'interferències",r:"Director BIM",a:"SBS",c:"Tots els equips",i:"Client"}]},
+  cde:{wipPerOrg:true,disciplineSub:false,pubPerMilestone:true,resources:true,extra:""}
+});
+let P = DEF();
+let uid = () => Math.random().toString(36).slice(2,9);
+
+/* ================= IndexedDB ================= */
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open("guaita19650",1);
+  r.onupgradeneeded=()=>r.result.createObjectStore("prj");
+  r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function saveDB(){try{const db=await idb();db.transaction("prj","readwrite").objectStore("prj").put(P,"current");}catch(e){console.warn(e);}}
+async function loadDB(){try{const db=await idb();return new Promise(res=>{
+  const q=db.transaction("prj").objectStore("prj").get("current");
+  q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null);});}catch(e){return null;}}
+let saveT=null; const save=()=>{clearTimeout(saveT);saveT=setTimeout(saveDB,400);};
+
+/* ================= Utilitats ================= */
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function setPath(obj,path,val){const p=path.split(".");let o=obj;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=val;}
+function getPath(obj,path){return path.split(".").reduce((o,k)=>o?.[k],obj);}
+function dl(name,data,type){const b=data instanceof Blob?data:new Blob([data],{type});
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000);}
+function buildName(c,proj){const p=proj||P;
+  return [p.code,c.org,c.vol,c.lvl,c.typ,c.dis,c.num].join("-");}
+function namePattern(){return P.code+"-[Originador]-[Volum]-[Nivell]-[Tipus]-[Disciplina]-[Número]";}
+function msByCode(code){return P.milestones.find(m=>m.code===code);}
+function midpGroups(containers){const g={};(containers||P.containers).forEach(c=>{(g[c.org]=g[c.org]||[]).push(c);});return g;}
+
+/* ================= ZIP (només directoris, store) ================= */
+function makeZip(paths){
+  const enc=new TextEncoder(),chunks=[],central=[];let off=0;
+  const u16=v=>[v&255,(v>>8)&255], u32=v=>[v&255,(v>>8)&255,(v>>16)&255,(v>>>24)&255];
+  for(const p of paths){
+    const name=enc.encode(p.endsWith("/")?p:p+"/");
+    const lh=new Uint8Array([...u32(0x04034b50),...u16(20),...u16(0x800),...u16(0),...u16(0),...u16(0x21),
+      ...u32(0),...u32(0),...u32(0),...u16(name.length),...u16(0)]);
+    chunks.push(lh,name);
+    const ch=new Uint8Array([...u32(0x02014b50),...u16(20),...u16(20),...u16(0x800),...u16(0),...u16(0),...u16(0x21),
+      ...u32(0),...u32(0),...u32(0),...u16(name.length),...u16(0),...u16(0),...u16(0),...u16(0),
+      ...u32(0x10),...u32(off)]);
+    central.push(ch,name);
+    off+=lh.length+name.length;
+  }
+  let cs=0;central.forEach(a=>cs+=a.length);
+  const end=new Uint8Array([...u32(0x06054b50),...u16(0),...u16(0),...u16(paths.length),...u16(paths.length),...u32(cs),...u32(off),...u16(0)]);
+  const out=new Uint8Array(off+cs+end.length);let pos=0;
+  for(const a of[...chunks,...central,end]){out.set(a,pos);pos+=a.length;}
+  return out;
+}
+
+/* ================= Arbre CDE ================= */
+function cdeTree(){
+  const root=(P.code+(P.name?"_"+P.name.replace(/[^\wÀ-ÿ-]+/g,"_"):""))+"/";
+  const t=[root];
+  if(P.cde.resources) t.push(root+"00_Recursos/",root+"00_Recursos/Plantilles/",root+"00_Recursos/Estàndards/");
+  t.push(root+"01_WIP/");
+  if(P.cde.wipPerOrg) P.originators.forEach(o=>{
+    const base=root+"01_WIP/"+o.code+"/"; t.push(base);
+    if(P.cde.disciplineSub) P.disciplines.forEach(d=>t.push(base+d.code+"_"+d.name.replace(/[^\wÀ-ÿ-]+/g,"_")+"/"));
+  });
+  t.push(root+"02_Compartit/");
+  t.push(root+"03_Publicat/");
+  if(P.cde.pubPerMilestone) P.milestones.forEach(m=>t.push(root+"03_Publicat/"+m.code+"_"+m.name.replace(/[^\wÀ-ÿ-]+/g,"_")+"/"));
+  t.push(root+"04_Arxivat/");
+  P.cde.extra.split(/\n+/).map(s=>s.trim()).filter(Boolean).forEach(s=>t.push(root+s.replace(/\/+$/,"")+"/"));
+  return t;
+}
+function treeAscii(paths){
+  return paths.map(p=>{const parts=p.replace(/\/$/,"").split("/");
+    return "  ".repeat(parts.length-1)+(parts.length>1?"└─ ":"")+parts[parts.length-1]+"/";}).join("\n");
+}
+
+/* ================= Render: pestanyes ================= */
+document.getElementById("nav").addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll("section.tab").forEach(s=>s.classList.toggle("on",s.id==="tab-"+b.dataset.tab));
+  renderTab(b.dataset.tab);
+});
+function renderTab(t){({prj:renderPrj,midp:renderMidp,bep:renderBep,cde:renderCde})[t]();}
+
+/* ---------- Projecte ---------- */
+function listEditor(key,cols){
+  const rows=P[key].map((r,i)=>"<tr>"+cols.map(c=>
+    `<td><input class="code" data-list="${key}" data-i="${i}" data-f="${c.f}" type="${c.type||"text"}" value="${esc(r[c.f])}"></td>`).join("")+
+    `<td><button class="x" data-del="${key}" data-i="${i}" title="Elimina">✕</button></td></tr>`).join("");
+  return `<table><thead><tr>${cols.map(c=>`<th>${c.h}</th>`).join("")}<th></th></tr></thead>
+  <tbody>${rows}</tbody></table>
+  <button class="btn sec" data-add="${key}">+ Afegeix</button>`;
+}
+function renderPrj(){
+  const el=document.getElementById("tab-prj");
+  el.innerHTML=`
+  <div class="toolbar">
+    <button class="btn" id="btn-export-json">Desa projecte (.json)</button>
+    <button class="btn sec" id="btn-import-json">Obre projecte…</button>
+    <input type="file" id="file-json" accept=".json" style="display:none">
+    <span class="sp"></span>
+    <button class="btn mag" id="btn-reset">Projecte nou</button>
+  </div>
+  <div class="card"><h2>Dades del projecte</h2>
+    <div class="grid3">
+      <div><label>Codi de projecte</label><input class="code" data-bind="code" value="${esc(P.code)}"></div>
+      <div><label>Nom</label><input data-bind="name" value="${esc(P.name)}"></div>
+      <div><label>Client (part contractant)</label><input data-bind="client" value="${esc(P.client)}"></div>
+      <div><label>Part contractada principal</label><input data-bind="appointed" value="${esc(P.appointed)}"></div>
+      <div><label>Versió del pla</label><input data-bind="version" value="${esc(P.version)}"></div>
+    </div>
+    <h3>Convenció de nomenclatura (ISO 19650-2 / UNE-EN 17412)</h3>
+    <div class="pattern mono" id="pattern">${esc(namePattern())}</div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h2>Originadors (equips de tasca)</h2>${listEditor("originators",[{h:"Codi",f:"code"},{h:"Nom",f:"name"}])}</div>
+    <div class="card"><h2>Volums / zones</h2>${listEditor("volumes",[{h:"Codi",f:"code"},{h:"Nom",f:"name"}])}</div>
+    <div class="card"><h2>Nivells</h2>${listEditor("levels",[{h:"Codi",f:"code"},{h:"Nom",f:"name"}])}</div>
+    <div class="card"><h2>Tipus de document</h2>${listEditor("types",[{h:"Codi",f:"code"},{h:"Nom",f:"name"}])}</div>
+    <div class="card"><h2>Disciplines / rols</h2>${listEditor("disciplines",[{h:"Codi",f:"code"},{h:"Nom",f:"name"}])}</div>
+    <div class="card"><h2>Codis d'estat</h2>${listEditor("states",[{h:"Codi",f:"code"},{h:"Descripció",f:"name"}])}</div>
+    <div class="card"><h2>Fites de lliurament</h2>${listEditor("milestones",[{h:"Codi",f:"code"},{h:"Nom",f:"name"},{h:"Data",f:"date",type:"date"}])}</div>
+  </div>`;
+  document.getElementById("btn-export-json").onclick=()=>dl((P.code||"projecte")+"_guaita19650.json",JSON.stringify(P,null,2),"application/json");
+  document.getElementById("btn-import-json").onclick=()=>document.getElementById("file-json").click();
+  document.getElementById("file-json").onchange=e=>{const f=e.target.files[0];if(!f)return;
+    f.text().then(t=>{try{P=Object.assign(DEF(),JSON.parse(t));save();renderPrj();}catch(err){alert("JSON no vàlid: "+err.message);}});};
+  document.getElementById("btn-reset").onclick=()=>{if(confirm("Vols descartar el projecte actual i començar-ne un de nou?")){P=DEF();save();renderPrj();}};
+}
+
+/* delegació d'edició de llistes i camps simples */
+document.querySelector("main").addEventListener("input",e=>{
+  const t=e.target;
+  if(t.dataset.bind){setPath(P,t.dataset.bind,t.value);
+    if(t.dataset.bind==="code"){const pt=document.getElementById("pattern");if(pt)pt.textContent=namePattern();}
+    save();return;}
+  if(t.dataset.list){P[t.dataset.list][+t.dataset.i][t.dataset.f]=t.value;save();return;}
+  if(t.dataset.cid){const c=P.containers.find(x=>x.id===t.dataset.cid);if(!c)return;
+    c[t.dataset.f]=t.value;
+    const nm=document.getElementById("nm-"+c.id);if(nm)nm.textContent=buildName(c);
+    save();return;}
+  if(t.dataset.sw!==undefined){P.bep.software[+t.dataset.sw][t.dataset.f]=t.value;save();return;}
+  if(t.dataset.raci!==undefined){P.bep.raci[+t.dataset.raci][t.dataset.f]=t.value;save();return;}
+  if(t.dataset.cde){P.cde[t.dataset.cde]=t.type==="checkbox"?t.checked:t.value;save();refreshTree();return;}
+});
+document.querySelector("main").addEventListener("click",e=>{
+  const t=e.target;
+  if(t.dataset.add){const key=t.dataset.add;
+    P[key].push(key==="milestones"?{code:"",name:"",date:""}:{code:"",name:""});save();renderPrj();return;}
+  if(t.dataset.del){P[t.dataset.del].splice(+t.dataset.i,1);save();renderPrj();return;}
+  if(t.dataset.cdel){P.containers=P.containers.filter(c=>c.id!==t.dataset.cdel);save();renderMidp();return;}
+  if(t.dataset.swdel){P.bep.software.splice(+t.dataset.swdel,1);save();renderBep();return;}
+  if(t.dataset.racidel){P.bep.raci.splice(+t.dataset.racidel,1);save();renderBep();return;}
+});
+
+/* ---------- MIDP / TIDP ---------- */
+function optSel(list,val){return list.map(o=>`<option value="${esc(o.code)}"${o.code===val?" selected":""}>${esc(o.code)} · ${esc(o.name)}</option>`).join("");}
+function nextNum(){const n=P.containers.length+1;return String(n).padStart(4,"0");}
+function renderMidp(){
+  const el=document.getElementById("tab-midp");
+  const filt=el.dataset.filt||"";
+  const rows=P.containers.filter(c=>!filt||c.org===filt).map(c=>`<tr>
+    <td class="name" id="nm-${c.id}">${esc(buildName(c))}</td>
+    <td><input data-cid="${c.id}" data-f="title" value="${esc(c.title)}" placeholder="Títol"></td>
+    <td><select data-cid="${c.id}" data-f="org">${optSel(P.originators,c.org)}</select></td>
+    <td><select data-cid="${c.id}" data-f="vol">${optSel(P.volumes,c.vol)}</select></td>
+    <td><select data-cid="${c.id}" data-f="lvl">${optSel(P.levels,c.lvl)}</select></td>
+    <td><select data-cid="${c.id}" data-f="typ">${optSel(P.types,c.typ)}</select></td>
+    <td><select data-cid="${c.id}" data-f="dis">${optSel(P.disciplines,c.dis)}</select></td>
+    <td style="width:64px"><input class="code" data-cid="${c.id}" data-f="num" value="${esc(c.num)}"></td>
+    <td><select data-cid="${c.id}" data-f="ms">${P.milestones.map(m=>`<option value="${esc(m.code)}"${m.code===c.ms?" selected":""}>${esc(m.code)}</option>`).join("")}</select></td>
+    <td style="width:70px"><input class="code" data-cid="${c.id}" data-f="fmt" value="${esc(c.fmt)}"></td>
+    <td><input data-cid="${c.id}" data-f="loin" value="${esc(c.loin)}" placeholder="LOIN"></td>
+    <td><select data-cid="${c.id}" data-f="state">${optSel(P.states,c.state)}</select></td>
+    <td style="width:60px"><input class="code" data-cid="${c.id}" data-f="rev" value="${esc(c.rev)}"></td>
+    <td><button class="x" data-cdel="${c.id}" title="Elimina">✕</button></td>
+  </tr>`).join("");
+  const chips=Object.entries(midpGroups()).map(([o,cs])=>`<span class="chip"><b>${esc(o)}</b> ${cs.length} contenidors</span>`).join("");
+  el.innerHTML=`
+  <div class="toolbar">
+    <button class="btn" id="btn-add-c">+ Contenidor d'informació</button>
+    <select id="sel-filt" style="width:auto"><option value="">MIDP · tots els equips</option>
+      ${P.originators.map(o=>`<option value="${esc(o.code)}"${o.code===filt?" selected":""}>TIDP · ${esc(o.code)}</option>`).join("")}</select>
+    <span class="sp"></span>
+    <button class="btn sec" id="btn-csv">Exporta CSV</button>
+    <button class="btn sec" id="btn-rep">Informe HTML</button>
+  </div>
+  <div class="chips">${chips||'<span class="chip">Encara no hi ha contenidors</span>'}</div>
+  <div class="card" style="overflow-x:auto">
+  <table><thead><tr><th>Contenidor</th><th>Títol</th><th>Orig.</th><th>Vol.</th><th>Niv.</th><th>Tipus</th><th>Disc.</th><th>Núm.</th><th>Fita</th><th>Format</th><th>LOIN</th><th>Estat</th><th>Rev.</th><th></th></tr></thead>
+  <tbody>${rows||'<tr><td colspan="14" class="hint">Afegeix el primer contenidor per començar el MIDP.</td></tr>'}</tbody></table>
+  </div>
+  <h2>Planificació per fites</h2>
+  <div class="card">${ganttSvg()}</div>`;
+  document.getElementById("btn-add-c").onclick=()=>{
+    P.containers.push({id:uid(),title:"",org:P.originators[0]?.code||"",vol:P.volumes[0]?.code||"ZZ",
+      lvl:P.levels[0]?.code||"ZZ",typ:P.types[0]?.code||"M3",dis:P.disciplines[0]?.code||"A",
+      num:nextNum(),ms:P.milestones[0]?.code||"",fmt:"IFC",loin:"",state:"S0",rev:"P01"});
+    save();renderMidp();};
+  document.getElementById("sel-filt").onchange=e=>{el.dataset.filt=e.target.value;renderMidp();};
+  document.getElementById("btn-csv").onclick=exportCsv;
+  document.getElementById("btn-rep").onclick=exportMidpReport;
+}
+function ganttSvg(){
+  const ms=P.milestones.filter(m=>m.date).sort((a,b)=>a.date<b.date?-1:1);
+  if(ms.length<1)return '<p class="hint">Posa dates a les fites (pestanya Projecte) per veure la línia de temps.</p>';
+  const t0=new Date(ms[0].date).getTime(),t1=new Date(ms[ms.length-1].date).getTime()||t0+1;
+  const W=1100,H=90+P.originators.length*0,pad=60;
+  const x=d=>ms.length===1?W/2:pad+(new Date(d).getTime()-t0)/((t1-t0)||1)*(W-2*pad);
+  const counts=Object.fromEntries(ms.map(m=>[m.code,P.containers.filter(c=>c.ms===m.code).length]));
+  const maxC=Math.max(1,...Object.values(counts));
+  let s=`<svg class="gantt" viewBox="0 0 ${W} ${H+70}" role="img" aria-label="Línia de temps de fites">`;
+  s+=`<line x1="${pad}" y1="${H}" x2="${W-pad}" y2="${H}" stroke="#1E5C54" stroke-width="2"/>`;
+  ms.forEach(m=>{const X=x(m.date),h=counts[m.code]/maxC*60;
+    s+=`<rect x="${X-14}" y="${H-h}" width="28" height="${h}" fill="#CDF500" opacity="0.85"/>`;
+    s+=`<circle cx="${X}" cy="${H}" r="4" fill="#39E6D0"/>`;
+    s+=`<text x="${X}" y="${H-h-6}" fill="#EAF7EF" font-size="12" text-anchor="middle">${counts[m.code]}</text>`;
+    s+=`<text x="${X}" y="${H+18}" fill="#CDF500" font-size="12" text-anchor="middle" font-weight="bold">${esc(m.code)}</text>`;
+    s+=`<text x="${X}" y="${H+34}" fill="#9DBEB4" font-size="10.5" text-anchor="middle">${esc(m.date)}</text>`;
+    s+=`<text x="${X}" y="${H+50}" fill="#9DBEB4" font-size="10.5" text-anchor="middle">${esc(m.name)}</text>`;});
+  return s+"</svg>";
+}
+function exportCsv(){
+  const head=["Contenidor","Títol","Originador","Volum","Nivell","Tipus","Disciplina","Fita","Data fita","Format","LOIN","Estat","Revisió"];
+  const lines=[head.join(";")].concat(P.containers.map(c=>[buildName(c),c.title,c.org,c.vol,c.lvl,c.typ,c.dis,c.ms,msByCode(c.ms)?.date||"",c.fmt,c.loin,c.state,c.rev]
+    .map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")));
+  dl((P.code||"MIDP")+"_MIDP.csv","\uFEFF"+lines.join("\r\n"),"text/csv;charset=utf-8");
+}
+function midpTableHtml(cs){
+  return `<table><thead><tr><th>Contenidor</th><th>Títol</th><th>Fita</th><th>Data</th><th>Format</th><th>LOIN</th><th>Estat</th><th>Rev.</th></tr></thead><tbody>`+
+  cs.map(c=>`<tr><td class="mono">${esc(buildName(c))}</td><td>${esc(c.title)}</td><td>${esc(c.ms)}</td><td>${esc(msByCode(c.ms)?.date||"")}</td><td>${esc(c.fmt)}</td><td>${esc(c.loin)}</td><td>${esc(c.state)}</td><td>${esc(c.rev)}</td></tr>`).join("")+"</tbody></table>";
+}
+function reportShell(title,body){
+  return `<!DOCTYPE html><html lang="ca"><head><meta charset="UTF-8"><title>${esc(title)}</title><style>
+  body{font:13px/1.5 "Segoe UI",sans-serif;color:#123;max-width:960px;margin:24px auto;padding:0 16px}
+  h1{color:#0F4B45;border-bottom:3px solid #CDF500;padding-bottom:6px}h2{color:#0F4B45;margin-top:22px}
+  table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
+  th{background:#0F4B45;color:#CDF500;text-align:left;padding:5px 7px}td{border-bottom:1px solid #cdd;padding:4px 7px}
+  .mono{font-family:Consolas,monospace}.meta{color:#567;font-size:11.5px}
+  footer{margin-top:30px;color:#789;font-size:11px;border-top:1px solid #cdd;padding-top:8px}
+  @media print{body{margin:8mm}}</style></head><body>
+  <h1>${esc(title)}</h1><p class="meta">Projecte ${esc(P.code)} · ${esc(P.name)} · Client: ${esc(P.client)} · Generat el ${new Date().toLocaleDateString("ca")}</p>
+  ${body}<footer>Generat amb Guaita 19650 · SBS BIM Consulting</footer></body></html>`;
+}
+function exportMidpReport(){
+  const g=midpGroups();
+  let body=`<h2>MIDP · Pla mestre de lliurament d'informació</h2>${midpTableHtml(P.containers)}`;
+  for(const[o,cs]of Object.entries(g)){const org=P.originators.find(x=>x.code===o);
+    body+=`<h2>TIDP · ${esc(o)} ${esc(org?.name||"")}</h2>${midpTableHtml(cs)}`;}
+  dl((P.code||"PRJ")+"_MIDP_TIDP.html",reportShell("MIDP / TIDP · "+P.code,body),"text/html");
+}
+
+/* ---------- BEP ---------- */
+function renderBep(){
+  const el=document.getElementById("tab-bep");
+  const sw=P.bep.software.map((s,i)=>`<tr>
+    <td><input data-sw="${i}" data-f="name" value="${esc(s.name)}"></td>
+    <td><input data-sw="${i}" data-f="ver" value="${esc(s.ver)}"></td>
+    <td><input data-sw="${i}" data-f="use" value="${esc(s.use)}"></td>
+    <td><button class="x" data-swdel="${i}">✕</button></td></tr>`).join("");
+  const rc=P.bep.raci.map((r,i)=>`<tr>
+    <td><input data-raci="${i}" data-f="task" value="${esc(r.task)}"></td>
+    <td><input data-raci="${i}" data-f="r" value="${esc(r.r)}"></td>
+    <td><input data-raci="${i}" data-f="a" value="${esc(r.a)}"></td>
+    <td><input data-raci="${i}" data-f="c" value="${esc(r.c)}"></td>
+    <td><input data-raci="${i}" data-f="i" value="${esc(r.i)}"></td>
+    <td><button class="x" data-racidel="${i}">✕</button></td></tr>`).join("");
+  el.innerHTML=`
+  <div class="toolbar">
+    <button class="btn" id="btn-bep-md">Exporta Markdown</button>
+    <button class="btn sec" id="btn-bep-html">Exporta HTML imprimible</button>
+  </div>
+  <div class="card"><h2>1 · Resposta a l'EIR</h2>
+    <p class="hint">Com respon la part contractada als requisits d'intercanvi d'informació del client.</p>
+    <textarea data-bind="bep.eir">${esc(P.bep.eir)}</textarea></div>
+  <div class="card"><h2>2 · Objectius i usos BIM</h2>
+    <textarea data-bind="bep.objectives">${esc(P.bep.objectives)}</textarea></div>
+  <div class="card"><h2>3 · Matriu de responsabilitats (RACI)</h2>
+    <table><thead><tr><th>Activitat</th><th>Responsable</th><th>Aprovador</th><th>Consultats</th><th>Informats</th><th></th></tr></thead>
+    <tbody>${rc}</tbody></table>
+    <button class="btn sec" id="btn-raci-add">+ Activitat</button></div>
+  <div class="card"><h2>4 · Estratègia de federació</h2>
+    <textarea data-bind="bep.federation">${esc(P.bep.federation)}</textarea></div>
+  <div class="card"><h2>5 · Estàndards i mètodes de producció</h2>
+    <textarea data-bind="bep.infoStd">${esc(P.bep.infoStd)}</textarea></div>
+  <div class="card"><h2>6 · Programari</h2>
+    <table><thead><tr><th>Programa</th><th>Versió</th><th>Ús</th><th></th></tr></thead><tbody>${sw}</tbody></table>
+    <button class="btn sec" id="btn-sw-add">+ Programa</button></div>
+  <div class="card"><h2>7 · CDE (descripció)</h2>
+    <p class="hint">La nomenclatura, els codis d'estat i l'estructura de carpetes s'inclouen automàticament a l'exportació des de les pestanyes Projecte i CDE.</p>
+    <textarea data-bind="bep.cdeDesc">${esc(P.bep.cdeDesc)}</textarea></div>`;
+  document.getElementById("btn-sw-add").onclick=()=>{P.bep.software.push({name:"",ver:"",use:""});save();renderBep();};
+  document.getElementById("btn-raci-add").onclick=()=>{P.bep.raci.push({task:"",r:"",a:"",c:"",i:""});save();renderBep();};
+  document.getElementById("btn-bep-md").onclick=()=>dl((P.code||"PRJ")+"_BEP.md",bepMarkdown(),"text/markdown");
+  document.getElementById("btn-bep-html").onclick=()=>dl((P.code||"PRJ")+"_BEP.html",bepHtml(),"text/html");
+}
+function mdTable(head,rows){
+  return "| "+head.join(" | ")+" |\n|"+head.map(()=>"---").join("|")+"|\n"+
+    rows.map(r=>"| "+r.map(v=>String(v??"").replace(/\|/g,"\\|"))
+    .join(" | ")+" |").join("\n");
+}
+function bepMarkdown(){
+  const g=midpGroups();
+  let md=`# BEP · Pla d'execució BIM\n\n**Projecte:** ${P.code} · ${P.name}\n**Client:** ${P.client}\n**Part contractada principal:** ${P.appointed}\n**Versió:** ${P.version} · ${new Date().toLocaleDateString("ca")}\n\n`;
+  md+=`## 1. Resposta a l'EIR\n\n${P.bep.eir||"_Pendent._"}\n\n## 2. Objectius i usos BIM\n\n${P.bep.objectives||"_Pendent._"}\n\n`;
+  md+="## 3. Matriu de responsabilitats\n\n"+mdTable(["Activitat","R","A","C","I"],P.bep.raci.map(r=>[r.task,r.r,r.a,r.c,r.i]))+"\n\n";
+  md+=`## 4. Estratègia de federació\n\n${P.bep.federation||"_Pendent._"}\n\n## 5. Estàndards i mètodes\n\n${P.bep.infoStd||"_Pendent._"}\n\n`;
+  md+="## 6. Programari\n\n"+mdTable(["Programa","Versió","Ús"],P.bep.software.map(s=>[s.name,s.ver,s.use]))+"\n\n";
+  md+=`## 7. Convenció de nomenclatura\n\nPatró: \`${namePattern()}\`\n\n`;
+  md+="**Originadors:** "+P.originators.map(o=>`${o.code} (${o.name})`).join(", ")+"\n\n";
+  md+="**Volums:** "+P.volumes.map(o=>`${o.code} (${o.name})`).join(", ")+"\n\n";
+  md+="**Nivells:** "+P.levels.map(o=>`${o.code} (${o.name})`).join(", ")+"\n\n";
+  md+="**Tipus:** "+P.types.map(o=>`${o.code} (${o.name})`).join(", ")+"\n\n";
+  md+="**Disciplines:** "+P.disciplines.map(o=>`${o.code} (${o.name})`).join(", ")+"\n\n";
+  md+="## 8. CDE\n\n"+(P.bep.cdeDesc?P.bep.cdeDesc+"\n\n":"")+
+    "**Codis d'estat:** "+P.states.map(s=>`${s.code} (${s.name})`).join(", ")+"\n\n"+
+    "Estructura de carpetes:\n\n```\n"+treeAscii(cdeTree())+"\n```\n\n";
+  md+="## 9. MIDP\n\n"+mdTable(["Contenidor","Títol","Fita","Data","Format","LOIN"],
+    P.containers.map(c=>[buildName(c),c.title,c.ms,msByCode(c.ms)?.date||"",c.fmt,c.loin]))+"\n\n";
+  for(const[o,cs]of Object.entries(g))
+    md+=`### TIDP · ${o}\n\n`+mdTable(["Contenidor","Títol","Fita"],cs.map(c=>[buildName(c),c.title,c.ms]))+"\n\n";
+  md+="---\n\n_Generat amb Guaita 19650 · SBS BIM Consulting_\n";
+  return md;
+}
+function bepHtml(){
+  const raci=`<table><thead><tr><th>Activitat</th><th>R</th><th>A</th><th>C</th><th>I</th></tr></thead><tbody>`+
+    P.bep.raci.map(r=>`<tr><td>${esc(r.task)}</td><td>${esc(r.r)}</td><td>${esc(r.a)}</td><td>${esc(r.c)}</td><td>${esc(r.i)}</td></tr>`).join("")+"</tbody></table>";
+  const sw=`<table><thead><tr><th>Programa</th><th>Versió</th><th>Ús</th></tr></thead><tbody>`+
+    P.bep.software.map(s=>`<tr><td>${esc(s.name)}</td><td>${esc(s.ver)}</td><td>${esc(s.use)}</td></tr>`).join("")+"</tbody></table>";
+  const para=t=>esc(t||"Pendent.").split(/\n{2,}/).map(p=>`<p>${p.replace(/\n/g,"<br>")}</p>`).join("");
+  const body=`<h2>1. Resposta a l'EIR</h2>${para(P.bep.eir)}
+  <h2>2. Objectius i usos BIM</h2>${para(P.bep.objectives)}
+  <h2>3. Matriu de responsabilitats</h2>${raci}
+  <h2>4. Estratègia de federació</h2>${para(P.bep.federation)}
+  <h2>5. Estàndards i mètodes</h2>${para(P.bep.infoStd)}
+  <h2>6. Programari</h2>${sw}
+  <h2>7. Convenció de nomenclatura</h2><p class="mono">${esc(namePattern())}</p>
+  <p><b>Originadors:</b> ${esc(P.originators.map(o=>o.code+" ("+o.name+")").join(", "))}</p>
+  <p><b>Disciplines:</b> ${esc(P.disciplines.map(o=>o.code+" ("+o.name+")").join(", "))}</p>
+  <h2>8. CDE</h2>${para(P.bep.cdeDesc)}
+  <p><b>Codis d'estat:</b> ${esc(P.states.map(s=>s.code+" ("+s.name+")").join(", "))}</p>
+  <pre class="mono" style="background:#f2f6f4;padding:10px;border:1px solid #cdd">${esc(treeAscii(cdeTree()))}</pre>
+  <h2>9. MIDP</h2>${midpTableHtml(P.containers)}`;
+  return reportShell("BEP · Pla d'execució BIM · "+P.code,body);
+}
+
+/* ---------- CDE ---------- */
+function renderCde(){
+  const el=document.getElementById("tab-cde");
+  el.innerHTML=`
+  <div class="card"><h2>Generador d'estructura de carpetes</h2>
+    <div class="grid2">
+      <div>
+        <label><input type="checkbox" data-cde="resources" ${P.cde.resources?"checked":""} style="width:auto;margin-right:6px">Carpeta 00_Recursos (plantilles i estàndards)</label>
+        <label><input type="checkbox" data-cde="wipPerOrg" ${P.cde.wipPerOrg?"checked":""} style="width:auto;margin-right:6px">WIP separat per originador</label>
+        <label><input type="checkbox" data-cde="disciplineSub" ${P.cde.disciplineSub?"checked":""} style="width:auto;margin-right:6px">Subcarpetes per disciplina dins del WIP</label>
+        <label><input type="checkbox" data-cde="pubPerMilestone" ${P.cde.pubPerMilestone?"checked":""} style="width:auto;margin-right:6px">Publicat organitzat per fites</label>
+        <label>Carpetes addicionals (una per línia, rutes relatives)</label>
+        <textarea data-cde="extra" placeholder="05_Contractació/Ofertes">${esc(P.cde.extra)}</textarea>
+      </div>
+      <div>
+        <label>Vista prèvia</label>
+        <pre class="tree" id="cde-tree"></pre>
+      </div>
+    </div>
+    <button class="btn" id="btn-zip">Descarrega .zip (carpetes buides)</button>
+    <button class="btn sec" id="btn-bat">Script Windows (.bat)</button>
+    <button class="btn sec" id="btn-sh">Script Linux/macOS (.sh)</button>
+  </div>
+  <div class="card"><h2>Estats del CDE (ISO 19650-1)</h2>
+    <p class="hint">WIP → Compartit → Publicat → Arxivat. Els codis d'estat es configuren a la pestanya Projecte.</p>
+    <div class="chips">${P.states.map(s=>`<span class="chip"><b>${esc(s.code)}</b> ${esc(s.name)}</span>`).join("")}</div>
+  </div>`;
+  refreshTree();
+  document.getElementById("btn-zip").onclick=()=>dl((P.code||"CDE")+"_CDE.zip",new Blob([makeZip(cdeTree())],{type:"application/zip"}));
+  document.getElementById("btn-bat").onclick=()=>dl("crea_cde.bat","@echo off\r\nchcp 65001>nul\r\n"+cdeTree().map(p=>'mkdir "'+p.replace(/\/$/,"").replace(/\//g,"\\")+'"').join("\r\n")+"\r\necho Estructura CDE creada.\r\n","text/plain");
+  document.getElementById("btn-sh").onclick=()=>dl("crea_cde.sh","#!/bin/sh\n"+cdeTree().map(p=>"mkdir -p '"+p.replace(/'/g,"'\\''")+"'").join("\n")+"\necho 'Estructura CDE creada.'\n","text/plain");
+}
+function refreshTree(){const pre=document.getElementById("cde-tree");if(pre)pre.textContent=treeAscii(cdeTree());}
+
+/* ---------- Inici ---------- */
+(async()=>{const st=await loadDB();if(st)P=Object.assign(DEF(),st);renderPrj();})();
+
+/* exposa per a tests */
+if(typeof window!=="undefined")window.G19650={buildName,makeZip,cdeTree,bepMarkdown,midpGroups,treeAscii,get P(){return P;},set P(v){P=v;}};
+</script>
+</body>
+</html>
