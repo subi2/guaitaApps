@@ -1,0 +1,2074 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>Guaita Fitxers</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--groc:#e8ff2b;--fons:#16181c;--panell:#1f2228;--vora:#31353d;--text:#e8eaee;--mut:#9aa0ab}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;font:14px/1.45 "Segoe UI",system-ui,sans-serif;background:var(--fons);color:var(--text);display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:baseline;gap:14px;padding:14px 20px;border-bottom:2px solid var(--groc)}
+header h1{margin:0;font-size:20px;letter-spacing:.5px}
+header h1 span{color:var(--groc)}
+header small{color:var(--mut)}
+#disposicio{display:flex;align-items:stretch;flex:1;min-height:0}
+#arbre{width:270px;flex:none;background:var(--panell);border-right:1px solid var(--vora);font-size:13px;display:flex;flex-direction:column;min-height:0}
+#arbrecos,#arbre2cos{flex:1;overflow:auto;padding:8px 8px 4px}
+.caparbre,.capdesti{padding:10px 8px 8px;border-bottom:1px solid var(--vora);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.caparbre #arrel,.capdesti #triadesti{flex:1;min-width:120px}
+.caparbre #cami,#destinom{flex-basis:100%;color:var(--mut);font-size:11.5px;font-family:Consolas,monospace;word-break:break-all;padding:2px}
+.groc{background:var(--groc)!important;color:#111!important;border-color:var(--groc)!important;font-weight:700}
+.navdesti{display:flex;gap:4px}
+#arbre ul{list-style:none;margin:0;padding-left:14px}
+#arbrecos>ul{padding-left:0}
+#arbre li{margin:1px 0}
+#arbre .node{display:flex;align-items:center;gap:4px;padding:2px 6px;border-radius:5px;cursor:pointer;white-space:nowrap}
+#arbre .node:hover{background:var(--fons)}
+#arbre .node.actiu{background:var(--groc);color:#111;font-weight:600}
+#arbre .fletxa,#arbre2 .fletxa{width:14px;flex:none;text-align:center;color:var(--mut)}
+#arbre2{width:250px;flex:none;background:var(--panell);border-left:1px solid var(--vora);font-size:13px;display:flex;flex-direction:column;min-height:0}
+#arbre2 ul{list-style:none;margin:0;padding-left:14px}
+#arbre2cos>ul{padding-left:0}
+#arbre2 li{margin:1px 0}
+#arbre2 .node{display:flex;align-items:center;gap:4px;padding:2px 6px;border-radius:5px;cursor:pointer;white-space:nowrap}
+#arbre2 .node:hover{background:var(--fons)}
+#arbre2 .node.actiu{background:var(--groc);color:#111;font-weight:600}
+#nansa2{width:5px;flex:none;cursor:col-resize;background:var(--vora)}
+#nansa2:hover{background:var(--groc)}
+.node.dropzona{outline:2px dashed var(--groc);outline-offset:-2px;background:#2a2c1e!important;color:var(--text)!important}
+#menudrop{position:fixed;z-index:10;background:var(--panell);border:1px solid var(--groc);border-radius:8px;padding:6px;display:flex;flex-direction:column;gap:4px;box-shadow:0 6px 18px rgba(0,0,0,.5)}
+#menudrop button{text-align:left;background:var(--fons);color:var(--text);border:1px solid var(--vora)}
+#menudrop button:hover{border-color:var(--groc)}
+#progres{position:fixed;bottom:0;left:0;right:0;background:var(--panell);border-top:2px solid var(--groc);display:flex;gap:12px;align-items:center;padding:8px 20px;z-index:9;font-size:13px}
+#progres progress{flex:1;height:10px}
+#prtext2{color:var(--mut);min-width:150px;text-align:right}
+#modallliure img{max-width:256px;background:#0c0d10;border:1px solid var(--vora);border-radius:6px;float:right;margin:0 0 10px 12px;image-rendering:pixelated}
+#dxfvisor{clear:both;margin-top:10px}
+#dxfvisor canvas{width:100%;height:auto;background:#0c0d10;border:1px solid var(--vora);border-radius:6px;cursor:grab;display:block}
+#dxfvisor canvas.arrossega{cursor:grabbing}
+#dxfvisor .barra{display:flex;gap:8px;align-items:center;margin-top:6px;color:var(--mut);font-size:12px}
+#pdfvisor{clear:both;margin-top:10px}
+#pdfvisor iframe{width:100%;height:68vh;border:1px solid var(--vora);border-radius:6px;background:#fff}
+#imgvisor{clear:both;margin-top:10px;text-align:center}
+#modallliure #imgvisor img{float:none;max-width:100%;max-height:62vh;margin:0}
+#modalcos.ample{max-width:1040px;width:92vw}
+#modallliure dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:0 0 12px;font-size:13px}
+#modallliure dt{color:var(--mut)}
+#modallliure dd{margin:0;word-break:break-all}
+#modallliure table{border-collapse:collapse;width:100%;font-size:12.5px;clear:both}
+#modallliure td,#modallliure th{padding:3px 8px;border-bottom:1px solid var(--vora);text-align:left}
+#modallliure th{color:var(--groc)}
+#modalaccions{margin-top:10px;text-align:right}
+.dup{cursor:pointer}
+main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+#maincos{flex:1;overflow:auto;min-height:0}
+#controls{display:flex;gap:8px;align-items:center;padding:10px 20px;flex-wrap:wrap}
+#controls label{color:var(--mut);font-size:13px}
+select{background:var(--fons);color:var(--text);border:1px solid var(--vora);border-radius:6px;padding:6px}
+table#llista{width:calc(100% - 40px);margin:0 20px 30px;border-collapse:collapse;font-size:13px}
+#llista th{text-align:left;padding:7px 8px;border-bottom:2px solid var(--groc);cursor:pointer;user-select:none;white-space:nowrap;color:var(--text)}
+#llista th.actiu{color:var(--groc)}
+#llista td{padding:6px 8px;border-bottom:1px solid var(--vora);vertical-align:middle}
+#llista tr:hover td{background:var(--panell)}
+#llista img{width:36px;height:36px;object-fit:contain;background:#0c0d10;border-radius:4px;cursor:zoom-in;display:block}
+#llista button{padding:4px 7px;font-size:12px}
+#llista small{color:var(--mut)}
+button,a#ajuda{background:var(--groc);border:none;color:#111;font-weight:600;padding:7px 12px;border-radius:6px;cursor:pointer}
+button.sec,a#ajuda{background:var(--fons);color:var(--text);border:1px solid var(--vora)}
+a#ajuda{text-decoration:none;display:inline-block;line-height:1.45}
+button:hover,a#ajuda:hover{filter:brightness(1.08)}
+button:disabled{opacity:.4;cursor:default}
+#carpetes{display:flex;flex-wrap:wrap;gap:6px;padding:10px 20px}
+#carpetes .dir{background:var(--panell);border:1px solid var(--vora);color:var(--text);padding:5px 10px;border-radius:14px;cursor:pointer;font-size:13px}
+#carpetes .dir:hover{border-color:var(--groc)}
+#graella{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;padding:6px 20px 30px}
+.fitxa{background:var(--panell);border:1px solid var(--vora);border-radius:10px;padding:12px;display:flex;gap:12px;user-select:none;cursor:default}
+.fitxa.sel{border-color:var(--groc);background:#2a2c1e}
+.fitxa.cut,#llista tr.cut{opacity:.45}
+#llista tbody tr{user-select:none;cursor:default}
+#llista tr.sel td{background:#2a2c1e!important;box-shadow:inset 0 -1px 0 var(--groc),inset 0 1px 0 var(--groc)}
+#selinfo{color:var(--groc);font-weight:700;font-size:12.5px;min-width:52px}
+#ops button:disabled{opacity:.35}
+.thumb{width:128px;height:128px;flex:none;background:#0c0d10;border:1px solid var(--vora);border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:zoom-in}
+.thumb img{max-width:100%;max-height:100%}
+.thumb .buit{color:var(--mut);font-size:11px;text-align:center;padding:6px}
+.dades{flex:1;min-width:0}
+.nom{font-weight:600;word-break:break-all}
+.etiq{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:4px;margin-right:6px;vertical-align:1px}
+.e-rvt{background:#2f6fed;color:#fff}.e-rfa{background:#18a06a;color:#fff}
+.e-rte{background:#d9930d;color:#111}.e-rft{background:#a04ad9;color:#fff}
+.versio{background:var(--groc);color:#111;font-weight:700;font-size:11px;padding:1px 7px;border-radius:4px}
+.meta{color:var(--mut);font-size:12.5px;margin-top:6px}
+.meta b{color:var(--text);font-weight:600}
+.accions{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;align-items:center}
+.err{color:#ff7b72;font-size:12px;margin-top:6px}
+#avis{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--groc);color:#111;font-weight:600;padding:10px 18px;border-radius:8px;display:none;max-width:80vw;z-index:9}
+#zoom{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;cursor:zoom-out;z-index:8}
+#zoom img{max-width:92vw;max-height:92vh;border:2px solid var(--groc);border-radius:8px;background:#fff;image-rendering:pixelated}
+#nansa{width:5px;flex:none;cursor:col-resize;background:var(--vora)}
+#nansa:hover{background:var(--groc)}
+#filtres{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:0 20px 8px}
+#filtres label{color:var(--mut);font-size:13px;margin-right:2px}
+.xip{background:var(--panell);border:1px solid var(--vora);color:var(--mut);padding:3px 10px;border-radius:14px;cursor:pointer;font-size:12px;font-weight:600;user-select:none}
+.xip.actiu{background:var(--groc);border-color:var(--groc);color:#111}
+.e-dwg{background:#8a1f1f;color:#fff}.e-dxf{background:#5b5f68;color:#fff}
+.e-pdf{background:#b3211f;color:#fff}
+.e-obj,.e-glb,.e-gltf,.e-3dm{background:#0f6e8c;color:#fff}
+.e-e57,.e-xyz,.e-pts{background:#6b3fa0;color:#fff}
+.e-png,.e-jpg,.e-jpeg{background:#1f7a55;color:#fff}
+.e-bcf{background:#0b7285;color:#fff}
+.e-html,.e-htm{background:#c2571f;color:#fff}
+.e-ifc{background:#c2312f;color:#fff}.e-alt{background:#3a3f48;color:#cfd3da}
+#inici{padding:40px 20px;text-align:center;color:var(--mut)}
+#inici button{font-size:16px;padding:12px 24px}
+footer{flex:none;color:var(--mut);font-weight:normal;font-size:12px;text-align:center;padding:5px 8px}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:9}
+#modalcos{background:var(--panell);border:1px solid var(--groc);border-radius:10px;padding:18px;max-width:560px;max-height:80vh;overflow:auto;min-width:340px}
+#modalcos h3{margin:0 0 10px;font-size:15px;word-break:break-all}
+#modalcos table{border-collapse:collapse;width:100%;font-size:13px}
+#modalcos td,#modalcos th{padding:4px 10px;border-bottom:1px solid var(--vora);text-align:left}
+#modalcos th{color:var(--groc)}
+.lnk{cursor:pointer;text-decoration:underline dotted}
+.alerta{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:4px;background:#d9930d;color:#111;margin-left:6px}
+.fitxa.multi,#llista tr.multi td:first-child{box-shadow:inset 4px 0 0 var(--groc)}
+.dup{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:4px;color:#111;margin-left:6px}
+#cerca{background:var(--fons);border:1px solid var(--vora);color:var(--text);padding:5px 10px;border-radius:14px;font-size:12.5px;width:190px}
+#extlliure{background:var(--fons);border:1px solid var(--vora);color:var(--text);padding:4px 10px;border-radius:14px;font-size:12px;width:110px;font-family:Consolas,monospace}
+.copbadge{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:4px;background:#3d6ea5;color:#fff;margin-left:6px;cursor:pointer}
+#pont{margin-left:6px}
+#pont.viu{background:#18a06a;border-color:#18a06a;color:#fff}
+#rutabs{background:var(--fons);border:1px solid var(--vora);color:var(--text);padding:4px 8px;border-radius:6px;font-size:12px;font-family:Consolas,monospace;width:250px}
+</style>
+</head>
+<body>
+<header><h1><span>Guaita</span> Fitxers</h1><small>fitxers Revit · versió · autoria · miniatures — 100% local</small></header>
+
+<div id="disposicio" hidden>
+  <aside id="arbre">
+    <div class="caparbre">
+      <button class="sec" id="arrel" title="Carrega o canvia la carpeta arrel">📂 Carpeta arrel</button>
+      <button class="sec" id="refresca" title="Refresca">↻</button>
+      <div id="cami"></div>
+    </div>
+    <div id="arbrecos"></div>
+  </aside>
+  <div id="nansa" title="Arrossega per redimensionar"></div>
+  <main>
+   <div id="maincos">
+    <div id="controls">
+      <button class="sec" id="plega" title="Mostra/oculta l'arbre de carpetes">◧</button>
+      <button class="sec" id="enrere" title="Enrere (Alt+←)" disabled>◄</button>
+      <button class="sec" id="endavant" title="Endavant (Alt+→)" disabled>►</button>
+      <span id="ops">
+        <button class="sec" id="bcopia" title="Copia (Ctrl+C)" disabled>⧉</button>
+        <button class="sec" id="btalla" title="Retalla (Ctrl+X)" disabled>✂</button>
+        <button class="sec" id="benganxa" title="Enganxa a la carpeta actual (Ctrl+V)" disabled>📋</button>
+        <button class="sec" id="besborra" title="Esborra (Supr) — definitiu, no va a la paperera" disabled>🗑</button>
+        <button class="sec" id="brenom" title="Reanomena (F2)" disabled>✏</button>
+        <button class="sec" id="bcarpeta" title="Nova carpeta a la carpeta actual">➕📁</button>
+        <button class="sec" id="bdesfes" title="Desfés l'última operació (Ctrl+Z)" disabled>↩</button>
+        <button class="sec" id="bregistre" title="Registre d'operacions de la sessió">🗒</button>
+        <button class="sec" id="bsafata" title="Envia la selecció a la Safata de fitxers del launcher" hidden disabled>📤</button>
+      </span>
+      <span id="selinfo"></span>
+      <label for="ordena">Ordena per</label>
+      <select id="ordena">
+        <optgroup label="Criteri simple">
+          <option value="nom">Nom</option>
+          <option value="tipus">Tipus (RVT·RFA·RTE·RFT)</option>
+          <option value="versio">Versió de Revit</option>
+          <option value="mida">Mida</option>
+          <option value="data">Data de modificació</option>
+          <option value="desats">Nombre de desats</option>
+          <option value="usuari">Darrer editor</option>
+          <option value="primer">Primer editor</option>
+        </optgroup>
+        <optgroup label="Combinacions">
+          <option value="versio,tipus,data">Versió → Tipus → Data</option>
+          <option value="tipus,versio,nom">Tipus → Versió → Nom</option>
+          <option value="usuari,data,nom">Darrer editor → Data → Nom</option>
+          <option value="versio,usuari,data">Versió → Darrer editor → Data</option>
+          <option value="primer,data,nom">Primer editor → Data → Nom</option>
+        </optgroup>
+      </select>
+      <button class="sec" id="sentit" title="Sentit de l'ordre">↓</button>
+      <button class="sec" id="vista" title="Canvia la vista">☰ Llista</button>
+      <button class="sec" id="plega2" title="Mostra/oculta l'arbre de destí (segona carpeta, pot ser una altra unitat)">◨ Destí</button>
+      <a class="sec" id="ajuda" href="GuaitaFitxersAjuda.html" target="_blank" title="Ajuda d'usuari">❔ Ajuda</a>
+    </div>
+    <div id="filtres">
+      <label>Formats</label>
+      <span class="xip actiu" data-x="rvt">RVT</span>
+      <span class="xip actiu" data-x="rfa">RFA</span>
+      <span class="xip actiu" data-x="rte">RTE</span>
+      <span class="xip actiu" data-x="rft">RFT</span>
+      <span class="xip" data-x="dwg">DWG</span>
+      <span class="xip" data-x="3d" title="ifc · obj · glb · gltf · 3dm · dxf · e57 · xyz · pts">3D · Núvols</span>
+      <span class="xip" data-x="img" title="png · jpg · jpeg">Imatges</span>
+      <span class="xip" data-x="pdf">PDF</span>
+      <span class="xip" data-x="bcf" title="Fitxers BCF (BIM Collaboration Format)">BCF</span>
+      <span class="xip" data-x="html" title="html · htm">HTML</span>
+      <span class="xip" data-x="tots" title="Selecciona tots els formats; torna a clicar per no seleccionar-ne cap">Tots</span>
+      <span class="xip" data-x="estel">*.*</span>
+      <span class="xip" id="recursiu" title="Inclou totes les subcarpetes">⤵ Subcarpetes</span>
+      <span class="xip" id="copies" title="Còpies de seguretat de Revit (NOM.0040.rvt): apilades sota el fitxer principal, amagades o visibles">⧉ Còpies: apilades</span>
+      <span class="xip" data-x="lliure" title="Activa o desactiva les extensions escrites al costat">✎ altres</span>
+      <input id="extlliure" placeholder=".xxx; .xxx" title="Extensions pròpies, separades per ; — prem Retorn per aplicar-les">
+      <span class="xip xalerta" data-a="multi" title="Només fitxers amb més d'un editor">⚠ multi</span>
+      <span class="xip xalerta" data-a="central" title="Només fitxers amb Central Model Path">⚠ central</span>
+      <span class="xip xalerta" data-a="dup" title="Només fitxers duplicats">≡ dups</span>
+      <input id="cerca" type="search" placeholder="cerca nom o editor…">
+      <button class="sec" id="tsv" title="Exporta la taula a TSV">⬇ TSV</button>
+      <span class="xip" id="pont" title="Pont amb guaita_fitxers.py per obrir Revit">⛭ pont</span>
+      <input id="rutabs" placeholder="ruta absoluta de l'arrel, p.ex. E:\ENTREGUES" hidden>
+    </div>
+    <div id="graella"></div>
+    <table id="llista" hidden><thead></thead><tbody></tbody></table>
+   </div>
+   <footer>SBS BIM Consulting 2026</footer>
+  </main>
+  <div id="nansa2" title="Arrossega per redimensionar" hidden></div>
+  <aside id="arbre2" hidden>
+    <div class="capdesti">
+      <button class="sec groc" id="triadesti">📂 Carpeta destí</button>
+      <span class="navdesti"><button class="sec" id="enrere2" title="Enrere" disabled>◄</button><button class="sec" id="endavant2" title="Endavant" disabled>►</button></span>
+      <button class="sec" id="bcarpeta2" title="Nova carpeta dins la carpeta de destí marcada">➕📁 Nova carpeta al destí</button>
+      <div id="destinom"></div>
+    </div>
+    <div id="arbre2cos"></div>
+  </aside>
+</div>
+<div id="menudrop" hidden>
+  <button data-m="copy">⧉ Copia aquí</button>
+  <button data-m="move">➜ Mou aquí</button>
+  <button data-m="">✕ Cancel·la</button>
+</div>
+<div id="inici">
+  <p>Tria una carpeta amb fitxers <b>.rvt · .rfa · .rte · .rft</b>.<br>
+  Res no surt del teu equip: la lectura i l'edició es fan al navegador.</p>
+  <button id="obreCarpeta">📂 Obre una carpeta</button>
+  <button class="sec" id="torna" hidden></button>
+  <p id="noapi" class="err" hidden>Aquest navegador no suporta la File System Access API (cal Chrome o Edge).
+  L'edició de miniatures no estarà disponible.</p>
+  <p><input type="file" id="fallback" multiple hidden>
+  <button class="sec" id="obreFitxers">…o selecciona fitxers (només lectura)</button></p>
+</div>
+<div id="avis"></div>
+<div id="zoom"><img alt=""></div>
+<div id="modal"><div id="modalcos"><h3></h3><div id="modallliure"></div><table><thead></thead><tbody></tbody></table><div id="modalaccions"><button class="sec" id="modaltsv" hidden>⬇ TSV del registre</button></div></div></div>
+<div id="progres" hidden><span id="prtext"></span><progress></progress><span id="prtext2"></span><button class="sec" id="prcancel" title="Cancel·la">✕</button></div>
+
+<script>
+"use strict";
+/* ═══════════════════════ Parser CFBF/OLE2 (sense dependències) ═══════════════════════ */
+const PNG_SIG = [0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A];
+const FREESECT=0xFFFFFFFF, ENDOFCHAIN=0xFFFFFFFE, FATSECT=0xFFFFFFFD, DIFSECT=0xFFFFFFFC;
+
+class CFB {
+  constructor(buf){
+    this.buf = buf; this.dv = new DataView(buf); this.u8 = new Uint8Array(buf);
+    if (this.dv.getUint32(0,true)!==0xE011CFD0 || this.dv.getUint32(4,true)!==0xE11AB1A1)
+      throw new Error("No és un fitxer OLE2/CFBF");
+    this.ssz  = 1 << this.dv.getUint16(30,true);       // mida de sector
+    this.mssz = 1 << this.dv.getUint16(32,true);       // mida de mini-sector
+    this.miniCutoff = this.dv.getUint32(56,true);
+    this._loadFAT(); this._loadDir(); this._loadMiniFAT();
+    const root = this.entries[0];
+    this.rootChain = this._chain(root.start, this.fat);
+  }
+  _sectOff(s){ return (s+1)*this.ssz; }
+  _loadFAT(){
+    const nFAT = this.dv.getUint32(44,true);
+    const difat = [];
+    for (let i=0;i<109;i++) difat.push(this.dv.getUint32(76+i*4,true));
+    let ds = this.dv.getUint32(68,true);
+    const perDif = this.ssz/4 - 1;
+    while (ds!==ENDOFCHAIN && ds!==FREESECT){
+      const off = this._sectOff(ds);
+      for (let i=0;i<perDif;i++) difat.push(this.dv.getUint32(off+i*4,true));
+      ds = this.dv.getUint32(off+perDif*4,true);
+    }
+    this.fat = new Uint32Array(nFAT * this.ssz/4);
+    let k=0;
+    for (const s of difat){
+      if (s===FREESECT || k>=this.fat.length) continue;
+      const off = this._sectOff(s);
+      for (let i=0;i<this.ssz/4 && k<this.fat.length;i++) this.fat[k++]=this.dv.getUint32(off+i*4,true);
+    }
+  }
+  _chain(start, fat){
+    const out=[]; let s=start, guard=fat.length+2;
+    while (s!==ENDOFCHAIN && s!==FREESECT && guard-->0){ out.push(s); s=fat[s]; if(s===undefined)break; }
+    return out;
+  }
+  _loadDir(){
+    const secs = this._chain(this.dv.getUint32(48,true), this.fat);
+    this.entries=[];
+    for (const s of secs){
+      const base=this._sectOff(s);
+      for (let o=0;o<this.ssz;o+=128){
+        const off=base+o, type=this.u8[off+66];
+        if (type===0) continue;
+        const nlen=this.dv.getUint16(off+64,true);
+        let name="";
+        for (let i=0;i<nlen-2;i+=2) name+=String.fromCharCode(this.dv.getUint16(off+i,true));
+        this.entries.push({name,type,off,
+          left:this.dv.getInt32(off+68,true), right:this.dv.getInt32(off+72,true),
+          child:this.dv.getInt32(off+76,true),
+          start:this.dv.getUint32(off+116,true),
+          size:this.dv.getUint32(off+120,true) + this.dv.getUint32(off+124,true)*2**32,
+          idx:this.entries.length});
+      }
+    }
+    // reconstrueix rutes recorrent l'arbre
+    this.paths = new Map();
+    const walk=(idx,prefix)=>{
+      if (idx<0||idx>=this.entries.length) return;
+      const e=this.entries[idx];
+      walk(e.left,prefix); walk(e.right,prefix);
+      const p = prefix ? prefix+"/"+e.name : e.name;
+      this.paths.set(p, e);
+      if (e.child>=0) walk(e.child, e.type===5?"":p);
+    };
+    if (this.entries.length) walk(this.entries[0].child,"");
+  }
+  _loadMiniFAT(){
+    const secs=this._chain(this.dv.getUint32(60,true), this.fat);
+    this.minifat=new Uint32Array(secs.length*this.ssz/4);
+    let k=0;
+    for (const s of secs){
+      const off=this._sectOff(s);
+      for (let i=0;i<this.ssz/4;i++) this.minifat[k++]=this.dv.getUint32(off+i*4,true);
+    }
+  }
+  /* extents: llista {fileOff,len} que cobreix el stream dins el fitxer */
+  extents(entry){
+    const out=[]; let rem=entry.size;
+    if (entry.size < this.miniCutoff && entry.type!==5){
+      const mchain=this._chain(entry.start,this.minifat);
+      for (const ms of mchain){
+        if (rem<=0) break;
+        const posInRoot = ms*this.mssz;                    // posició dins el mini-stream
+        const rs = this.rootChain[Math.floor(posInRoot/this.ssz)];
+        const fileOff = this._sectOff(rs) + posInRoot%this.ssz;
+        out.push({fileOff, len:Math.min(this.mssz,rem)}); rem-=this.mssz;
+      }
+    } else {
+      for (const s of this._chain(entry.start,this.fat)){
+        if (rem<=0) break;
+        out.push({fileOff:this._sectOff(s), len:Math.min(this.ssz,rem)}); rem-=this.ssz;
+      }
+    }
+    return out;
+  }
+  read(path){
+    const e=this.paths.get(path); if(!e) return null;
+    const out=new Uint8Array(e.size); let p=0;
+    for (const {fileOff,len} of this.extents(e)){ out.set(this.u8.subarray(fileOff,fileOff+len),p); p+=len; }
+    return out;
+  }
+  exists(path){ return this.paths.has(path); }
+}
+
+/* ═══════════════════════ Utilitats de parsing Revit ═══════════════════════ */
+const findBytes=(hay,needle,from=0)=>{
+  outer: for(let i=from;i<=hay.length-needle.length;i++){
+    for(let j=0;j<needle.length;j++) if(hay[i+j]!==needle[j]) continue outer;
+    return i;
+  } return -1;
+};
+const u16bytes = s => { const b=new Uint8Array(s.length*2); for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);b[i*2]=c&255;b[i*2+1]=c>>8;} return b; };
+const decU16 = (u8,off,len) => { let s=""; for(let i=off;i+1<off+len&&i+1<u8.length;i+=2) s+=String.fromCharCode(u8[i]|u8[i+1]<<8); return s; };
+const u32at=(u8,o)=>u8[o]|u8[o+1]<<8|u8[o+2]<<16|(u8[o+3]<<24>>>0);
+
+function parseBasicFileInfo(raw){
+  const grab=(label,maxc)=>{
+    const i=findBytes(raw,u16bytes(label));
+    return i<0?null:decU16(raw,i,maxc*2);
+  };
+  const info={version:null,build:null,username:null,central:null};
+  let t=grab("Format:",40);
+  let m=t&&t.match(/Format:\s*(\d{4})/);
+  if(m) info.version=m[1];
+  if(!info.version){
+    t=grab("Autodesk Revit",60);
+    m=t&&t.match(/Autodesk Revit(?:\s+\w+)*\s+(20\d\d)/);
+    if(m) info.version=m[1];
+  }
+  t=grab("Build:",80); m=t&&t.match(/Build:[ \t]*([^\r\n\x00]+)/); if(m) info.build=m[1].trim();
+  t=grab("Username:",80); m=t&&t.match(/Username:[ \t]*([^\r\n\x00]+)/); if(m) info.username=m[1].trim();
+  t=grab("Central Model Path:",300); m=t&&t.match(/Central Model Path:[ \t]*([^\r\n\x00]+)/); if(m) info.central=m[1].trim();
+  return info;
+}
+
+async function gunzipTolerant(raw){
+  for (const [skip,fmtz] of [[8,"gzip"],[0,"gzip"],[8,"deflate-raw"],[8,"deflate"]]){
+    try{
+      const ds=new DecompressionStream(fmtz);
+      const w=ds.writable.getWriter();
+      const chunks=[]; let done=false;
+      const rd=(async()=>{const r=ds.readable.getReader();
+        try{for(;;){const {value,done:d}=await r.read(); if(d)break; chunks.push(value);}}catch(e){/* padding final */}
+        done=true;})();
+      try{ await w.write(raw.subarray(skip)); await w.close(); }catch(e){/* trailing junk */}
+      await rd;
+      if (chunks.length){
+        const n=chunks.reduce((a,c)=>a+c.length,0), out=new Uint8Array(n); let p=0;
+        for(const c of chunks){out.set(c,p);p+=c.length;}
+        if(out.length) return out;
+      }
+    }catch(e){}
+  }
+  return null;
+}
+
+const TS_MIN=1104537600, TS_MAX=4102444800;   // 2005–2100
+
+function nameAt(d,i,n){
+  const end=i+4+n*2;
+  if(end+2>d.length || d[end]!==0 || d[end+1]!==0) return null;  // terminador 00 00
+  let name="";
+  for(let k=i+4;k<end;k+=2){
+    const c=d[k]|d[k+1]<<8;
+    if(c<0x20||c>0x2FF) return null;      // fora del rang llatí plausible
+    name+=String.fromCharCode(c);
+  }
+  return name;
+}
+
+/* Escàner tolerant: no assumeix la mida del bloc de comptadors ni la de la capçalera.
+   Cerca [u32 longitud][nom UTF-16LE][00 00] i, en els 48 bytes següents,
+   el primer u32 que sigui un timestamp Unix plausible (primer alineat, després byte a byte). */
+async function parseIncrementTable(raw){
+  const d=await gunzipTolerant(raw); if(!d) return [];
+  const recs=[]; let i=0;
+  while(i+8<=d.length){
+    const n=u32at(d,i);
+    if(n>=1&&n<=64){
+      const name=nameAt(d,i,n);
+      if(name){
+        const base=i+4+n*2+2, lim=Math.min(base+48,d.length-4);
+        let ts=null;
+        for(let j=base;j<=lim;j+=4){ const v=u32at(d,j); if(v>TS_MIN&&v<TS_MAX){ts=v;break;} }
+        if(ts===null) for(let j=base;j<=lim;j++){ const v=u32at(d,j); if(v>TS_MIN&&v<TS_MAX){ts=v;break;} }
+        if(ts!==null){ recs.push({name,ts}); i=base; continue; }
+      }
+    }
+    i++;
+  }
+  return recs;
+}
+
+function pngSpan(raw){
+  const i=findBytes(raw,PNG_SIG); if(i<0) return null;
+  let p=i+8;
+  while(p+8<=raw.length){
+    const ln=raw[p]<<24|raw[p+1]<<16|raw[p+2]<<8|raw[p+3];
+    const typ=String.fromCharCode(raw[p+4],raw[p+5],raw[p+6],raw[p+7]);
+    p+=8+ln+4;
+    if(typ==="IEND") return [i,p];
+  }
+  return null;
+}
+
+const THUMB_STREAMS=["RevitPreview4.0","RevitPreview/Preview"];
+
+async function readRvt(buf){
+  const cfb=new CFB(buf);
+  const out={version:null,build:null,username:null,first:null,last:null,saves:0,thumb:null,cfb};
+  if(cfb.exists("BasicFileInfo")) Object.assign(out,parseBasicFileInfo(cfb.read("BasicFileInfo")));
+  for(const p of ["Global/DocumentIncrementTable","DocumentIncrementTable"])
+    if(cfb.exists(p)){
+      const recs=await parseIncrementTable(cfb.read(p));
+      if(recs.length){out.saves=recs.length;out.first=recs[0];out.last=recs[recs.length-1];out.recs=recs;}
+      break;
+    }
+  for(const p of THUMB_STREAMS)
+    if(cfb.exists(p)){
+      const raw=cfb.read(p), span=pngSpan(raw);
+      if(span) out.thumb={stream:p,raw,span,png:raw.slice(span[0],span[1])};
+      break;
+    }
+  return out;
+}
+
+/* ═══ Substitució de miniatura in-place (mateixa mida de stream, PNG nou ≤ antic) ═══ */
+function patchThumbnail(buf, cfb, thumb, newPng){
+  const {stream,raw,span}=thumb, [ini,fi]=span, oldLen=fi-ini;
+  if(newPng.length>oldLen)
+    return {ok:false,msg:`El PNG nou (${newPng.length} B) és més gran que l'espai disponible (${oldLen} B). Prova una imatge més senzilla.`};
+  const newRaw=raw.slice();
+  newRaw.set(newPng,ini);
+  newRaw.fill(0,ini+newPng.length,fi);                       // padding rere IEND
+  // actualitza el camp de longitud del prefix si hi és una sola vegada
+  const oldLenLE=new Uint8Array([oldLen&255,oldLen>>8&255,oldLen>>16&255,oldLen>>>24]);
+  let hits=[],k=0;
+  while((k=findBytes(newRaw.subarray(0,ini),oldLenLE,k))>=0){hits.push(k);k++;}
+  if(hits.length===1){
+    const n=newPng.length;
+    newRaw.set([n&255,n>>8&255,n>>16&255,n>>>24],hits[0]);
+  }
+  // escriu el stream sencer a les seves posicions absolutes dins el fitxer
+  const u8=new Uint8Array(buf); let p=0;
+  for(const {fileOff,len} of cfb.extents(cfb.paths.get(stream))){
+    u8.set(newRaw.subarray(p,p+len),fileOff); p+=len;
+  }
+  return {ok:true,msg:"Miniatura substituïda."};
+}
+
+/* re-codifica qualsevol imatge a PNG amb les dimensions de l'antiga */
+function reencodePng(file, oldPng){
+  const w=oldPng[16]<<24|oldPng[17]<<16|oldPng[18]<<8|oldPng[19];
+  const h=oldPng[20]<<24|oldPng[21]<<16|oldPng[22]<<8|oldPng[23];
+  return new Promise((res,rej)=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement("canvas"); c.width=w; c.height=h;
+      c.getContext("2d").drawImage(img,0,0,w,h);
+      c.toBlob(async b=>b?res(new Uint8Array(await b.arrayBuffer())):rej(new Error("toBlob")),"image/png");
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror=()=>rej(new Error("Imatge no llegible"));
+    img.src=URL.createObjectURL(file);
+  });
+}
+
+/* ═══════════════════════════════ Interfície ═══════════════════════════════ */
+const $=s=>document.querySelector(s);
+const HAS_FSA = "showDirectoryPicker" in window;
+const RVT_FAM=["rvt","rfa","rte","rft"];
+const GRUP3D=["ifc","obj","glb","gltf","3dm","dxf","e57","xyz","pts"];
+const IMATGES=["png","jpg","jpeg"];
+const NUVOLS=["xyz","pts"];
+const HTMLS=["html","htm"];
+const XIPS={rvt:["rvt"],rfa:["rfa"],rte:["rte"],rft:["rft"],dwg:["dwg"],"3d":GRUP3D,img:IMATGES,pdf:["pdf"],bcf:["bcf"],html:HTMLS};
+const TOTES=[...RVT_FAM,"dwg",...GRUP3D,...IMATGES,"pdf","bcf",...HTMLS];
+let FILTRE=new Set(RVT_FAM), TOT=false, EXTRA=[];
+/* Còpies de seguretat de Revit: NOM.0040.rvt / NOMFAMILIA.0003.rfa */
+const RE_COPIA=/^(.*)\.(\d{4})\.(rvt|rfa|rte|rft)$/i;
+const esCopia=n=>{const m=n.match(RE_COPIA); return m?{base:m[1],num:+m[2],ext:m[3].toLowerCase()}:null;};
+let MODECOPIES="apila";   // apila · amaga · mostra
+const extDe=n=>n.includes(".")?n.split(".").pop().toLowerCase():"";
+const passaFiltre=n=>TOT||FILTRE.has(extDe(n));
+const dataMax=a=>a.reduce((x,c)=>Math.max(x,c.mtime),0);
+const dataMin=a=>a.reduce((x,c)=>Math.min(x,c.mtime),Infinity);
+let ROOT=null, CURRENT=null, ITEMS=[], VIEW="graella", SORT={keys:["nom"],dir:1};
+let RECURSIU=false, CERCA="", PONT=null;
+let SEL=new Set(), ANCORA=null, PORTA=null, VISL=[];
+let DRAG=null, PENDENT=null, DESTIROOT=null, DESTISEL=null;
+let HIST=[], HISTI=-1, HIST2=[], HISTI2=-1, NAV=false;
+let FALERTA=new Set(), CANCEL=false, PRFET=0, PRTOT=0, PRT0=0;
+const LOG=[], DESFES=[];
+const DUP_COLORS=["#e8ff2b","#7fd0ff","#ff9ecb","#9dffa8","#ffce7a","#c9a6ff"];
+
+/* ─── Persistència del handle arrel (IndexedDB) ─── */
+const teIDB = typeof indexedDB!=="undefined";
+const obreDB=()=>new Promise((res,rej)=>{const r=indexedDB.open("guaita-fitxers",1);
+  r.onupgradeneeded=()=>r.result.createObjectStore("kv");
+  r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);});
+async function desaHandle(h){ if(!teIDB) return;
+  try{const db=await obreDB();db.transaction("kv","readwrite").objectStore("kv").put(h,"arrel");}catch(e){} }
+async function llegeixHandle(){ if(!teIDB) return null;
+  try{const db=await obreDB();
+    return await new Promise(res=>{const q=db.transaction("kv").objectStore("kv").get("arrel");
+      q.onsuccess=()=>res(q.result||null); q.onerror=()=>res(null);});}catch(e){return null;} }
+
+/* ─── Pont amb guaita_fitxers.py (obrir amb Revit) ─── */
+async function detectaPont(){
+  try{
+    const r=await fetch("http://127.0.0.1:8765/api/revits",{signal:AbortSignal.timeout(900)});
+    PONT=await r.json(); if(!Array.isArray(PONT)||!PONT.length) PONT=null;
+  }catch(e){ PONT=null; }
+  const p=$("#pont");
+  p.classList.toggle("viu",!!PONT);
+  p.textContent=PONT?`⛭ pont actiu (${PONT.map(r=>r.year).join(", ")})`:"⛭ pont";
+  p.title=PONT?"guaita_fitxers.py detectat: pots obrir fitxers amb Revit"
+             :"Executa guaita_fitxers.py per poder obrir amb Revit (clic per reintentar)";
+  $("#rutabs").hidden=!PONT;
+  if(PONT&&!$("#rutabs").value) $("#rutabs").value=localStorage.getItem("guaita_rutabs")||"";
+  if(ITEMS.length) render();
+}
+function rutaAbsoluta(it){
+  const base=$("#rutabs").value.trim().replace(/[\\\/]+$/,"");
+  if(!base) return null;
+  return [base,...(it.rel?it.rel.split("/"):[]),it.name].join("\\");
+}
+async function obreAmbRevit(it,exe){
+  const path=rutaAbsoluta(it);
+  if(!path){ avis("Escriu la ruta absoluta de la carpeta arrel al camp del costat del pont"); $("#rutabs").focus(); return; }
+  try{
+    const r=await(await fetch("http://127.0.0.1:8765/api/open",{method:"POST",
+      headers:{"Content-Type":"application/json"},body:JSON.stringify({exe,path})})).json();
+    avis(r.msg||(r.ok?"Obrint…":"Error"));
+  }catch(e){ avis("Pont no disponible: "+e.message); detectaPont(); }
+}
+const fmt=ts=>new Date(ts*1000).toLocaleString("ca-ES",{dateStyle:"short",timeStyle:"short"});
+const kb=n=>n>1048576?(n/1048576).toFixed(1)+" MB":Math.round(n/1024)+" kB";
+
+function avis(msg){const a=$("#avis");a.textContent=msg;a.style.display="block";clearTimeout(a._t);a._t=setTimeout(()=>a.style.display="none",5000);}
+function zoom(url){
+  const im=$("#zoom img");
+  im.onload=()=>{im.style.width=Math.min(im.naturalWidth*2, innerWidth*.92)+"px";im.style.height="auto";};
+  im.src=url; $("#zoom").style.display="flex";
+}
+
+/* ─── Arbre de carpetes ─── */
+async function obreArrel(){
+  try{ ROOT=await showDirectoryPicker({mode:"readwrite"}); }
+  catch(e){ if(e.name!=="AbortError") avis(e.message); return; }
+  desaHandle(ROOT);
+  iniciaAmb(ROOT);
+}
+async function iniciaAmb(handle){
+  ROOT=handle;
+  HIST=[]; HISTI=-1;
+  $("#inici").hidden=true; $("#disposicio").hidden=false;
+  const arrel={name:ROOT.name,handle:ROOT,parent:null};
+  $("#arbrecos").innerHTML=""; 
+  const ul=document.createElement("ul");
+  ul.appendChild(nodeArbre(arrel));
+  $("#arbrecos").appendChild(ul);
+  await expandeix(arrel);
+  selecciona(arrel);
+}
+
+function nodeArbre(n,alClick){
+  const li=document.createElement("li");
+  const row=document.createElement("div"); row.className="node";
+  const f=document.createElement("span"); f.className="fletxa"; f.textContent="▸";
+  const t=document.createElement("span"); t.textContent="📁 "+n.name;
+  row.append(f,t); li.appendChild(row);
+  const sub=document.createElement("ul"); sub.hidden=true; li.appendChild(sub);
+  n.el=row; n.sub=sub; n.fletxa=f; n.alClick=alClick||selecciona;
+  f.onclick=e=>{e.stopPropagation();plegaDesplega(n);};
+  row.onclick=()=>{n.alClick(n); if(sub.hidden) plegaDesplega(n);};
+  if(n.parent!==undefined&&n.parent!==null){
+    row.draggable=true;
+    row.ondragstart=e=>{ e.stopPropagation();
+      DRAG=[{name:n.name,h:n.handle,dir:n.parent.handle,esDir:true,node:n}];
+      e.dataTransfer.setData("text/plain",n.name);
+      e.dataTransfer.effectAllowed="copyMove"; };
+    row.ondragend=()=>{ DRAG=null;
+      document.querySelectorAll(".dropzona").forEach(x=>x.classList.remove("dropzona")); };
+    row.ondblclick=async e=>{ e.stopPropagation();
+      const nou=prompt("Nou nom de la carpeta:",n.name);
+      if(!nou||nou===n.name) return;
+      if(await existeix(n.parent.handle,nou)){ avis("Ja existeix"); return; }
+      try{
+        avis("Reanomenant carpeta (còpia recursiva)…");
+        await reanomenaDins(n.parent.handle,n.name,nou);
+        DESFES.push({mode:"rename",recs:[{dir:n.parent.handle,de:n.name,a:nou}]}); actualitzaDesfes();
+        registra("reanomena carpeta",n.name+" → "+nou,camiDe(n.parent).join("/"),"");
+        await refrescaNode(n.parent);
+        if(CURRENT) llista();
+      }catch(e2){ avis("Error: "+e2.message); }
+    };
+  }
+  row.ondragover=e=>{ if(!DRAG) return; e.preventDefault();
+    e.dataTransfer.dropEffect=e.ctrlKey?"copy":"move"; row.classList.add("dropzona"); };
+  row.ondragleave=()=>row.classList.remove("dropzona");
+  row.ondrop=e=>{ if(!DRAG) return; e.preventDefault(); row.classList.remove("dropzona"); gestionaDrop(n,e); };
+  return li;
+}
+
+async function expandeix(n){
+  if(n.carregat){n.sub.hidden=false;n.fletxa.textContent="▾";return;}
+  const dirs=[];
+  for await (const [name,h] of n.handle.entries())
+    if(h.kind==="directory"&&!name.startsWith(".")&&!name.startsWith("$")) dirs.push({name,handle:h,parent:n});
+  dirs.sort((a,b)=>a.name.localeCompare(b.name));
+  for(const d of dirs) n.sub.appendChild(nodeArbre(d,n.alClick));
+  n.carregat=true; n.fletxa.textContent=dirs.length?"▾":"·"; n.sub.hidden=false;
+}
+function plegaDesplega(n){
+  if(!n.carregat){expandeix(n);return;}
+  n.sub.hidden=!n.sub.hidden;
+  if(n.fletxa.textContent!=="·") n.fletxa.textContent=n.sub.hidden?"▸":"▾";
+}
+function camiDe(n){const p=[];for(let x=n;x;x=x.parent)p.unshift(x.name);return p;}
+
+async function selecciona(n){
+  if(CURRENT&&CURRENT.el) CURRENT.el.classList.remove("actiu");
+  CURRENT=n; n.el.classList.add("actiu");
+  $("#cami").textContent=camiDe(n).join(" / ");
+  if(!NAV){ HIST=HIST.slice(0,HISTI+1); if(HIST[HISTI]!==n){ HIST.push(n); HISTI=HIST.length-1; } }
+  actualitzaNav();
+  await llista();
+}
+function actualitzaNav(){
+  $("#enrere").disabled=HISTI<=0;
+  $("#endavant").disabled=HISTI>=HIST.length-1;
+}
+async function navHist(delta){
+  const i=HISTI+delta;
+  if(i<0||i>=HIST.length) return;
+  HISTI=i; NAV=true;
+  try{ await selecciona(HIST[i]); } finally{ NAV=false; }
+}
+
+/* ─── Llistat i càrrega de fitxers ─── */
+async function* recorre(dir,rel){
+  for await (const [name,h] of dir.entries()){
+    if(h.kind==="directory"){
+      if(RECURSIU&&!name.startsWith(".")&&!name.startsWith("$")) yield* recorre(h, rel?rel+"/"+name:name);
+    } else if(passaFiltre(name)) yield {name,h,dir,rel};
+  }
+}
+async function llista(){
+  ITEMS=[];
+  for await (const e of recorre(CURRENT.handle,"")){
+    if(MODECOPIES==="amaga"&&esCopia(e.name)) continue;
+    const f=await e.h.getFile();
+    ITEMS.push({name:e.name,h:e.h,dir:e.dir,rel:e.rel,ext:extDe(e.name),file:f,
+                size:f.size,mtime:f.lastModified,meta:null,thumbURL:null,err:null,hash:null,dup:null});
+  }
+  if(MODECOPIES==="apila") apilaCopies();
+  SEL.clear(); ANCORA=null;
+  ordena(); render(); pintaSeleccio();
+  for(const it of ITEMS) carrega(it);   // paral·lel, actualitza in-place
+}
+
+function dxfSegments(txt,maxE=8000){
+  const L=txt.split(/\r?\n/), segs=[];
+  let ent=null,dins=false,nE=0;
+  let minx=1e12,miny=1e12,maxx=-1e12,maxy=-1e12;
+  const seg=(x1,y1,x2,y2)=>{segs.push(x1,y1,x2,y2);
+    minx=Math.min(minx,x1,x2);maxx=Math.max(maxx,x1,x2);
+    miny=Math.min(miny,y1,y2);maxy=Math.max(maxy,y1,y2);};
+  const flush=()=>{
+    if(!ent) return;
+    if(ent.t==="LINE"&&isFinite(ent.x10)&&isFinite(ent.x11)) seg(ent.x10,ent.y20,ent.x11,ent.y21);
+    else if(ent.pts&&ent.pts.length>=4){
+      for(let i=2;i+1<ent.pts.length;i+=2) seg(ent.pts[i-2],ent.pts[i-1],ent.pts[i],ent.pts[i+1]);
+      if(ent.f70&1) seg(ent.pts[ent.pts.length-2],ent.pts[ent.pts.length-1],ent.pts[0],ent.pts[1]);
+    }
+    else if((ent.t==="CIRCLE"||ent.t==="ARC")&&isFinite(ent.x10)&&isFinite(ent.r40)){
+      const a0=ent.t==="ARC"?(ent.a50||0)*Math.PI/180:0;
+      let sw=ent.t==="ARC"?(((ent.a51||360)-(ent.a50||0))*Math.PI/180):2*Math.PI;
+      if(sw<=0) sw+=2*Math.PI;
+      const n=24;
+      let px=ent.x10+ent.r40*Math.cos(a0), py=ent.y20+ent.r40*Math.sin(a0);
+      for(let i=1;i<=n;i++){
+        const a=a0+sw*i/n, x=ent.x10+ent.r40*Math.cos(a), y=ent.y20+ent.r40*Math.sin(a);
+        seg(px,py,x,y); px=x; py=y;
+      }
+    }
+    ent=null;
+  };
+  for(let i=0;i+1<L.length;i+=2){
+    const c=parseInt(L[i],10), v=L[i+1];
+    if(c===0){
+      const t=v.trim();
+      if(t==="ENDSEC"){ if(dins){flush();break;} }
+      else if(dins){
+        if(t==="VERTEX"&&ent&&ent.t==="POLYLINE") continue;   // els 10/20 següents van a pts
+        if(t==="SEQEND"&&ent&&ent.t==="POLYLINE"){ flush(); continue; }
+        flush();
+        if(++nE>maxE) break;
+        ent={t,pts:(t==="LWPOLYLINE"||t==="POLYLINE")?[]:null};
+      }
+    } else if(c===2&&v.trim()==="ENTITIES") dins=true;
+    else if(dins&&ent){
+      const f=parseFloat(v);
+      if(c===10){ if(ent.pts) ent._x=f; else ent.x10=f; }
+      else if(c===20){ if(ent.pts){ if(isFinite(ent._x)) ent.pts.push(ent._x,f); } else ent.y20=f; }
+      else if(c===11) ent.x11=f;
+      else if(c===21) ent.y21=f;
+      else if(c===40) ent.r40=f;
+      else if(c===50) ent.a50=f;
+      else if(c===51) ent.a51=f;
+      else if(c===70) ent.f70=parseInt(v,10)||0;
+    }
+  }
+  flush();
+  return {segs,bbox:[minx,miny,maxx,maxy]};
+}
+async function dxfThumb(txt){
+  const {segs,bbox}=dxfSegments(txt);
+  if(segs.length<4) return null;
+  const [x0,y0,x1,y1]=bbox, w=x1-x0, h=y1-y0;
+  if(!(w>0||h>0)) return null;
+  const c=document.createElement("canvas"); c.width=c.height=128;
+  const ctx=c.getContext&&c.getContext("2d");
+  if(!ctx||!c.toBlob) return null;
+  ctx.fillStyle="#0c0d10"; ctx.fillRect(0,0,128,128);
+  const esc=116/Math.max(w,h,1e-9), ox=(128-w*esc)/2, oy=(128-h*esc)/2;
+  const X=x=>ox+(x-x0)*esc, Y=y=>128-(oy+(y-y0)*esc);
+  ctx.strokeStyle="#e8ff2b"; ctx.lineWidth=1; ctx.beginPath();
+  for(let i=0;i<segs.length;i+=4){ ctx.moveTo(X(segs[i]),Y(segs[i+1])); ctx.lineTo(X(segs[i+2]),Y(segs[i+3])); }
+  ctx.stroke();
+  return await new Promise(r=>c.toBlob(b=>r(b),"image/png"));
+}
+
+async function dwgThumbnail(file){
+  const head=new Uint8Array(await file.slice(0,32).arrayBuffer());
+  const seeker=u32at(head,0x0D);
+  if(!seeker||seeker>=file.size) return null;
+  const blk=new Uint8Array(await file.slice(seeker,Math.min(seeker+2048,file.size)).arrayBuffer());
+  let p=16+4;                                  // sentinel(16) + mida global(4)
+  const cnt=blk[p]; p+=1;
+  if(!cnt||cnt>10) return null;
+  for(let i=0;i<cnt;i++){
+    const code=blk[p], start=u32at(blk,p+1), size=u32at(blk,p+5); p+=9;
+    if(start+size>file.size||!size) continue;
+    if(code===6){                               // PNG (2013+)
+      return new Blob([await file.slice(start,start+size).arrayBuffer()],{type:"image/png"});
+    }
+    if(code===2){                               // BMP sense BITMAPFILEHEADER
+      const data=new Uint8Array(await file.slice(start,start+size).arrayBuffer());
+      const biSize=u32at(data,0), bits=data[14]|data[15]<<8, clrUsed=u32at(data,32);
+      const paleta=bits<=8?((clrUsed||1<<bits)*4):0;
+      const off=14+biSize+paleta, total=14+data.length;
+      const hdr=new Uint8Array([0x42,0x4D,total&255,total>>8&255,total>>16&255,total>>>24,
+                                0,0,0,0,off&255,off>>8&255,off>>16&255,off>>>24]);
+      return new Blob([hdr,data],{type:"image/bmp"});
+    }
+  }
+  return null;
+}
+
+/* ─── Duplicats per SHA-256 ─── */
+function marcaDuplicats(){
+  const grups=new Map();
+  for(const it of ITEMS) if(it.hash) (grups.get(it.hash)||grups.set(it.hash,[]).get(it.hash)).push(it);
+  let g=0;
+  for(const [,its] of grups){
+    const dup=its.length>1?g++:null;
+    for(const it of its) if(it.dup!==dup){ it.dup=dup; actualitza(it); }
+  }
+}
+
+const DWG_VER={AC1006:"R10",AC1009:"R11/12",AC1012:"R13",AC1014:"R14",AC1015:"2000",
+               AC1018:"2004",AC1021:"2007",AC1024:"2010",AC1027:"2013",AC1032:"2018+"};
+function parseCad(ext,cap){
+  const txt=new TextDecoder("latin1").decode(cap);
+  if(ext==="dwg"){
+    const tag=txt.slice(0,6);
+    return {version:DWG_VER[tag]?"DWG "+DWG_VER[tag]:tag};
+  }
+  if(ext==="dxf"){
+    const i=txt.indexOf("$ACADVER");
+    const m=i>=0&&txt.slice(i,i+120).match(/AC10\d\d/);
+    return {version:m&&DWG_VER[m[0]]?"DXF "+DWG_VER[m[0]]:(m?m[0]:null)};
+  }
+  // ifc
+  const s=txt.match(/FILE_SCHEMA\s*\(\s*\(\s*'([^']+)'/);
+  const a=txt.match(/FILE_NAME\s*\(\s*'[^']*'\s*,\s*'[^']*'\s*,\s*\(\s*'([^']*)'/);
+  return {version:s?s[1]:null, username:a&&a[1]?a[1]:null};
+}
+
+/* ─── Lectura per trossos ─── */
+async function tros(file,ini,fi){
+  const f=Math.min(fi,file.size);
+  if(ini>=f) return new Uint8Array(0);
+  if(file.slice) return new Uint8Array(await file.slice(ini,f).arrayBuffer());
+  const b=await file.arrayBuffer();
+  return new Uint8Array(b.slice(ini,Math.min(f,b.byteLength)));
+}
+const u32be=(u,o)=>((u[o]<<24)>>>0)+(u[o+1]<<16)+(u[o+2]<<8)+u[o+3];
+const milers=n=>Number(n).toLocaleString("ca-ES");
+const compta=n=>n>=1e6?(n/1e6).toFixed(1)+" M":n>=1e3?(n/1e3).toFixed(1)+" k":String(n);
+
+/* ─── PDF: versió, pàgines, autor, aplicació creadora ─── */
+function netPdfStr(s){
+  s=s.replace(/\\([nrtbf()\\])/g,(m,c)=>({n:"\n",r:"",t:"\t",b:"",f:""})[c]??c)
+     .replace(/\\(\d{1,3})/g,(m,o)=>String.fromCharCode(parseInt(o,8)));
+  if(s.charCodeAt(0)===0xFE&&s.charCodeAt(1)===0xFF){
+    let r=""; for(let i=2;i+1<s.length;i+=2) r+=String.fromCharCode(s.charCodeAt(i)<<8|s.charCodeAt(i+1));
+    s=r;
+  }
+  return s.replace(/[\x00-\x08\x0e-\x1f]/g,"").trim().slice(0,120)||null;
+}
+function parsePdf(cap,cua){
+  const out={};
+  const v=cap.match(/%PDF-(\d\.\d)/); if(v) out.version="PDF "+v[1];
+  const t=cap+"\n"+cua;
+  let n=0;
+  for(const m of t.matchAll(/\/Count\s+(\d+)/g)) n=Math.max(n,+m[1]);
+  if(!n) n=(t.match(/\/Type\s*\/Page[^s]/g)||[]).length;
+  if(n) out.pagines=n;
+  const g=k=>{ const m=t.match(new RegExp("\\/"+k+"\\s*\\(((?:\\\\.|[^\\\\()])*)\\)"));
+               if(m) return netPdfStr(m[1]);
+               const h=t.match(new RegExp("\\/"+k+"\\s*<([0-9A-Fa-f\\s]{2,400})>"));
+               if(!h) return null;
+               const hx=h[1].replace(/\s/g,""); let s="";
+               for(let i=0;i+1<hx.length;i+=2) s+=String.fromCharCode(parseInt(hx.substr(i,2),16));
+               return netPdfStr(s); };
+  out.username=g("Author"); out.creador=g("Creator"); out.productor=g("Producer");
+  const d=t.match(/\/CreationDate\s*\(D:(\d{8})(\d{0,6})/);
+  if(d) out.creat=`${d[1].slice(6,8)}/${d[1].slice(4,6)}/${d[1].slice(0,4)}`+(d[2].length>=4?` ${d[2].slice(0,2)}:${d[2].slice(2,4)}`:"");
+  if(out.pagines) out.extra=out.pagines+(out.pagines===1?" pàgina":" pàgines");
+  return out;
+}
+
+/* ─── Imatges: dimensions de la capçalera ─── */
+function midaImatge(ext,u){
+  if(u[0]===0x89&&u[1]===0x50) return [u32be(u,16),u32be(u,20)];
+  if(u[0]===0xFF&&u[1]===0xD8){
+    let p=2;
+    while(p+9<u.length){
+      if(u[p]!==0xFF){p++;continue;}
+      const m=u[p+1];
+      if(m>=0xC0&&m<=0xCF&&m!==0xC4&&m!==0xC8&&m!==0xCC) return [u[p+7]<<8|u[p+8], u[p+5]<<8|u[p+6]];
+      if(m===0xD8||m===0x01||(m>=0xD0&&m<=0xD7)){p+=2;continue;}
+      p+=2+((u[p+2]<<8)|u[p+3]);
+    }
+  }
+  return null;
+}
+
+/* ─── Núvol de punts genèric a canvas (reutilitzat per XYZ/PTS i OBJ) ─── */
+async function puntsThumb(pts){
+  if(pts.length<9) return null;
+  const mn=[Infinity,Infinity,Infinity], mx=[-Infinity,-Infinity,-Infinity];
+  for(let i=0;i<pts.length;i+=3) for(let k=0;k<3;k++){const v=pts[i+k]; if(v<mn[k])mn[k]=v; if(v>mx[k])mx[k]=v;}
+  const ex=[mx[0]-mn[0],mx[1]-mn[1],mx[2]-mn[2]];
+  const ord=[0,1,2].sort((a,b)=>ex[b]-ex[a]);
+  const A=ord[0], B=ord[1], w=ex[A]||1, h=ex[B]||1;
+  const c=document.createElement("canvas"); c.width=c.height=128;
+  const ctx=c.getContext&&c.getContext("2d");
+  if(!ctx||!c.toBlob) return null;
+  ctx.fillStyle="#0c0d10"; ctx.fillRect(0,0,128,128);
+  const esc=116/Math.max(w,h), ox=(128-w*esc)/2, oy=(128-h*esc)/2;
+  ctx.fillStyle="#e8ff2b";
+  for(let i=0;i<pts.length;i+=3)
+    ctx.fillRect(ox+(pts[i+A]-mn[A])*esc, 128-(oy+(pts[i+B]-mn[B])*esc), 1, 1);
+  return await new Promise(r=>c.toBlob(b=>r(b),"image/png"));
+}
+
+/* ─── XYZ / PTS ─── */
+function parsePunts(txt,ext,parcial){
+  const L=txt.split(/\r?\n/);
+  let i0=0, declarats=null;
+  if(ext==="pts"&&/^\s*\d+\s*$/.test(L[0]||"")){ declarats=+L[0]; i0=1; }
+  const pts=[]; let n=0;
+  const fi=parcial?L.length-1:L.length;
+  for(let i=i0;i<fi;i++){
+    const p=L[i].trim().split(/[\s,;]+/);
+    if(p.length<3) continue;
+    const x=+p[0],y=+p[1],z=+p[2];
+    if(!isFinite(x)||!isFinite(y)||!isFinite(z)) continue;
+    n++;
+    if(pts.length<60000) pts.push(x,y,z);
+  }
+  const out={pts,punts:n,declarats};
+  out.extra=declarats?`${compta(declarats)} punts`:`${compta(n)} punts${parcial?" (mostra)":""}`;
+  return out;
+}
+
+/* ─── OBJ ─── */
+function parseObj(txt,parcial){
+  const L=txt.split(/\r?\n/);
+  const v=[]; let nv=0,nf=0,mtl=null;
+  const fi=parcial?L.length-1:L.length;
+  for(let i=0;i<fi;i++){
+    const l=L[i];
+    if(l.startsWith("v ")){
+      const p=l.split(/\s+/), x=+p[1],y=+p[2],z=+p[3];
+      if(isFinite(x)&&isFinite(y)&&isFinite(z)){ nv++; if(v.length<60000) v.push(x,y,z); }
+    } else if(l.startsWith("f ")) nf++;
+    else if(l.startsWith("mtllib ")&&!mtl) mtl=l.slice(7).trim();
+  }
+  return {v,extra:`${compta(nv)} vèrtexs · ${compta(nf)} cares${parcial?" (mostra)":""}`,materials:mtl};
+}
+
+/* ─── glTF / GLB ─── */
+function parseGltfJson(o){
+  const out={};
+  if(o.asset){ out.version="glTF "+(o.asset.version||"?"); out.creador=o.asset.generator||null; }
+  const b=[];
+  if(o.meshes) b.push(compta(o.meshes.length)+" malles");
+  if(o.nodes) b.push(compta(o.nodes.length)+" nodes");
+  if(o.materials) b.push(compta(o.materials.length)+" materials");
+  if(b.length) out.extra=b.join(" · ");
+  return out;
+}
+function parseGlb(u){
+  const dv=new DataView(u.buffer,u.byteOffset,u.byteLength);
+  if(u.length<20||dv.getUint32(0,true)!==0x46546C67) return null;
+  const out={version:"glTF "+dv.getUint32(4,true)};
+  const clen=dv.getUint32(12,true), ctype=dv.getUint32(16,true);
+  if(ctype!==0x4E4F534A) return out;
+  try{
+    const json=new TextDecoder().decode(u.subarray(20,20+Math.min(clen,u.length-20)));
+    Object.assign(out,parseGltfJson(JSON.parse(json)));
+  }catch(e){}
+  return out;
+}
+
+/* ─── 3DM (Rhino) ─── */
+function parse3dm(u){
+  const txt=new TextDecoder("latin1").decode(u.subarray(0,64));
+  if(!txt.startsWith("3D Geometry File Format")) return null;
+  const m=txt.match(/3D Geometry File Format\s+(\d+)/);
+  const v=m?+m[1]:null;
+  const rh={1:"Rhino 1",2:"Rhino 2",3:"Rhino 3",4:"Rhino 4",5:"Rhino 5",50:"Rhino 5",60:"Rhino 6",70:"Rhino 7",80:"Rhino 8"};
+  return {version:v?"3DM v"+v:"3DM", extra:v&&rh[v]?rh[v]:null};
+}
+
+/* ─── E57 ─── */
+async function parseE57(file){
+  const h=await tros(file,0,48);
+  if(h.length<48) return null;
+  if(new TextDecoder("latin1").decode(h.subarray(0,8))!=="ASTM-E57") return null;
+  const dv=new DataView(h.buffer,h.byteOffset,h.byteLength);
+  const out={version:`E57 ${dv.getUint32(8,true)}.${dv.getUint32(12,true)}`};
+  try{
+    const xmlOff=Number(dv.getBigUint64(24,true)), xmlLen=Number(dv.getBigUint64(32,true));
+    const pag=Number(dv.getBigUint64(40,true))||1024, dades=pag-4;
+    const cap=Math.min(xmlLen,4000000);
+    const raw=await tros(file,xmlOff,xmlOff+Math.ceil(cap/dades)*pag+pag);
+    const net=new Uint8Array(cap); let o=0;
+    for(let i=0;i<raw.length&&o<cap;i++) if((xmlOff+i)%pag<dades) net[o++]=raw[i];
+    const xml=new TextDecoder("utf-8",{fatal:false}).decode(net.subarray(0,o));
+    let n=0,esc=0;
+    for(const m of xml.matchAll(/recordCount\s*=\s*"(\d+)"/g)){ n+=+m[1]; esc++; }
+    const s=xml.match(/<sensorModel[^>]*>(?:<!\[CDATA\[)?([^<\]]+)/);
+    const ve=xml.match(/<sensorVendor[^>]*>(?:<!\[CDATA\[)?([^<\]]+)/);
+    if(s||ve) out.creador=[ve&&ve[1].trim(),s&&s[1].trim()].filter(Boolean).join(" ");
+    const b=[];
+    if(esc) b.push(esc+(esc===1?" escaneig":" escanejos"));
+    if(n) b.push(compta(n)+" punts");
+    if(b.length) out.extra=b.join(" · ");
+  }catch(e){}
+  return out;
+}
+
+/* ─── ZIP mínim (central directory) per llegir BCF ─── */
+async function zipEntrades(file){
+  const ini=Math.max(0,file.size-66000);
+  const cua=await tros(file,ini,file.size);
+  let p=-1;
+  for(let i=cua.length-22;i>=0;i--)
+    if(cua[i]===0x50&&cua[i+1]===0x4B&&cua[i+2]===0x05&&cua[i+3]===0x06){p=i;break;}
+  if(p<0) return null;
+  const dv=new DataView(cua.buffer,cua.byteOffset,cua.byteLength);
+  const n=dv.getUint16(p+10,true), cdMida=dv.getUint32(p+12,true), cdOff=dv.getUint32(p+16,true);
+  if(!n||cdOff>=file.size) return null;
+  const cd=await tros(file,cdOff,cdOff+cdMida);
+  const cdv=new DataView(cd.buffer,cd.byteOffset,cd.byteLength);
+  const out=[]; let o=0;
+  for(let i=0;i<n&&o+46<=cd.length;i++){
+    if(cdv.getUint32(o,true)!==0x02014b50) break;
+    const met=cdv.getUint16(o+10,true), csz=cdv.getUint32(o+20,true);
+    const nl=cdv.getUint16(o+28,true), el=cdv.getUint16(o+30,true), cl=cdv.getUint16(o+32,true);
+    const lo=cdv.getUint32(o+42,true);
+    out.push({nom:new TextDecoder().decode(cd.subarray(o+46,o+46+nl)),met,csz,lo});
+    o+=46+nl+el+cl;
+  }
+  return out;
+}
+async function zipLlegeix(file,e){
+  const h=await tros(file,e.lo,e.lo+30);
+  const hv=new DataView(h.buffer,h.byteOffset,h.byteLength);
+  if(h.length<30||hv.getUint32(0,true)!==0x04034b50) return null;
+  const ini=e.lo+30+hv.getUint16(26,true)+hv.getUint16(28,true);
+  const dades=await tros(file,ini,ini+e.csz);
+  if(e.met===0) return dades;
+  if(e.met!==8) return null;
+  const ds=new DecompressionStream("deflate-raw");
+  const w=ds.writable.getWriter(), chunks=[];
+  const rd=(async()=>{const r=ds.readable.getReader();
+    try{ for(;;){ const {value,done}=await r.read(); if(done) break; chunks.push(value); } }catch(x){}})();
+  try{ await w.write(dades); await w.close(); }catch(x){}
+  await rd;
+  const tot=chunks.reduce((a,c)=>a+c.length,0), out=new Uint8Array(tot); let q=0;
+  for(const c of chunks){ out.set(c,q); q+=c.length; }
+  return out;
+}
+async function parseBcf(file){
+  const es=await zipEntrades(file);
+  if(!es) return {version:"BCF"};
+  const out={};
+  const temes=es.filter(e=>/(^|\/)markup\.bcf$/i.test(e.nom)).length;
+  const v=es.find(e=>/(^|\/)bcf\.version$/i.test(e.nom));
+  if(v) try{
+    const d=await zipLlegeix(file,v);
+    const m=d&&new TextDecoder().decode(d).match(/VersionId\s*=\s*"([^"]+)"/);
+    if(m) out.version="BCF "+m[1];
+  }catch(x){}
+  if(!out.version) out.version="BCF";
+  if(temes) out.extra=temes+(temes===1?" tema":" temes");
+  const inst=[...new Set(es.map(e=>{const m=e.nom.match(/(^|\/)([^\/]+)\.(jpg|jpeg|png)$/i); return m?m[3].toLowerCase():null;}).filter(Boolean))];
+  if(inst.length) out.extra=(out.extra?out.extra+" · ":"")+"amb instantànies";
+  return out;
+}
+
+/* ─── Metadades dels formats no-Revit ─── */
+async function metaAltres(it,file){
+  const e=it.ext;
+  const posaThumb=b=>{ if(!b) return; if(it.thumbURL) URL.revokeObjectURL(it.thumbURL); it.thumbURL=URL.createObjectURL(b); };
+  if(IMATGES.includes(e)){
+    const u=await tros(file,0,262144);
+    const d=midaImatge(e,u);
+    posaThumb(file);
+    return {version:e==="png"?"PNG":"JPEG", extra:d?`${d[0]}×${d[1]} px`:null, dims:d?`${d[0]} × ${d[1]} px`:null};
+  }
+  if(e==="pdf"){
+    const cap=new TextDecoder("latin1").decode(await tros(file,0,65536));
+    const cua=file.size>65536?new TextDecoder("latin1").decode(await tros(file,file.size-65536,file.size)):"";
+    return parsePdf(cap,cua);
+  }
+  if(NUVOLS.includes(e)){
+    const parcial=file.size>2000000;
+    const txt=new TextDecoder("latin1").decode(await tros(file,0,2000000));
+    const r=parsePunts(txt,e,parcial);
+    try{ posaThumb(await puntsThumb(r.pts)); }catch(x){}
+    return {extra:r.extra, punts:r.declarats||r.punts};
+  }
+  if(e==="obj"){
+    const parcial=file.size>2000000;
+    const txt=new TextDecoder("latin1").decode(await tros(file,0,2000000));
+    const r=parseObj(txt,parcial);
+    try{ posaThumb(await puntsThumb(r.v)); }catch(x){}
+    return {extra:r.extra, materials:r.materials};
+  }
+  if(e==="glb") return parseGlb(await tros(file,0,4000000))||{};
+  if(e==="gltf"){
+    try{ return parseGltfJson(JSON.parse(new TextDecoder().decode(await tros(file,0,4000000)))); }
+    catch(x){ return {version:"glTF"}; }
+  }
+  if(e==="3dm"){
+    const u=await tros(file,0,1500000);
+    const m=parse3dm(u)||{};
+    try{ const s=pngSpan(u); if(s) posaThumb(new Blob([u.slice(s[0],s[1])],{type:"image/png"})); }catch(x){}
+    return m;
+  }
+  if(e==="e57") return (await parseE57(file))||{};
+  if(e==="bcf") return await parseBcf(file);
+  if(HTMLS.includes(e)){
+    const t=new TextDecoder("latin1").decode(await tros(file,0,65536));
+    const o={version:/<!DOCTYPE\s+html/i.test(t)?"HTML5":"HTML"};
+    const ti=t.match(/<title[^>]*>([^<]{1,120})<\/title>/i);
+    if(ti) o.extra=ti[1].trim();
+    const au=t.match(/<meta[^>]+name\s*=\s*["\']author["\'][^>]+content\s*=\s*["\']([^"\']{1,80})/i);
+    if(au) o.username=au[1].trim();
+    return o;
+  }
+  return {};
+}
+
+async function carrega(it,força){
+  if(it.meta&&!força){actualitza(it);return;}
+  try{
+    const file=await it.h.getFile();
+    it.file=file; it.size=file.size; it.mtime=file.lastModified;
+    let buf=null;
+    if(RVT_FAM.includes(it.ext)){
+      buf=await file.arrayBuffer();
+      const d=await readRvt(buf);
+      it.meta={version:d.version,username:d.username,saves:d.saves,first:d.first,last:d.last,
+               recs:d.recs||null, editors:d.recs?new Set(d.recs.map(r=>r.name)).size:0,
+               central:d.central||null, teThumb:!!d.thumb};
+      if(it.thumbURL) URL.revokeObjectURL(it.thumbURL);
+      it.thumbURL=d.thumb?URL.createObjectURL(new Blob([d.thumb.png],{type:"image/png"})):null;
+    } else if(["dwg","dxf","ifc"].includes(it.ext)){
+      const capN=it.ext==="dxf"?2000000:8192;
+      const cap=await (file.slice?file.slice(0,capN).arrayBuffer():file.arrayBuffer());
+      it.meta=parseCad(it.ext,new Uint8Array(cap.slice(0,8192)));
+      if(it.ext==="dxf"){
+        try{
+          const b=await dxfThumb(new TextDecoder("latin1").decode(cap));
+          if(b){ if(it.thumbURL) URL.revokeObjectURL(it.thumbURL); it.thumbURL=URL.createObjectURL(b); }
+        }catch(e){}
+      }
+      if(it.ext==="dwg"&&file.slice){
+        try{ const b=await dwgThumbnail(file);
+             if(b){ if(it.thumbURL)URL.revokeObjectURL(it.thumbURL); it.thumbURL=URL.createObjectURL(b); } }catch(e){}
+      }
+    } else it.meta=await metaAltres(it,file);
+    // hash per a detecció de duplicats (≤256 MB)
+    if(globalThis.crypto?.subtle && file.size<=268435456){
+      if(!buf) buf=await file.arrayBuffer();
+      const h=await crypto.subtle.digest("SHA-256",buf);
+      it.hash=[...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,"0")).join("");
+    }
+  }catch(e){ it.err=e.message; it.meta={}; }
+  marcaDuplicats();
+  actualitza(it);
+}
+
+/* ─── Còpies de seguretat de Revit: apilades sota el fitxer principal ─── */
+function apilaCopies(){
+  const principals=new Map();
+  for(const it of ITEMS){
+    if(esCopia(it.name)) continue;
+    principals.set((it.rel||"")+"\u0000"+it.name.toLowerCase(),it);
+  }
+  const resta=[];
+  for(const it of ITEMS){
+    const c=esCopia(it.name);
+    if(!c){ resta.push(it); continue; }
+    const pare=principals.get((it.rel||"")+"\u0000"+(c.base+"."+c.ext).toLowerCase());
+    if(!pare){ resta.push(it); continue; }   // sense principal: es mostra tal qual
+    (pare.copies||(pare.copies=[])).push({name:it.name,num:c.num,mtime:it.mtime,size:it.size});
+  }
+  for(const p of principals.values()) if(p.copies) p.copies.sort((a,b)=>a.num-b.num);
+  ITEMS=resta;
+}
+function obreCopies(it){
+  const c=it.copies||[];
+  $("#modalcos h3").textContent=it.name+" — còpies de seguretat ("+c.length+")";
+  $("#modallliure").innerHTML="";
+  $("#modalcos thead").innerHTML="<tr><th>#</th><th>Fitxer</th><th>Data</th><th>Mida</th></tr>";
+  $("#modalcos tbody").innerHTML=c.map(x=>`<tr><td>${String(x.num).padStart(4,"0")}</td><td>${x.name}</td><td><small>${new Date(x.mtime).toLocaleString("ca-ES")}</small></td><td>${kb(x.size)}</td></tr>`).join("");
+  mostraModal();
+}
+
+/* ─── Ordenació ─── */
+const nomUsuari=it=>it.meta?.last?.name||it.meta?.username||"\uffff";
+const nomPrimer=it=>it.meta?.first?.name||it.meta?.username||"\uffff";
+const CLAUS={
+  nom:(a,b)=>a.name.localeCompare(b.name,"ca",{numeric:true}),
+  tipus:(a,b)=>a.ext.localeCompare(b.ext),
+  versio:(a,b)=>(+a.meta?.version||9999)-(+b.meta?.version||9999),
+  mida:(a,b)=>a.size-b.size,
+  data:(a,b)=>a.mtime-b.mtime,
+  desats:(a,b)=>(a.meta?.saves||0)-(b.meta?.saves||0),
+  usuari:(a,b)=>nomUsuari(a).localeCompare(nomUsuari(b),"ca"),
+  carpeta:(a,b)=>(a.rel||"").localeCompare(b.rel||"","ca"),
+  primer:(a,b)=>nomPrimer(a).localeCompare(nomPrimer(b),"ca"),
+};
+function ordena(){
+  ITEMS.sort((a,b)=>{
+    for(const k of SORT.keys){ const c=CLAUS[k](a,b); if(c) return SORT.dir*c; }
+    return SORT.dir*CLAUS.nom(a,b);
+  });
+}
+
+/* ─── Render de les dues vistes ─── */
+const COLS=[["","thumb"],["Nom","nom"],["Carpeta","carpeta"],["Tipus","tipus"],["Versió","versio"],["Mida","mida"],
+            ["Modificat","data"],["Desats","desats"],["Primer editor","primer"],["Darrer editor","usuari"],["Accions",""]];
+function passaAlerta(it){
+  if(!FALERTA.size) return true;
+  const m=it.meta||{};
+  return (FALERTA.has("multi")&&(m.editors||0)>1)
+       ||(FALERTA.has("central")&&!!m.central)
+       ||(FALERTA.has("dup")&&it.dup!==null&&it.dup!==undefined);
+}
+function coincideix(it){
+  if(!passaAlerta(it)) return false;
+  if(!CERCA) return true;
+  const q=CERCA.toLowerCase(), m=it.meta||{};
+  return it.name.toLowerCase().includes(q)||(it.rel||"").toLowerCase().includes(q)
+    ||[m.username,m.first?.name,m.last?.name].some(n=>n&&n.toLowerCase().includes(q));
+}
+
+function render(){
+  const VIS=ITEMS.filter(coincideix); VISL=VIS;
+  for(const it of ITEMS){ it.card=null; it.row=null; }
+  for(const s of SEL) if(!ITEMS.includes(s)) SEL.delete(s);
+  if(VIEW==="graella"){
+    $("#llista").hidden=true; $("#graella").hidden=false;
+    $("#graella").innerHTML=VIS.length?"":'<p style="color:var(--mut);padding:0 2px">Cap fitxer coincident en aquesta carpeta.</p>';
+    for(const it of VIS){
+      const div=document.createElement("div"); div.className="fitxa"; it.card=div;
+      $("#graella").appendChild(div); pintaFitxa(it);
+    }
+  } else {
+    $("#graella").hidden=true; $("#llista").hidden=false;
+    $("#llista thead").innerHTML="<tr>"+COLS.map(([t,k])=>
+      `<th data-k="${k}" class="${k===SORT.keys[0]?"actiu":""}">${t}${k===SORT.keys[0]?(SORT.dir>0?" ↑":" ↓"):""}</th>`).join("")+"</tr>";
+    document.querySelectorAll("#llista th[data-k]").forEach(th=>{
+      if(!th.dataset.k) return;
+      th.onclick=()=>{const k=th.dataset.k; if(k==="thumb")return;
+        if(SORT.keys[0]===k)SORT.dir*=-1; else SORT={keys:[k],dir:1};
+        if([...$("#ordena").options].some(o=>o.value===k)) $("#ordena").value=k;
+        $("#sentit").textContent=SORT.dir>0?"↓":"↑";
+        ordena(); render();};
+    });
+    const tb=$("#llista tbody"); tb.innerHTML="";
+    for(const it of VIS){
+      const tr=document.createElement("tr"); it.row=tr; tb.appendChild(tr); pintaFila(it);
+    }
+    if(!VIS.length) tb.innerHTML='<tr><td colspan="11" style="color:var(--mut)">Cap fitxer coincident.</td></tr>';
+  }
+}
+function actualitza(it){ if(VIEW==="graella"&&it.card)pintaFitxa(it); if(VIEW==="llista"&&it.row)pintaFila(it); }
+
+function etiquetes(it){
+  const m=it.meta; let s="";
+  if((m?.editors||0)>1) s+=`<span class="alerta">⚠ ${m.editors} editors</span>`;
+  if(m?.central) s+=`<span class="alerta" title="Model amb worksharing: ${m.central}">⚠ central</span>`;
+  if(it.dup!==null&&it.dup!==undefined) s+=`<span class="dup" style="background:${DUP_COLORS[it.dup%DUP_COLORS.length]}" title="Fitxer idèntic byte a byte a un altre de la llista">≡ duplicat</span>`;
+  if(it.copies&&it.copies.length){
+    const c=it.copies, p=new Date(dataMin(c)).toLocaleDateString("ca-ES"), u=new Date(dataMax(c)).toLocaleDateString("ca-ES");
+    s+=`<span class="copbadge" title="Còpies de seguretat de Revit — primera: ${p} · darrera: ${u}">⧉ ${c.length} còpi${c.length===1?"a":"es"} · ${p} → ${u}</span>`;
+  }
+  return s;
+}
+function mostraModal(){ $("#modaltsv").hidden=true; $("#modalcos").classList.remove("ample"); $("#modal").style.display="flex"; }
+function obreHistorial(it){
+  const recs=it.meta?.recs; if(!recs) return;
+  $("#modalcos h3").textContent=it.name+" — historial de desats";
+  $("#modallliure").innerHTML="";
+  $("#modalcos thead").innerHTML="<tr><th>#</th><th>Editor</th><th>Data</th></tr>";
+  $("#modalcos tbody").innerHTML=recs.map((r,i)=>`<tr><td>${i+1}</td><td>${r.name}</td><td>${fmt(r.ts)}</td></tr>`).join("");
+  mostraModal();
+}
+function obreDuplicats(it){
+  if(!it.hash) return;
+  const grup=ITEMS.filter(x=>x.hash===it.hash);
+  $("#modalcos h3").textContent="Grup de duplicats ("+grup.length+") — SHA-256 "+it.hash.slice(0,16)+"…";
+  $("#modallliure").innerHTML="";
+  $("#modalcos thead").innerHTML="<tr><th>Nom</th><th>Carpeta</th><th>Mida</th><th>Modificat</th></tr>";
+  $("#modalcos tbody").innerHTML=grup.map(x=>`<tr><td>${x.name}</td><td><small>${x.rel||"(arrel)"}</small></td><td>${kb(x.size)}</td><td><small>${new Date(x.mtime).toLocaleString("ca-ES")}</small></td></tr>`).join("");
+  mostraModal();
+}
+function obreRegistre(){
+  $("#modalcos h3").textContent="Registre d'operacions de la sessió ("+LOG.length+")";
+  $("#modallliure").innerHTML="";
+  $("#modalcos thead").innerHTML="<tr><th>Hora</th><th>Operació</th><th>Element</th><th>Origen</th><th>Destí</th><th></th></tr>";
+  $("#modalcos tbody").innerHTML=LOG.map(l=>`<tr><td><small>${new Date(l.t).toLocaleTimeString("ca-ES")}</small></td><td>${l.op}</td><td>${l.fitxer}</td><td><small>${l.origen}</small></td><td><small>${l.desti}</small></td><td>${l.ok?"✓":'<span class="err">✗</span>'}</td></tr>`).join("")||'<tr><td colspan="6" style="color:var(--mut)">Cap operació encara.</td></tr>';
+  mostraModal();
+  $("#modaltsv").hidden=!LOG.length;
+}
+$("#modaltsv").onclick=()=>{
+  const cap=["Hora","Operació","Element","Origen","Destí","OK"].join("\t");
+  const net=s=>String(s??"").replace(/[\t\r\n]+/g," ");
+  const files=LOG.map(l=>[new Date(l.t).toISOString(),l.op,l.fitxer,l.origen,l.desti,l.ok?"OK":"ERROR"].map(net).join("\t"));
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob(["\ufeff"+[cap,...files].join("\r\n")],{type:"text/tab-separated-values"}));
+  a.download="guaita-fitxers_registre.tsv"; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+};
+async function visorPdf(it,cont){
+  try{
+    const file=it.file||await it.h.getFile();
+    const url=URL.createObjectURL(file.type?file:new Blob([await file.arrayBuffer()],{type:"application/pdf"}));
+    cont.innerHTML=`<iframe src="${url}#view=FitH" title="Visor PDF"></iframe>`;
+    const obs=new MutationObserver(()=>{ if($("#modal").style.display==="none"){ URL.revokeObjectURL(url); obs.disconnect(); } });
+    obs.observe($("#modal"),{attributes:true,attributeFilter:["style"]});
+  }catch(e){ cont.innerHTML=`<span class="err">No s'ha pogut obrir: ${e.message}</span>`; }
+}
+
+async function visorDxf(it,cont){
+  let file, txt;
+  try{
+    file=await it.h.getFile();
+    const cap=await(file.slice?file.slice(0,2000000).arrayBuffer():file.arrayBuffer());
+    txt=new TextDecoder("latin1").decode(cap);
+  }catch(e){ cont.innerHTML=`<span class="err">No s'ha pogut llegir: ${e.message}</span>`; return; }
+  const {segs,bbox}=dxfSegments(txt);
+  if(segs.length<4){ cont.innerHTML='<span style="color:var(--mut)">Sense geometria de línia visualitzable.</span>'; return; }
+  const [x0,y0,x1,y1]=bbox, w=x1-x0||1, h=y1-y0||1;
+  const cv=document.createElement("canvas"); cv.width=760; cv.height=460;
+  cont.innerHTML="";
+  const barra=document.createElement("div"); barra.className="barra";
+  barra.innerHTML=`<button class="sec" data-z="1.25">＋</button><button class="sec" data-z="0.8">－</button><button class="sec" data-r>⟲ Ajusta</button><span>${(segs.length/4)|0} segments · roda per fer zoom, arrossega per moure</span>`;
+  cont.append(cv,barra);
+  const ctx=cv.getContext("2d");
+  let esc, ox, oy;
+  const ajusta=()=>{ const m=20; esc=Math.min((cv.width-2*m)/w,(cv.height-2*m)/h);
+    ox=(cv.width-w*esc)/2-x0*esc; oy=(cv.height-h*esc)/2-y0*esc; dibuixa(); };
+  const dibuixa=()=>{
+    ctx.fillStyle="#0c0d10"; ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.strokeStyle="#e8ff2b"; ctx.lineWidth=1; ctx.beginPath();
+    for(let i=0;i<segs.length;i+=4){
+      ctx.moveTo(ox+segs[i]*esc, cv.height-(oy+segs[i+1]*esc));
+      ctx.lineTo(ox+segs[i+2]*esc, cv.height-(oy+segs[i+3]*esc));
+    }
+    ctx.stroke();
+  };
+  cv.onwheel=e=>{ e.preventDefault();
+    const r=cv.getBoundingClientRect(), mx=(e.clientX-r.left)*cv.width/r.width, my=(e.clientY-r.top)*cv.height/r.height;
+    const f=e.deltaY<0?1.15:1/1.15;
+    ox=mx-(mx-ox)*f; oy=(cv.height-my)-((cv.height-my)-oy)*f; esc*=f; dibuixa();
+  };
+  let arr=null;
+  cv.onmousedown=e=>{ arr={x:e.clientX,y:e.clientY,ox,oy}; cv.classList.add("arrossega"); };
+  window.addEventListener("mousemove",e=>{ if(!arr) return;
+    const r=cv.getBoundingClientRect(), k=cv.width/r.width;
+    ox=arr.ox+(e.clientX-arr.x)*k; oy=arr.oy-(e.clientY-arr.y)*k*(cv.height/cv.width*r.width/r.height||1); dibuixa();
+  });
+  window.addEventListener("mouseup",()=>{ arr=null; cv.classList.remove("arrossega"); });
+  barra.querySelectorAll("[data-z]").forEach(b=>b.onclick=()=>{
+    const f=+b.dataset.z, cx=cv.width/2, cy=cv.height/2;
+    ox=cx-(cx-ox)*f; oy=cy-(cy-oy)*f; esc*=f; dibuixa();
+  });
+  barra.querySelector("[data-r]").onclick=ajusta;
+  ajusta();
+}
+
+function obreDetall(it){
+  const m=it.meta||{};
+  $("#modalcos h3").textContent=it.name;
+  $("#modalcos thead").innerHTML=""; $("#modalcos tbody").innerHTML="";
+  const fila=(k,v)=>v?`<dt>${k}</dt><dd>${v}</dd>`:"";
+  $("#modallliure").innerHTML=`
+    ${it.thumbURL&&!IMATGES.includes(it.ext)?`<img src="${it.thumbURL}">`:""}
+    <dl>
+      ${fila("Tipus",badgeExt(it.ext))}
+      ${fila("Versió",m.version)}
+      ${fila("Build",m.build)}
+      ${fila("Dimensions",m.dims)}
+      ${fila("Pàgines",m.pagines)}
+      ${fila("Punts",m.punts&&milers(m.punts))}
+      ${fila("Contingut",m.extra&&!m.dims&&!m.pagines?m.extra:"")}
+      ${fila("Creador",m.creador)}
+      ${fila("Aplicació",m.productor)}
+      ${fila("Materials",m.materials)}
+      ${fila("Creat",m.creat)}
+      ${fila("Carpeta",it.rel||"(arrel)")}
+      ${fila("Mida",kb(it.size)+" ("+it.size.toLocaleString("ca-ES")+" bytes)")}
+      ${fila("Modificat",new Date(it.mtime).toLocaleString("ca-ES"))}
+      ${fila("Usuari (BasicFileInfo)",m.username)}
+      ${fila("Central Model Path",m.central&&`<span class="alerta">⚠</span> ${m.central}`)}
+      ${fila("Editors únics",m.editors)}
+      ${fila("SHA-256",it.hash&&`<small style="font-family:Consolas,monospace">${it.hash}</small>`)}
+      ${fila("Duplicat",it.dup!==null&&it.dup!==undefined?"sí (vegeu el badge ≡)":"")}
+      ${fila("Còpies de seguretat",it.copies&&it.copies.length?`${it.copies.length} · de ${new Date(dataMin(it.copies)).toLocaleString("ca-ES")} a ${new Date(dataMax(it.copies)).toLocaleString("ca-ES")}`:"")}
+    </dl>
+    ${m.recs?`<table><thead><tr><th>#</th><th>Editor</th><th>Data</th></tr></thead><tbody>${m.recs.map((r,i)=>`<tr><td>${i+1}</td><td>${r.name}</td><td>${fmt(r.ts)}</td></tr>`).join("")}</tbody></table>`:""}
+    ${it.ext==="dxf"?'<div id="dxfvisor">Carregant el visor DXF…</div>':""}
+    ${it.ext==="pdf"?'<div id="pdfvisor">Carregant el visor PDF…</div>':""}
+    ${IMATGES.includes(it.ext)&&it.thumbURL?`<div id="imgvisor"><img src="${it.thumbURL}"></div>`:""}`;
+  mostraModal();
+  if(["pdf","dxf",...IMATGES].includes(it.ext)) $("#modalcos").classList.add("ample");
+  if(it.ext==="dxf") visorDxf(it,$("#dxfvisor"));
+  if(it.ext==="pdf") visorPdf(it,$("#pdfvisor"));
+}
+$("#modal").onclick=e=>{if(e.target.id==="modal")$("#modal").style.display="none";};
+
+function badgeExt(ext){
+  const cls=[...TOTES].includes(ext)?ext:"alt";
+  return `<span class="etiq e-${cls}">${(ext||"—").toUpperCase()}</span>`;
+}
+function badgeVer(m,ext){
+  if(!m) return "…";
+  if(!m.version) return RVT_FAM.includes(ext)?'<span class="err">versió?</span>':"—";
+  return `<span class="versio">${/^\d{4}$/.test(m.version)?"Revit "+m.version:m.version}</span>`;
+}
+
+function pintaFitxa(it){
+  const m=it.meta;
+  let info;
+  if(it.err) info=`<span class="err">${it.err}</span>`;
+  else if(!m) info="llegint…";
+  else if(m.saves) info=`<span class="lnk historial">${m.saves} desat${m.saves>1?"s":""}</span><br><b>Primer:</b> ${m.first.name} <small>(${fmt(m.first.ts)})</small><br><b>Darrer:</b> ${m.last.name} <small>(${fmt(m.last.ts)})</small>`;
+  else if(m.username) info=`<b>${RVT_FAM.includes(it.ext)?"Usuari (BasicFileInfo)":"Autor"}:</b> ${m.username}`;
+  else info=RVT_FAM.includes(it.ext)?"sense historial de desats llegible":(m.username?`<b>Autor:</b> ${m.username}`:"");
+  it.card.classList.toggle("multi",(m?.editors||0)>1);
+  it.card.innerHTML=`
+    <div class="thumb">${it.thumbURL?`<img src="${it.thumbURL}">`:`<span class="buit">${m?"sense miniatura":"…"}</span>`}</div>
+    <div class="dades">
+      <div class="nom">${badgeExt(it.ext)}${it.name}${etiquetes(it)}</div>
+      <div class="meta">${badgeVer(m,it.ext)}${m?.extra?" · "+m.extra:""} · ${kb(it.size)} · ${new Date(it.mtime).toLocaleDateString("ca-ES")}${it.rel?` · <b>📁 ${it.rel}</b>`:""}</div>
+      <div class="meta">${info}</div>
+      <div class="accions"></div>
+    </div>`;
+  it.card.onclick=e=>clicSeleccio(it,e);
+  fesArrossegable(it,it.card);
+  if(it.thumbURL) it.card.querySelector(".thumb").onclick=()=>zoom(it.thumbURL);
+  const hl=it.card.querySelector(".historial");
+  if(hl) hl.onclick=()=>obreHistorial(it);
+  const dp=it.card.querySelector(".dup");
+  if(dp) dp.onclick=e=>{e.stopPropagation();obreDuplicats(it);};
+  const cp=it.card.querySelector(".copbadge");
+  if(cp) cp.onclick=e=>{e.stopPropagation();obreCopies(it);};
+  botons(it,it.card.querySelector(".accions"),false);
+  marcaSel(it);
+}
+
+function pintaFila(it){
+  const m=it.meta;
+  it.row.classList.toggle("multi",(m?.editors||0)>1);
+  it.row.innerHTML=`
+    <td>${it.thumbURL?`<img src="${it.thumbURL}">`:""}</td>
+    <td>${it.name}${etiquetes(it)}${it.err?`<br><span class="err">${it.err}</span>`:""}</td>
+    <td><small>${it.rel||""}</small></td>
+    <td>${badgeExt(it.ext)}</td>
+    <td>${badgeVer(m,it.ext)}${m?.extra?`<br><small>${m.extra}</small>`:""}</td>
+    <td>${kb(it.size)}</td>
+    <td><small>${new Date(it.mtime).toLocaleDateString("ca-ES")}</small></td>
+    <td>${m?(m.saves?`<span class="lnk historial">${m.saves}</span>`:"—"):"…"}</td>
+    <td>${m?.first?`${m.first.name}<br><small>${fmt(m.first.ts)}</small>`:(m?.username?m.username:"—")}</td>
+    <td>${m?.last?`${m.last.name}<br><small>${fmt(m.last.ts)}</small>`:"—"}</td>
+    <td class="acc"></td>`;
+  it.row.onclick=e=>clicSeleccio(it,e);
+  fesArrossegable(it,it.row);
+  const img=it.row.querySelector("img");
+  if(img) img.onclick=()=>zoom(it.thumbURL);
+  const hl=it.row.querySelector(".historial");
+  if(hl) hl.onclick=()=>obreHistorial(it);
+  const dp=it.row.querySelector(".dup");
+  if(dp) dp.onclick=e=>{e.stopPropagation();obreDuplicats(it);};
+  const cp=it.row.querySelector(".copbadge");
+  if(cp) cp.onclick=e=>{e.stopPropagation();obreCopies(it);};
+  botons(it,it.row.querySelector(".acc"),true);
+  marcaSel(it);
+}
+
+function botons(it,cont,compacte){
+  const potEditar=HAS_FSA&&it.h&&it.meta?.teThumb&&it.dir;
+  const potObrir=PONT&&RVT_FAM.includes(it.ext)&&it.dir;
+  const potLocalitzar=PONT&&it.dir;
+  cont.innerHTML=`
+    ${potObrir?`<select class="rv">${PONT.map(r=>`<option value="${r.exe.replace(/"/g,"&quot;")}" ${r.year===it.meta?.version?"selected":""}>${r.year}</option>`).join("")}</select><button class="obre" title="Obre amb Revit">▶${compacte?"":" Obre"}</button>`:""}
+    ${it.thumbURL?`<button class="sec baixa" title="Descarrega PNG">⬇${compacte?"":" PNG"}</button>`:""}
+    ${potEditar?`<button class="sec canvia" title="Substitueix la miniatura">🖼${compacte?"":" Canvia"}</button><input type="file" accept="image/*" hidden>`:""}
+    ${it.dir?`<button class="sec loc" title="Obre l'Explorer amb la carpeta que conté el fitxer">📂${compacte?"":" Localitza"}</button>`:""}
+    <button class="sec copia" title="Copia la ruta al porta-retalls (absoluta si has indicat l'arrel)">🔗</button>`;
+  const ob=cont.querySelector(".obre");
+  if(ob) ob.onclick=()=>obreAmbRevit(it,cont.querySelector(".rv").value);
+  const lc=cont.querySelector(".loc");
+  if(lc) lc.onclick=()=>localitza(it);
+  const bx=cont.querySelector(".baixa");
+  if(bx) bx.onclick=()=>{const a=document.createElement("a");a.href=it.thumbURL;a.download=it.name.replace(/\.\w+$/,".png");a.click();};
+  cont.querySelector(".copia").onclick=async()=>{
+    const abs=rutaAbsoluta(it);
+    const rel=[...camiDe(CURRENT||{name:""}).slice(1),...(it.rel?it.rel.split("/"):[]),it.name].join("\\");
+    await navigator.clipboard.writeText(abs||rel);
+    avis(abs?"Ruta absoluta copiada":"Ruta relativa copiada (indica l'arrel al costat del pont per obtenir-la absoluta)");};
+  if(potEditar){
+    const fi=cont.querySelector("input[type=file]");
+    cont.querySelector(".canvia").onclick=()=>fi.click();
+    fi.onchange=async()=>{
+      const imgFile=fi.files[0]; if(!imgFile) return;
+      try{ avis("Substituint miniatura…"); await editaMiniatura(it,imgFile);
+           avis("Miniatura substituïda · còpia .bak creada"); }
+      catch(e){ avis("Error: "+e.message); }
+      finally{ fi.value=""; }
+    };
+  }
+}
+
+async function editaMiniatura(it,imgFile){
+  const file=await it.h.getFile();
+  const buf=await file.arrayBuffer();
+  const d=await readRvt(buf);
+  if(!d.thumb) throw new Error("el fitxer ja no té miniatura");
+  const newPng=await reencodePng(imgFile,d.thumb.png);
+  const bak=await it.dir.getFileHandle(it.name+".bak",{create:true});
+  let w=await bak.createWritable(); await w.write(buf); await w.close();
+  const r=patchThumbnail(buf,d.cfb,d.thumb,newPng);
+  if(!r.ok) throw new Error(r.msg);
+  w=await it.h.createWritable(); await w.write(buf); await w.close();
+  await carrega(it,true);
+}
+
+/* ─── Fallback només lectura (Firefox / selecció de fitxers) ─── */
+$("#obreFitxers").onclick=()=>$("#fallback").click();
+$("#fallback").onchange=e=>{
+  const files=[...e.target.files]; if(!files.length) return;
+  $("#inici").hidden=true; $("#disposicio").hidden=false;
+  $("#arbrecos").innerHTML='<p style="color:var(--mut);padding:6px">selecció de fitxers<br>(només lectura)</p>';
+  $("#cami").textContent=`${files.length} fitxer(s)`;
+  ITEMS=files.map(f=>({name:f.name,h:{getFile:async()=>f},ext:f.name.split(".").pop().toLowerCase(),file:f,
+                       size:f.size,mtime:f.lastModified,meta:null,thumbURL:null,err:null}));
+  CURRENT=null; ordena(); render();
+  for(const it of ITEMS) carrega(it);
+};
+
+/* ─── Filtres de format ─── */
+function pintaXips(){
+  document.querySelectorAll("#filtres .xip").forEach(x=>{
+    const k=x.dataset.x; if(!k) return;
+    const g=k==="lliure"?EXTRA:XIPS[k];
+    x.classList.toggle("actiu", k==="estel"?TOT
+      : k==="tots"?(!TOT&&TOTES.every(e=>FILTRE.has(e)))
+      : g&&g.length?(!TOT&&g.every(e=>FILTRE.has(e))):false);
+  });
+  const c=$("#copies");
+  c.textContent="⧉ Còpies: "+({apila:"apilades",amaga:"amagades",mostra:"visibles"})[MODECOPIES];
+  c.classList.toggle("actiu",MODECOPIES!=="mostra");
+}
+document.querySelectorAll("#filtres .xip").forEach(x=>x.onclick=()=>{
+  const k=x.dataset.x; if(!k) return;
+  if(k==="estel") TOT=!TOT;
+  else if(k==="tots"){
+    TOT=false;
+    const plens=TOTES.every(e=>FILTRE.has(e)), lliuresActives=EXTRA.length&&EXTRA.every(e=>FILTRE.has(e));
+    FILTRE=plens?new Set():new Set(lliuresActives?[...TOTES,...EXTRA]:TOTES);
+  }
+  else {
+    const g=k==="lliure"?EXTRA:XIPS[k];
+    if(!g||!g.length){ if(k==="lliure") $("#extlliure").focus(); return; }
+    TOT=false;
+    if(g.every(e=>FILTRE.has(e))) g.forEach(e=>FILTRE.delete(e));
+    else g.forEach(e=>FILTRE.add(e));
+  }
+  pintaXips(); if(CURRENT) llista();
+});
+pintaXips();
+
+/* ─── Selecció estil Explorer ─── */
+function clicSeleccio(it,e){
+  if(e.target.closest("button,select,input,a,.lnk,.thumb,img")) return;
+  if(e.shiftKey&&ANCORA&&VISL.includes(ANCORA)){
+    const i1=VISL.indexOf(ANCORA), i2=VISL.indexOf(it);
+    SEL=new Set(VISL.slice(Math.min(i1,i2),Math.max(i1,i2)+1));
+  } else if(e.ctrlKey||e.metaKey){
+    SEL.has(it)?SEL.delete(it):SEL.add(it); ANCORA=it;
+  } else { SEL=new Set([it]); ANCORA=it; }
+  pintaSeleccio();
+}
+function esRetallat(it){
+  return !!PORTA&&PORTA.mode==="cut"&&PORTA.items.some(p=>p.name===it.name&&(p.rel||"")===(it.rel||""));
+}
+function marcaSel(it){
+  const el=it.card||it.row; if(!el) return;
+  el.classList.toggle("sel",SEL.has(it));
+  el.classList.toggle("cut",esRetallat(it));
+}
+function pintaSeleccio(){
+  for(const it of ITEMS) marcaSel(it);
+  $("#selinfo").textContent=SEL.size?SEL.size+" sel.":"";
+  $("#bcopia").disabled=$("#btalla").disabled=!SEL.size;
+  $("#brenom").disabled=SEL.size!==1||![...SEL].every(it=>it.dir);
+  $("#besborra").disabled=!SEL.size||![...SEL].every(it=>it.dir);
+  $("#benganxa").disabled=!PORTA||!CURRENT;
+  $("#bsafata").disabled=!SEL.size;
+}
+
+/* ─── Copia / retalla / enganxa / esborra ─── */
+function copiaSel(mode){
+  if(!SEL.size) return;
+  PORTA={mode,items:[...SEL].filter(it=>it.dir),origen:CURRENT?camiDe(CURRENT).join("/"):""};
+  if(!PORTA.items.length){PORTA=null;return;}
+  pintaSeleccio();
+  avis(PORTA.items.length+(mode==="cut"?" fitxer(s) retallat(s)":" fitxer(s) copiat(s)"));
+}
+async function nomLliure(dir,nom){
+  try{ await dir.getFileHandle(nom); }catch(e){ return nom; }
+  const p=nom.lastIndexOf("."), base=p>0?nom.slice(0,p):nom, ext=p>0?nom.slice(p):"";
+  for(let i=1;i<100;i++){
+    const n=`${base} - còpia${i>1?" "+i:""}${ext}`;
+    try{ await dir.getFileHandle(n); }catch(e){ return n; }
+  }
+  throw new Error("massa còpies");
+}
+function registra(op,fitxer,origen,desti,ok=true){
+  LOG.push({t:Date.now(),op,fitxer,origen:origen||"",desti:desti||"",ok});
+}
+async function existeix(dir,nom){
+  try{ await dir.getFileHandle(nom); return true; }catch(e){}
+  try{ await dir.getDirectoryHandle(nom); return true; }catch(e){}
+  return false;
+}
+async function copiaEntrada(h,destDir,nom){
+  if(h.kind==="directory"){
+    const nou=await destDir.getDirectoryHandle(nom,{create:true});
+    for await(const [n,ch] of h.entries()){
+      if(CANCEL) throw new Error("cancel·lat");
+      await copiaEntrada(ch,nou,n);
+    }
+  } else {
+    const f=await h.getFile();
+    const d=await destDir.getFileHandle(nom,{create:true});
+    const w=await d.createWritable();
+    if(f.stream){
+      const rd=f.stream().getReader();
+      for(;;){
+        const {value,done}=await rd.read();
+        if(done) break;
+        if(CANCEL){ await w.close(); throw new Error("cancel·lat"); }
+        await w.write(value); progresBytes(value.byteLength||value.length||0);
+      }
+    } else { await w.write(f); progresBytes(f.size||0); }
+    await w.close();
+  }
+}
+async function esborraEntrada(dir,nom,esDir){ await dir.removeEntry(nom,esDir?{recursive:true}:undefined); }
+
+/* ─── Progrés ─── */
+function progresIni(items,verb){
+  CANCEL=false; PRFET=0; PRT0=performance.now();
+  PRTOT=items.every(i=>!i.esDir)?items.reduce((a,i)=>a+(i.size||0),0):0;
+  const p=$("#progres progress");
+  if(PRTOT){p.max=PRTOT;p.value=0;} else p.removeAttribute("value");
+  $("#progres").hidden=false; $("#prtext").textContent=verb+"…"; $("#prtext2").textContent="";
+}
+function progresBytes(n){
+  PRFET+=n;
+  const seg=(performance.now()-PRT0)/1000||.001;
+  if(PRTOT) $("#progres progress").value=PRFET;
+  $("#prtext2").textContent=(PRFET/1048576).toFixed(1)+" MB · "+(PRFET/1048576/seg).toFixed(1)+" MB/s";
+}
+function progresPas(verb,i,n,nom){ $("#prtext").textContent=`${verb} ${i}/${n} — ${nom}`; }
+function progresFi(){ $("#progres").hidden=true; }
+$("#prcancel").onclick=()=>{ CANCEL=true; $("#prtext").textContent="Cancel·lant…"; };
+
+/* ─── Transferència genèrica (fitxers i carpetes) ─── */
+async function transfereix(items,node,mode,origenLabel){
+  const destDir=node.handle, destLabel=camiDe(node).join("/");
+  const verb=mode==="move"?"Movent":"Copiant";
+  progresIni(items,verb);
+  const recs=[]; let fets=0;
+  for(let i=0;i<items.length;i++){
+    const s=items[i];
+    progresPas(verb,i+1,items.length,s.name);
+    try{
+      if(CANCEL) break;
+      if(s.dir===destDir){ if(mode==="move") continue; }
+      if(s.esDir&&await esDinsDe(s.h,node)){ avis(`No pots ${mode==="move"?"moure":"copiar"} «${s.name}» dins d'ella mateixa`); continue; }
+      const nom=await nomLliure(destDir,s.name);
+      try{ await copiaEntrada(s.h,destDir,nom); }
+      catch(e){ try{ await esborraEntrada(destDir,nom,!!s.esDir); }catch(e2){} throw e; }
+      if(mode==="move") await esborraEntrada(s.dir,s.name,!!s.esDir);
+      recs.push({srcDir:s.dir,nomOrig:s.name,destDir,nomNou:nom,esDir:!!s.esDir,node:s.node||null});
+      registra(mode==="move"?"mou":"copia",s.name+(nom!==s.name?" → "+nom:""),origenLabel||"",destLabel);
+      fets++;
+    }catch(e){ avis(`Error amb ${s.name}: ${e.message}`); registra(mode==="move"?"mou":"copia",s.name,origenLabel||"",destLabel,false); }
+  }
+  progresFi();
+  if(fets){ DESFES.push({mode,recs}); if(DESFES.length>20) DESFES.shift(); }
+  actualitzaDesfes();
+  avis(CANCEL?"Cancel·lat ("+fets+" fets)":fets+" element(s) "+(mode==="move"?"mogut(s)":"copiat(s)"));
+  await refrescaNode(node);
+  for(const r of recs) if(r.esDir&&r.node&&r.node.parent&&mode==="move") await refrescaNode(r.node.parent);
+  if(CURRENT) llista();
+}
+async function esDinsDe(pare,node){
+  for(let x=node;x;x=x.parent){
+    if(pare===x.handle) return true;
+    try{ if(pare.isSameEntry&&await pare.isSameEntry(x.handle)) return true; }catch(e){}
+  }
+  return false;
+}
+async function refrescaNode(n){
+  if(!n||!n.sub) return;
+  n.carregat=false; n.sub.innerHTML="";
+  try{ await expandeix(n); }catch(e){}
+}
+
+/* ─── Desfés ─── */
+function actualitzaDesfes(){ $("#bdesfes").disabled=!DESFES.length; }
+async function desfes(){
+  const u=DESFES.pop(); actualitzaDesfes();
+  if(!u){ avis("Res per desfer"); return; }
+  try{
+    if(u.mode==="copy"){
+      for(const r of u.recs){ await esborraEntrada(r.destDir,r.nomNou,r.esDir); registra("desfés còpia",r.nomNou,"","" ); }
+    } else if(u.mode==="move"){
+      for(const r of u.recs){
+        let h; try{ h=await r.destDir.getFileHandle(r.nomNou); }catch(e){ h=await r.destDir.getDirectoryHandle(r.nomNou); }
+        const nom=await nomLliure(r.srcDir,r.nomOrig);
+        await copiaEntrada(h,r.srcDir,nom);
+        await esborraEntrada(r.destDir,r.nomNou,r.esDir);
+        registra("desfés mou",r.nomNou,"","");
+      }
+    } else if(u.mode==="rename"){
+      for(const r of u.recs){ await reanomenaDins(r.dir,r.a,r.de); registra("desfés reanomena",r.a+" → "+r.de,"",""); }
+    } else if(u.mode==="mkdir"){
+      for(const r of u.recs){ await r.dir.removeEntry(r.nom); registra("desfés carpeta",r.nom,"",""); }
+    }
+    avis("Desfet");
+  }catch(e){ avis("No s'ha pogut desfer del tot: "+e.message); }
+  if(CURRENT) llista();
+}
+
+/* ─── Reanomenar i carpeta nova ─── */
+async function reanomenaDins(dir,de,a){
+  let h,esDir=false;
+  try{ h=await dir.getFileHandle(de); }catch(e){ h=await dir.getDirectoryHandle(de); esDir=true; }
+  if(!esDir&&h.move){ await h.move(a); return; }
+  await copiaEntrada(h,dir,a);
+  await esborraEntrada(dir,de,esDir);
+}
+async function reanomena(){
+  if(SEL.size!==1) return;
+  const it=[...SEL][0]; if(!it.dir) return;
+  const nou=prompt("Nou nom:",it.name);
+  if(!nou||nou===it.name) return;
+  if(await existeix(it.dir,nou)){ avis("Ja existeix un element amb aquest nom"); return; }
+  try{
+    await reanomenaDins(it.dir,it.name,nou);
+    DESFES.push({mode:"rename",recs:[{dir:it.dir,de:it.name,a:nou}]}); actualitzaDesfes();
+    registra("reanomena",it.name+" → "+nou,camiDe(CURRENT).join("/"),"");
+    llista();
+  }catch(e){ avis("Error: "+e.message); }
+}
+async function novaCarpeta(node){
+  if(!node){ avis("Cap carpeta activa"); return; }
+  const nom=prompt("Nom de la carpeta nova:");
+  if(!nom) return;
+  if(await existeix(node.handle,nom)){ avis("Ja existeix"); return; }
+  try{
+    await node.handle.getDirectoryHandle(nom,{create:true});
+    DESFES.push({mode:"mkdir",recs:[{dir:node.handle,nom}]}); actualitzaDesfes();
+    registra("nova carpeta",nom,"",camiDe(node).join("/"));
+    await refrescaNode(node);
+    avis("Carpeta creada: "+nom);
+  }catch(e){ avis("Error: "+e.message); }
+}
+async function enganxa(){
+  if(!PORTA||!CURRENT) return;
+  await transfereix(PORTA.items,CURRENT,PORTA.mode==="cut"?"move":"copy",PORTA.origen);
+  if(PORTA&&PORTA.mode==="cut") PORTA=null;
+  pintaSeleccio();
+}
+async function esborra(){
+  const sel=[...SEL].filter(it=>it.dir);
+  if(!sel.length) return;
+  if(!confirm(`Esborrar definitivament ${sel.length} fitxer(s)?\n\nATENCIÓ: s'esborren del disc, NO van a la paperera.`)) return;
+  let fets=0;
+  for(const it of sel){
+    try{ await it.dir.removeEntry(it.name); fets++;
+         registra("esborra",it.name,camiDe(CURRENT).join("/")+(it.rel?"/"+it.rel:""),""); }
+    catch(e){ avis(`Error amb ${it.name}: ${e.message}`); registra("esborra",it.name,"","",false); }
+  }
+  SEL.clear(); ANCORA=null;
+  avis(fets+" fitxer(s) esborrat(s)");
+  llista();
+}
+/* ─── Safata de fitxers (launcher Guaita apps) ───
+   El pont Guaita l'injecta el launcher en servir aquest HTML; obert en solitari
+   el botó queda amagat i tot funciona igual. */
+addEventListener("load",detectaLauncher);
+setTimeout(detectaLauncher,400); setTimeout(detectaLauncher,1200);
+function detectaLauncher(){
+  if(window.Guaita && Guaita.dins()){
+    $("#bsafata").hidden=false;
+    $("#rutabs").hidden=false;
+    if(!$("#rutabs").value) $("#rutabs").value=localStorage.getItem("guaita_rutabs")||"";
+  }
+}
+$("#bsafata").onclick=async()=>{
+  if(!SEL.size || !window.Guaita) return;
+  const enviats=[];
+  for(const it of SEL){
+    try{ enviats.push(it.file||await it.h.getFile()); }
+    catch(e){ /* handle caducat o sense permís: s'omet */ }
+  }
+  if(enviats.length){
+    Guaita.aSafata(enviats);
+    avis(enviats.length+" fitxer(s) a la Safata de fitxers");
+  } else avis("No s'ha pogut llegir cap fitxer de la selecció");
+};
+
+$("#bcopia").onclick=()=>copiaSel("copy");
+$("#brenom").onclick=reanomena;
+$("#bcarpeta").onclick=()=>novaCarpeta(CURRENT);
+$("#bcarpeta2").onclick=()=>novaCarpeta(DESTISEL);
+$("#bdesfes").onclick=desfes;
+$("#bregistre").onclick=obreRegistre;
+document.querySelectorAll(".xalerta").forEach(x=>x.onclick=()=>{
+  const k=x.dataset.a;
+  FALERTA.has(k)?FALERTA.delete(k):FALERTA.add(k);
+  x.classList.toggle("actiu",FALERTA.has(k));
+  render(); pintaSeleccio();
+});
+$("#btalla").onclick=()=>copiaSel("cut");
+$("#benganxa").onclick=enganxa;
+$("#besborra").onclick=esborra;
+
+document.addEventListener("keydown",e=>{
+  if(e.target&&e.target.matches&&e.target.matches("input,select,textarea")) return;
+  const k=(e.key||"").toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&k==="a"&&VISL.length){ e.preventDefault(); SEL=new Set(VISL); ANCORA=VISL[0]; pintaSeleccio(); }
+  else if((e.ctrlKey||e.metaKey)&&k==="c"){ if(String(getSelection?.()||"").length) return; copiaSel("copy"); }
+  else if((e.ctrlKey||e.metaKey)&&k==="x"){ copiaSel("cut"); }
+  else if((e.ctrlKey||e.metaKey)&&k==="v"){ enganxa(); }
+  else if((e.ctrlKey||e.metaKey)&&k==="z"){ desfes(); }
+  else if(e.altKey&&e.key==="ArrowLeft"){ e.preventDefault(); navHist(-1); }
+  else if(e.altKey&&e.key==="ArrowRight"){ e.preventDefault(); navHist(1); }
+  else if(e.key==="F2"){ e.preventDefault(); reanomena(); }
+  else if(e.key===" "&&SEL.size===1){ e.preventDefault(); obreDetall([...SEL][0]); }
+  else if(e.key==="Delete"){ esborra(); }
+  else if(e.key==="Escape"){ SEL.clear(); ANCORA=null; pintaSeleccio();
+    $("#zoom").style.display="none"; $("#modal").style.display="none"; }
+});
+
+/* ─── Arrossegar i deixar anar ─── */
+function fesArrossegable(it,el){
+  el.draggable=true;
+  el.ondragstart=e=>{
+    if(!SEL.has(it)){ SEL=new Set([it]); ANCORA=it; pintaSeleccio(); }
+    DRAG=[...SEL].filter(x=>x.dir);
+    /* Adjunta els File reals: en deixar-los anar a la Safata del launcher, sobre el
+       xip d'una app o sobre una app oberta, hi arriben com un drop natiu de l'Explorador. */
+    const ambFile=[...SEL].filter(x=>x.file);
+    try{ for(const x of ambFile) e.dataTransfer.items.add(x.file); }catch(_){}
+    e.dataTransfer.setData("text/plain",[...SEL].map(x=>x.name).join(", "));
+    e.dataTransfer.effectAllowed="copyMove";
+    if(window.Guaita&&Guaita.dins()&&ambFile.length)
+      parent.postMessage({tipus:"guaita:drag-inici",fitxers:ambFile.map(x=>x.file)},"*");
+  };
+  el.ondragend=()=>{ DRAG=null;
+    if(window.Guaita&&Guaita.dins()) parent.postMessage({tipus:"guaita:drag-fi"},"*");
+    document.querySelectorAll(".dropzona").forEach(x=>x.classList.remove("dropzona")); };
+}
+function gestionaDrop(node,e){
+  const items=DRAG; DRAG=null;
+  document.querySelectorAll(".dropzona").forEach(x=>x.classList.remove("dropzona"));
+  if(!items||!items.length) return;
+  const orig=CURRENT?camiDe(CURRENT).join("/"):"";
+  if(e.ctrlKey){ transfereix(items,node,"copy",orig); return; }
+  if(e.shiftKey){ transfereix(items,node,"move",orig); return; }
+  PENDENT={items,node,orig};
+  const m=$("#menudrop");
+  m.hidden=false;
+  m.style.left=Math.min(e.clientX,innerWidth-180)+"px";
+  m.style.top=Math.min(e.clientY,innerHeight-130)+"px";
+}
+$("#menudrop").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+  $("#menudrop").hidden=true;
+  const p=PENDENT; PENDENT=null;
+  if(p&&b.dataset.m) transfereix(p.items,p.node,b.dataset.m,p.orig);
+});
+document.addEventListener("click",e=>{
+  if(!$("#menudrop").hidden&&!e.target.closest("#menudrop")){ $("#menudrop").hidden=true; PENDENT=null; }
+},true);
+
+/* ─── Arbre de destí (segona carpeta, només gestió) ─── */
+function marcaDesti(n){
+  DESTISEL=n;
+  document.querySelectorAll("#arbre2 .node.actiu").forEach(x=>x.classList.remove("actiu"));
+  n.el.classList.add("actiu");
+  if(!NAV){ HIST2=HIST2.slice(0,HISTI2+1); if(HIST2[HISTI2]!==n){ HIST2.push(n); HISTI2=HIST2.length-1; } }
+  actualitzaNav2();
+}
+function actualitzaNav2(){
+  $("#enrere2").disabled=HISTI2<=0;
+  $("#endavant2").disabled=HISTI2>=HIST2.length-1;
+}
+async function navHist2(delta){
+  const i=HISTI2+delta;
+  if(i<0||i>=HIST2.length) return;
+  HISTI2=i; NAV=true;
+  try{ marcaDesti(HIST2[i]); } finally{ NAV=false; }
+}
+async function triaDesti(){
+  let h;
+  try{ h=await showDirectoryPicker({mode:"readwrite"}); }
+  catch(e){ if(e.name!=="AbortError") avis(e.message); return; }
+  DESTIROOT=h; HIST2=[]; HISTI2=-1;
+  $("#destinom").textContent="Destí: "+h.name+" (arrossega-hi fitxers; Ctrl=copia, Maj=mou)";
+  const arrel={name:h.name,handle:h,parent:null};
+  $("#arbre2cos").innerHTML="";
+  const ul=document.createElement("ul");
+  ul.appendChild(nodeArbre(arrel,marcaDesti));
+  $("#arbre2cos").appendChild(ul);
+  await expandeix(arrel);
+  marcaDesti(arrel);
+}
+$("#triadesti").onclick=triaDesti;
+$("#enrere").onclick=()=>navHist(-1);
+$("#endavant").onclick=()=>navHist(1);
+$("#enrere2").onclick=()=>navHist2(-1);
+$("#endavant2").onclick=()=>navHist2(1);
+$("#plega2").onclick=()=>{
+  const mostra=$("#arbre2").hidden;
+  $("#arbre2").hidden=!mostra; $("#nansa2").hidden=!mostra;
+  $("#plega2").classList.toggle("actiu",mostra);
+  if(mostra&&!DESTIROOT&&HAS_FSA) triaDesti();
+};
+$("#nansa2").onmousedown=e=>{
+  e.preventDefault();
+  const move=ev=>{$("#arbre2").style.width=Math.min(560,Math.max(140,innerWidth-ev.clientX))+"px";};
+  const up=()=>{document.removeEventListener("mousemove",move);document.removeEventListener("mouseup",up);};
+  document.addEventListener("mousemove",move); document.addEventListener("mouseup",up);
+};
+
+/* ─── Localitza amb l'Explorer (via pont) ─── */
+async function localitza(it){
+  const path=rutaAbsoluta(it);
+  if(!path){ avis("Escriu la ruta absoluta de la carpeta arrel al camp del costat del pont"); $("#rutabs").focus(); return; }
+  if(PONT){
+    try{
+      const r=await(await fetch("http://127.0.0.1:8765/api/reveal",{method:"POST",
+        headers:{"Content-Type":"application/json"},body:JSON.stringify({path})})).json();
+      avis(r.msg||"…"); return;
+    }catch(e){ detectaPont(); }
+  }
+  // Sense pont: el navegador no pot obrir l'Explorer; copiem la carpeta contenidora
+  const carpeta=path.slice(0,path.lastIndexOf("\\"));
+  try{ await navigator.clipboard.writeText(carpeta);
+       avis("Sense pont actiu: carpeta copiada — enganxa-la a la barra d'adreces de l'Explorer"); }
+  catch(e){ avis("Carpeta: "+carpeta); }
+}
+
+/* ─── Exportació TSV ─── */
+const isoData=ms=>new Date(ms).toISOString().slice(0,16).replace("T"," ");
+const isoTs=ts=>ts?new Date(ts*1000).toISOString().slice(0,16).replace("T"," "):"";
+$("#tsv").onclick=()=>{
+  const cap=["Nom","Carpeta","Tipus","Versió","Mida (bytes)","Modificat","Desats","Editors",
+             "Primer editor","Primera data","Darrer editor","Darrera data","Central","Còpies","Primera còpia","Darrera còpia","SHA-256"];
+  const net=s=>String(s??"").replace(/[\t\r\n]+/g," ");
+  const files=ITEMS.filter(coincideix).map(it=>{const m=it.meta||{};
+    return [it.name,(it.rel||"").replaceAll("/","\\"),it.ext.toUpperCase(),m.version||"",it.size,isoData(it.mtime),
+            m.saves||0,m.editors||"",m.first?.name||m.username||"",isoTs(m.first?.ts),
+            m.last?.name||"",isoTs(m.last?.ts),m.central?"SÍ":"",
+            it.copies?it.copies.length:"", it.copies?isoData(dataMin(it.copies)):"", it.copies?isoData(dataMax(it.copies)):"",
+            it.hash||""].map(net).join("\t");});
+  const tsv=[cap.join("\t"),...files].join("\r\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob(["\ufeff"+tsv],{type:"text/tab-separated-values"}));
+  a.download="guaita-fitxers_"+(CURRENT?camiDe(CURRENT).join("_"):"fitxers")+".tsv"; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+  avis(files.length+" files exportades a TSV");
+};
+
+/* ─── Cerca, subcarpetes i ruta absoluta ─── */
+$("#cerca").oninput=e=>{CERCA=e.target.value.trim();render();};
+$("#recursiu").onclick=()=>{RECURSIU=!RECURSIU;$("#recursiu").classList.toggle("actiu",RECURSIU);if(CURRENT)llista();};
+$("#copies").onclick=()=>{
+  MODECOPIES={apila:"amaga",amaga:"mostra",mostra:"apila"}[MODECOPIES];
+  localStorage.setItem("guaita_copies",MODECOPIES);
+  pintaXips(); if(CURRENT) llista();
+};
+function aplicaExtLliures(){
+  const prev=new Set(EXTRA);
+  EXTRA=[...new Set(($("#extlliure").value.match(/[A-Za-z0-9]+/g)||[]).map(s=>s.toLowerCase()))];
+  for(const e of prev) if(!EXTRA.includes(e)) FILTRE.delete(e);
+  EXTRA.forEach(e=>FILTRE.add(e));
+  if(EXTRA.length) TOT=false;
+  localStorage.setItem("guaita_extlliure",$("#extlliure").value);
+  pintaXips(); if(CURRENT) llista();
+}
+$("#extlliure").onchange=aplicaExtLliures;
+$("#extlliure").onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); aplicaExtLliures(); } };
+(()=>{
+  const m=localStorage.getItem("guaita_copies");
+  if(m&&["apila","amaga","mostra"].includes(m)) MODECOPIES=m;
+  const x=localStorage.getItem("guaita_extlliure");
+  if(x){ $("#extlliure").value=x; EXTRA=[...new Set((x.match(/[A-Za-z0-9]+/g)||[]).map(s=>s.toLowerCase()))]; }
+  pintaXips();
+})();
+$("#rutabs").onchange=e=>localStorage.setItem("guaita_rutabs",e.target.value.trim());
+$("#pont").onclick=()=>{avis("Cercant el pont…");detectaPont();};
+
+/* ─── Nansa de redimensionament i plega de l'arbre ─── */
+$("#nansa").onmousedown=e=>{
+  e.preventDefault();
+  const move=ev=>{$("#arbre").style.width=Math.min(560,Math.max(140,ev.clientX))+"px";};
+  const up=()=>{document.removeEventListener("mousemove",move);document.removeEventListener("mouseup",up);};
+  document.addEventListener("mousemove",move); document.addEventListener("mouseup",up);
+};
+$("#plega").onclick=()=>{
+  const oc=!$("#arbre").hidden;
+  $("#arbre").hidden=oc; $("#nansa").hidden=oc;
+  $("#plega").textContent=oc?"◨":"◧";
+};
+
+/* ─── Controls ─── */
+$("#obreCarpeta").onclick=obreArrel;
+$("#arrel").onclick=obreArrel;
+$("#refresca").onclick=()=>CURRENT?llista():null;
+$("#ordena").onchange=e=>{SORT={keys:e.target.value.split(","),dir:SORT.dir};ordena();render();};
+$("#sentit").onclick=()=>{SORT.dir*=-1;$("#sentit").textContent=SORT.dir>0?"↓":"↑";ordena();render();};
+$("#vista").onclick=()=>{VIEW=VIEW==="graella"?"llista":"graella";
+  $("#vista").textContent=VIEW==="graella"?"☰ Llista":"▦ Targetes"; render();};
+$("#zoom").onclick=()=>$("#zoom").style.display="none";
+if(!HAS_FSA){$("#noapi").hidden=false;$("#obreCarpeta").disabled=true;}
+detectaPont();
+(async()=>{
+  if(!HAS_FSA) return;
+  const h=await llegeixHandle();
+  if(!h) return;
+  const b=$("#torna");
+  b.hidden=false; b.textContent="↩ Torna a "+h.name;
+  b.onclick=async()=>{
+    try{
+      if(await h.requestPermission({mode:"readwrite"})!=="granted"){avis("Permís denegat");return;}
+      iniciaAmb(h);
+    }catch(e){ avis("No s'ha pogut reobrir: "+e.message); }
+  };
+})();
+</script>
+</body>
+</html>

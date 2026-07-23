@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>Ajuda · Guaita Fitxers</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--groc:#e8ff2b;--fons:#16181c;--panell:#1f2228;--vora:#31353d;--text:#e8eaee;--mut:#9aa0ab}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.6 "Segoe UI",system-ui,sans-serif;background:var(--fons);color:var(--text)}
+header{display:flex;align-items:baseline;gap:14px;padding:16px 28px;border-bottom:2px solid var(--groc);position:sticky;top:0;background:var(--fons);z-index:2}
+header h1{margin:0;font-size:22px;letter-spacing:.5px}
+header h1 span{color:var(--groc)}
+header small{color:var(--mut)}
+.embolcall{display:flex;max-width:1100px;margin:0 auto;gap:28px;padding:24px 28px 60px}
+nav{flex:none;width:220px;position:sticky;top:78px;align-self:flex-start;font-size:14px}
+nav a{display:block;color:var(--mut);text-decoration:none;padding:4px 8px;border-left:2px solid transparent;border-radius:0 5px 5px 0}
+nav a:hover{color:var(--text);border-left-color:var(--vora)}
+nav a.tit{color:var(--groc);font-weight:700;margin-top:12px}
+main{flex:1;min-width:0}
+h2{color:var(--groc);border-bottom:1px solid var(--vora);padding-bottom:6px;margin:34px 0 12px;font-size:19px}
+h2:first-child{margin-top:0}
+h3{font-size:16px;margin:20px 0 6px}
+p{margin:8px 0}
+ul{margin:8px 0;padding-left:22px}
+li{margin:4px 0}
+kbd{background:var(--panell);border:1px solid var(--vora);border-bottom-width:2px;border-radius:5px;padding:1px 7px;font-family:Consolas,monospace;font-size:13px;color:var(--text)}
+.tec{color:var(--groc);font-weight:700}
+code{background:var(--panell);border:1px solid var(--vora);border-radius:4px;padding:1px 6px;font-family:Consolas,monospace;font-size:13.5px}
+.nota{background:var(--panell);border-left:3px solid var(--groc);border-radius:0 8px 8px 0;padding:10px 14px;margin:14px 0}
+.avis{background:var(--panell);border-left:3px solid #d9930d;border-radius:0 8px 8px 0;padding:10px 14px;margin:14px 0}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--vora)}
+th{color:var(--groc)}
+td:first-child{white-space:nowrap}
+.etiq{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:4px}
+.e-rvt{background:#2f6fed;color:#fff}.e-ifc{background:#c2312f;color:#fff}.e-dwg{background:#8a1f1f;color:#fff}
+.e-3d{background:#0f6e8c;color:#fff}.e-img{background:#1f7a55;color:#fff}.e-pdf{background:#b3211f;color:#fff}
+.e-bcf{background:#0b7285;color:#fff}.e-html{background:#c2571f;color:#fff}
+a{color:var(--groc)}
+footer{border-top:1px solid var(--vora);text-align:center;color:var(--mut);font-size:12px;padding:16px}
+footer b{color:var(--groc)}
+</style>
+</head>
+<body>
+<header><h1><span>Guaita</span> Fitxers</h1><small>ajuda d'usuari</small></header>
+
+<div class="embolcall">
+<nav>
+  <a class="tit" href="#intro">Introducció</a>
+  <a href="#inici">Obrir una carpeta</a>
+  <a href="#arbres">Els dos arbres</a>
+  <a class="tit" href="#info">Informació dels fitxers</a>
+  <a href="#formats">Formats i filtres</a>
+  <a href="#copies">Còpies de Revit</a>
+  <a href="#ordre">Ordenació</a>
+  <a href="#miniatures">Miniatures</a>
+  <a href="#detall">Detall i historial</a>
+  <a class="tit" href="#gestio">Gestió de fitxers</a>
+  <a href="#seleccio">Selecció</a>
+  <a href="#operacions">Copiar, moure, esborrar</a>
+  <a href="#arrossegar">Arrossegar</a>
+  <a href="#safata">Safata de fitxers</a>
+  <a href="#carpetes">Carpetes i reanomenar</a>
+  <a href="#desfes">Desfés i registre</a>
+  <a class="tit" href="#pont">El pont amb Revit</a>
+  <a href="#obrir">Obrir amb Revit</a>
+  <a href="#localitzar">Localitzar i copiar ruta</a>
+  <a class="tit" href="#dreceres">Dreceres de teclat</a>
+  <a href="#privadesa">Privadesa</a>
+</nav>
+
+<main>
+<h2 id="intro">Introducció</h2>
+<p>Guaita Fitxers és un navegador de fitxers Revit i CAD que funciona <b>íntegrament al navegador</b>, sense instal·lar res i sense enviar cap dada a cap servidor. Llegeix la versió de Revit, l'autoria (primer i darrer editor), les miniatures i les metadades directament del binari del fitxer, i permet gestionar-los com ho faries a l'explorador del sistema.</p>
+<div class="nota">Cal un navegador basat en Chromium (<b>Chrome</b> o <b>Edge</b>) per a totes les funcions. En altres navegadors només funciona la selecció manual de fitxers en mode lectura.</div>
+
+<h2 id="inici">Obrir una carpeta</h2>
+<p>En arrencar, prem <b>Obre una carpeta</b> i tria la carpeta arrel que vols explorar. El navegador et demanarà permís d'accés. A partir d'aquí es carrega l'arbre de carpetes a l'esquerra.</p>
+<p>Si ja havies obert una carpeta en una sessió anterior, apareix el botó <b>↩ Torna a…</b> per reobrir-la ràpidament (només cal reconfirmar el permís).</p>
+
+<h2 id="arbres">Els dos arbres</h2>
+<p>Guaita Fitxers té dos arbres de carpetes independents:</p>
+<ul>
+<li><b>Arbre origen</b> (esquerra): navegues per les carpetes i en veus el contingut al plafó central. La seva capçalera conté el botó <b>📂 Carpeta arrel</b>, el botó <b>↻</b> de refrescar i la ruta actual.</li>
+<li><b>Arbre destí</b> (dreta, botó groc <b>📂 Carpeta destí</b>): serveix <b>només com a destinació</b> per copiar o moure fitxers. No mostra fitxers, només carpetes, i pot ser d'una <b>altra unitat</b> diferent de l'origen. S'obre i s'amaga amb el botó <span class="tec">◨ Destí</span> dels controls.</li>
+</ul>
+<p>Tots dos arbres es poden <b>redimensionar</b> arrossegant la franja divisòria, tenen botons <b>◄ ►</b> d'anar enrere i endavant per l'historial de navegació, i mostren la signatura de SBS BIM Consulting al peu.</p>
+
+<h2 id="info">Informació dels fitxers</h2>
+<h3 id="formats">Formats i filtres</h3>
+<p>Cada fitxer es mostra amb una etiqueta de tipus i, quan es pot llegir, la versió:</p>
+<table>
+<tr><th>Xip</th><th>Formats</th><th>Què se'n llegeix</th></tr>
+<tr><td><span class="etiq e-rvt">RVT</span> Revit</td><td>rvt · rfa · rte · rft</td><td>versió, primer i darrer editor, nombre de desats, miniatura</td></tr>
+<tr><td><span class="etiq e-dwg">DWG</span></td><td>dwg</td><td>versió del format i previsualització incrustada</td></tr>
+<tr><td><span class="etiq e-3d">3D · Núvols</span></td><td>ifc · obj · glb · gltf · 3dm · dxf · e57 · xyz · pts</td><td>esquema o versió, autor o generador, recomptes de punts, vèrtexs i malles; miniatura dels que en tenen</td></tr>
+<tr><td><span class="etiq e-img">Imatges</span></td><td>png · jpg · jpeg</td><td>dimensions en píxels i previsualització directa</td></tr>
+<tr><td><span class="etiq e-pdf">PDF</span></td><td>pdf</td><td>versió, nombre de pàgines, autor, aplicació creadora i data</td></tr>
+<tr><td><span class="etiq e-bcf">BCF</span></td><td>bcf</td><td>versió del format i nombre de temes (incidències) del contenidor</td></tr>
+<tr><td><span class="etiq e-html">HTML</span></td><td>html · htm</td><td>títol del document i autor de les metadades</td></tr>
+</table>
+<p>Detall per format del grup <b>3D · Núvols</b>:</p>
+<ul>
+<li><b>IFC</b>: esquema (IFC4, IFC2X3…) i autor del fitxer.</li>
+<li><b>DXF</b>: versió del format, miniatura dibuixada i <b>visor interactiu</b> a la fitxa de detall.</li>
+<li><b>E57</b>: versió, fabricant i model del sensor, nombre d'escanejos i total de punts.</li>
+<li><b>XYZ · PTS</b>: recompte de punts i miniatura amb la projecció del núvol.</li>
+<li><b>OBJ</b>: vèrtexs, cares, biblioteca de materials i miniatura dels vèrtexs.</li>
+<li><b>GLB · glTF</b>: versió, programa generador i recomptes de malles, nodes i materials.</li>
+<li><b>3DM</b>: versió de Rhino i previsualització incrustada al fitxer.</li>
+</ul>
+<div class="nota">Els fitxers molt grans (núvols de punts, OBJ) es llegeixen només fins als primers 2 MB: els recomptes i les miniatures d'aquests casos es marquen com a <b>mostra</b>.</div>
+<p>Els <b>xips de format</b> a la barra de filtres permeten triar què vols veure. Es combinen entre ells. El xip <b>Tots</b> té doble ús: el primer clic selecciona tots els formats coneguts i el segon els desmarca <b>tots</b> (cap format). El xip <b>*.*</b> mostra qualsevol fitxer, sigui del tipus que sigui.</p>
+<p>El xip <b>✎ altres</b> filtra per <b>extensions pròpies</b>: escriu-les al camp del costat separades per punt i coma (<code>.bak; .log; .csv</code>) i prem Retorn. Es recorden entre sessions, i el xip les activa o desactiva sense haver-les de tornar a escriure. Els xips d'alerta filtren només els fitxers <span class="tec">⚠ multi</span> (més d'un editor), <span class="tec">⚠ central</span> (model amb worksharing) o <span class="tec">≡ dups</span> (duplicats).</p>
+<p>El xip <span class="tec">⤵ Subcarpetes</span> escaneja recursivament tot l'arbre penjant de la carpeta activa. El quadre de cerca filtra per nom de fitxer, subcarpeta o nom d'editor.</p>
+
+<h3 id="copies">Còpies de seguretat de Revit</h3>
+<p>Revit va deixant còpies amb el patró <code>NOM.0040.rvt</code> o <code>NOMFAMILIA.0003.rfa</code> (punt, quatre xifres, punt, extensió) que omplen les carpetes de treball. El xip <b>⧉ Còpies</b> les gestiona i té tres estats, que es recorden entre sessions:</p>
+<ul>
+<li><b>Apilades</b> (per defecte): no apareixen com a fitxers solts, sinó agrupades sota el seu fitxer principal amb un distintiu blau que indica <b>quantes n'hi ha i les dates de la primera i la darrera</b>. Clicant el distintiu s'obren totes amb el número, la data i la mida.</li>
+<li><b>Amagades</b>: desapareixen del llistat.</li>
+<li><b>Visibles</b>: es llisten com qualsevol altre fitxer (necessari si les vols seleccionar per esborrar-les o moure-les).</li>
+</ul>
+<div class="nota">L'apilat només agrupa còpies que són a la <b>mateixa carpeta</b> que el seu fitxer principal. Una còpia el fitxer principal de la qual no hi és (perquè s'ha mogut o esborrat) es continua veient com un fitxer normal, per no amagar-te informació sense avisar.</div>
+<p>Les columnes <b>Còpies</b>, <b>Primera còpia</b> i <b>Darrera còpia</b> també s'exporten al TSV.</p>
+
+<h3 id="ordre">Ordenació</h3>
+<p>El selector <b>Ordena per</b> ofereix criteris simples (nom, tipus, versió, mida, data, desats, primer editor, darrer editor) i <b>combinacions</b> encadenades, com «Versió → Tipus → Data»: quan hi ha empat pel primer criteri, desempata pel següent. El botó <b>↓/↑</b> inverteix el sentit. A la vista de taula, també pots ordenar clicant les capçaleres de columna.</p>
+
+<h3 id="miniatures">Miniatures</h3>
+<p>Les miniatures s'extreuen del fitxer. Clica-hi a sobre per veure-les ampliades al <b>doble de mida</b>. Amb el botó <b>⬇ PNG</b> descarregues la miniatura. Amb <b>🖼 Canvia</b> pots substituir la miniatura d'un fitxer Revit per una imatge teva (es crea automàticament una còpia <code>.bak</code> abans de modificar res).</p>
+
+<h3 id="detall">Detall i historial</h3>
+<p>Amb un fitxer seleccionat, prem <kbd>Espai</kbd> per obrir la <b>fitxa de detall</b>: miniatura gran, versió, build, ruta, hash, ruta del model central i l'historial complet de desats, a més de les metadades pròpies de cada format (pàgines, autor, dimensions, punts, malles…).</p>
+<p>Alguns formats hi afegeixen un visor:</p>
+<ul>
+<li><b>DXF</b>: visor interactiu amb zoom de roda i moviment arrossegant.</li>
+<li><b>PDF</b>: visor natiu complet del navegador, amb totes les pàgines i zoom.</li>
+<li><b>Imatges</b>: previsualització a mida gran.</li>
+</ul>
+<p>El nombre de desats és clicable i obre l'<b>historial complet</b> d'edicions. El badge <span class="tec">≡ duplicat</span> obre el grup de fitxers idèntics (mateix contingut byte a byte).</p>
+
+<h2 id="gestio">Gestió de fitxers</h2>
+<h3 id="seleccio">Selecció</h3>
+<p>Funciona com a l'explorador del sistema:</p>
+<ul>
+<li>Clic simple: selecciona un fitxer.</li>
+<li><kbd>Ctrl</kbd> + clic: afegeix o treu de la selecció.</li>
+<li><kbd>Maj</kbd> + clic: selecciona un rang.</li>
+<li><kbd>Ctrl</kbd>+<kbd>A</kbd>: selecciona-ho tot; <kbd>Esc</kbd> neteja la selecció.</li>
+</ul>
+
+<h3 id="operacions">Copiar, moure, esborrar</h3>
+<table>
+<tr><th>Acció</th><th>Botó</th><th>Drecera</th></tr>
+<tr><td>Copiar</td><td>⧉</td><td><kbd>Ctrl</kbd>+<kbd>C</kbd></td></tr>
+<tr><td>Retallar</td><td>✂</td><td><kbd>Ctrl</kbd>+<kbd>X</kbd></td></tr>
+<tr><td>Enganxar</td><td>📋</td><td><kbd>Ctrl</kbd>+<kbd>V</kbd></td></tr>
+<tr><td>Esborrar</td><td>🗑</td><td><kbd>Supr</kbd></td></tr>
+</table>
+<p>En enganxar a la mateixa carpeta, els noms en conflicte reben el sufix «- còpia». Les operacions grans mostren una <b>barra de progrés</b> amb el fitxer actual, els MB transferits i la velocitat, i es poden cancel·lar.</p>
+<div class="avis">L'esborrat és <b>definitiu</b>: no va a la paperera de reciclatge. Demana confirmació i queda registrat, però no es pot desfer.</div>
+
+<h3 id="arrossegar">Arrossegar</h3>
+<p>Pots arrossegar fitxers (i carpetes de l'arbre) cap a qualsevol carpeta dels dos arbres. En deixar-los anar:</p>
+<ul>
+<li>Amb <kbd>Ctrl</kbd>: còpia directa.</li>
+<li>Amb <kbd>Maj</kbd>: mou directament.</li>
+<li>Sense res: apareix un petit menú per triar <b>Copia aquí</b> o <b>Mou aquí</b>.</li>
+</ul>
+
+<h3 id="safata">La Safata de fitxers <small style="color:var(--mut)">(dins de Guaita apps)</small></h3>
+<p>Quan Guaita Fitxers corre <b>dins del launcher Guaita apps</b>, pots enviar fitxers a la <b>Safata de fitxers</b> —el repositori compartit del peu de la barra lateral— i obrir-los des d'allà amb qualsevol altra eina Guaita. Hi ha dues maneres:</p>
+<ul>
+<li><b>Botó 📤</b>: selecciona un o més fitxers i prem el <b>📤</b> de la barra d'eines (al costat del 🗒). La selecció apareix a la Safata en forma de xips.</li>
+<li><b>Arrossegar</b>: agafa un fitxer (o la selecció) i deixa'l anar sobre la Safata, sobre el <b>xip d'una app</b> de la llista lateral (s'obre amb el fitxer carregat) o sobre la finestra d'una app ja oberta.</li>
+</ul>
+<div class="nota">El botó 📤 i aquest arrossegament cap a fora només existeixen dins del launcher; si obres Guaita Fitxers sol al navegador, no hi són i tot funciona igual. L'arrossegament <b>intern</b> per copiar o moure entre carpetes no canvia.</div>
+
+<h3 id="carpetes">Carpetes i reanomenar</h3>
+<p>El botó <b>➕📁</b> crea una carpeta a la carpeta activa; <b>➕📁 Nova carpeta al destí</b> en crea a l'arbre de destí. Per <b>reanomenar</b>, selecciona un fitxer i prem <kbd>F2</kbd> (o el botó ✏); per reanomenar una carpeta, fes-hi doble clic a l'arbre.</p>
+
+<h3 id="desfes">Desfés i registre</h3>
+<p>El botó <b>↩</b> (o <kbd>Ctrl</kbd>+<kbd>Z</kbd>) desfà l'última operació de copiar, moure, reanomenar o crear carpeta. El botó <b>🗒</b> mostra el <b>registre</b> de totes les operacions de la sessió, exportable a TSV.</p>
+
+<h2 id="pont">El pont amb Revit</h2>
+<p>Un HTML no pot obrir programes ni l'explorador del sistema pel seu compte. Per aconseguir-ho, Guaita Fitxers es pot connectar a un petit programa Python (<code>guaita_fitxers.py</code>) que has d'executar al teu equip. Quan és actiu, l'indicador <span class="tec">⛭ pont</span> es posa verd i mostra les versions de Revit detectades.</p>
+<div class="nota">El pont escolta només a <code>127.0.0.1</code> (el teu propi equip). No obre cap connexió a l'exterior.</div>
+<p>Perquè el pont sàpiga on són realment els fitxers, has d'escriure un cop la <b>ruta absoluta de la carpeta arrel</b> (per exemple <code>E:\ENTREGUES</code>) al camp del costat de l'indicador. El navegador, per privadesa, no revela aquesta ruta pel seu compte.</p>
+
+<h3 id="obrir">Obrir amb Revit</h3>
+<p>Amb el pont actiu, cada fitxer Revit té un selector de versió i el botó <b>▶ Obre</b>, que engega la versió de Revit escollida amb aquell fitxer. Per defecte se selecciona la versió amb què es va desar el fitxer.</p>
+
+<h3 id="localitzar">Localitzar i copiar ruta</h3>
+<ul>
+<li><b>📂 Localitza</b>: amb el pont actiu, obre l'explorador del sistema amb el fitxer ressaltat. Sense pont, copia la carpeta contenidora al porta-retalls perquè l'enganxis a la barra d'adreces.</li>
+<li><b>🔗</b>: copia la ruta del fitxer al porta-retalls. Si has indicat la ruta arrel, copia la <b>ruta absoluta</b> completa; si no, la relativa.</li>
+</ul>
+
+<h2 id="dreceres">Dreceres de teclat</h2>
+<table>
+<tr><th>Tecla</th><th>Acció</th></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>C</kbd> / <kbd>X</kbd> / <kbd>V</kbd></td><td>Copiar / Retallar / Enganxar</td></tr>
+<tr><td><kbd>Supr</kbd></td><td>Esborrar (definitiu)</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>Seleccionar-ho tot</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td><td>Desfés</td></tr>
+<tr><td><kbd>F2</kbd></td><td>Reanomenar</td></tr>
+<tr><td><kbd>Espai</kbd></td><td>Fitxa de detall</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>←</kbd> / <kbd>→</kbd></td><td>Enrere / endavant a l'arbre origen</td></tr>
+<tr><td><kbd>Esc</kbd></td><td>Netejar selecció / tancar finestres</td></tr>
+</table>
+
+<h2 id="privadesa">Privadesa</h2>
+<p>Tot el processament és local: la lectura de metadades, les miniatures, els hash i les operacions de fitxer es fan al teu navegador. Cap fitxer ni cap dada surt del teu equip. L'única connexió possible és amb el pont Python, que corre a la teva màquina.</p>
+</main>
+</div>
+
+<footer>Guaita Fitxers · <b>SBS BIM Consulting</b> 2026 — tot el processament és local</footer>
+</body>
+</html>
