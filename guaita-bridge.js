@@ -67,10 +67,10 @@
     }, true);
     global.addEventListener('drop', function (ev) {
       if (!dragExtern || ev.__guaita) return;
-      if (ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files.length) {
-        dragExtern = null; // el canal natiu ha funcionat: deixa passar el drop real
-        return;
-      }
+      // Durant un arrossegament Guaita substituïm sempre el drop pel sintètic:
+      // els File del canal natiu poden arribar amb el contingut no llegible en
+      // creuar documents, mentre que els clons del canal de missatges són
+      // sempre complets. Els drops de l'Explorador no passen per aquí.
       ev.preventDefault();
       ev.stopPropagation();
       var fitxers = dragExtern; dragExtern = null;

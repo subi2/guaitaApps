@@ -27,6 +27,14 @@
   #body { flex: 1 1 auto; display: flex; min-height: 0; }
 
   #side { flex: 0 0 auto; width: 264px; min-width: 180px; max-width: 520px; background: #0d3a35; border-right: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; resize: horizontal; overflow: hidden; }
+  body.plegat #side { display: none; }
+  #marge { flex: 0 0 14px; display: flex; align-items: center; justify-content: center; background: var(--verd); border-right: 1px solid var(--border); cursor: pointer; user-select: none; }
+  #marge:hover { background: var(--verd-clar); }
+  #fletxa { color: var(--groc); font-size: 10px; line-height: 1; }
+  #fixades { flex: 0 0 auto; padding: 12px 10px 0; }
+  #fixades:empty { display: none; }
+  #fixades:not(:empty) { border-bottom: 2px solid rgba(205,245,0,.45); }
+  #fixades + #llista { padding-top: 10px; }
   #sidetitol { flex: 0 0 auto; padding: 12px 14px 0; font-size: 17px; font-weight: 400; }
   #sidetitol b { color: var(--groc); font-weight: 400; }
   #tabs { flex: 0 0 auto; display: flex; padding: 10px 10px 0; gap: 6px; }
@@ -69,8 +77,8 @@
   .xip .treu { flex: 0 0 auto; color: var(--tenue); cursor: pointer; font-size: 14px; line-height: 1; padding: 0 2px; }
   .xip .treu:hover { color: #e88; }
 
-  #main { flex: 1 1 auto; position: relative; min-height: 0; background: #fff; }
-  #main .vista { position: absolute; inset: 0; width: 100%; height: 100%; border: none; background: #fff; display: none; }
+  #main { flex: 1 1 auto; position: relative; min-height: 0; background: #121212; }
+  #main .vista { position: absolute; inset: 0; width: 100%; height: 100%; border: none; background: #121212; display: none; }
   #main .vista.activa { display: block; }
 
   #peu { flex: 0 0 auto; text-align: center; padding: 8px 14px; background: var(--verd); border-top: 1px solid var(--border); font-size: 11px; color: var(--tenue); }
@@ -88,6 +96,7 @@
         <div class="tab-btn actiu" data-tab="apps">les apps</div>
         <div class="tab-btn" data-tab="ajuda">l'ajuda</div>
       </div>
+      <div id="fixades"></div>
       <div id="llista"></div>
       <div id="safata">
         <div class="cap">
@@ -98,6 +107,7 @@
         <div id="xips"></div>
       </div>
     </nav>
+    <div id="marge" role="button" tabindex="0" aria-label="Replega la franja lateral"><span id="fletxa">◀</span></div>
     <div id="main">
       <iframe id="portada" class="vista" src="about:blank"></iframe>
     </div>
@@ -107,6 +117,9 @@
   <script>
   (function () {
     const llista = document.getElementById('llista');
+    const fixades = document.getElementById('fixades');
+    const marge = document.getElementById('marge');
+    const fletxa = document.getElementById('fletxa');
     const main = document.getElementById('main');
     const portada = document.getElementById('portada');
     const marca = document.getElementById('marca');
@@ -295,9 +308,8 @@
     elSafata.addEventListener('dragleave', () => elSafata.classList.remove('dropzona'));
     elSafata.addEventListener('drop', (ev) => {
       elSafata.classList.remove('dropzona');
-      const fitxers = (ev.dataTransfer.files && ev.dataTransfer.files.length)
-        ? Array.from(ev.dataTransfer.files)
-        : arrossegant;
+      const fitxers = arrossegant
+        || ((ev.dataTransfer.files && ev.dataTransfer.files.length) ? Array.from(ev.dataTransfer.files) : null);
       if (!fitxers || !fitxers.length) return;
       ev.preventDefault();
       afegeixASafata(fitxers);
@@ -389,9 +401,10 @@
           el.addEventListener('drop', (ev) => {
             ev.preventDefault();
             el.classList.remove('dropzona');
-            const fitxers = (ev.dataTransfer.files && ev.dataTransfer.files.length)
-              ? Array.from(ev.dataTransfer.files)
-              : arrossegant;
+            // Prioritza els clons del drag Guaita (fiables); el canal natiu
+            // només s'usa per a drops de l'Explorador (arrossegant és null).
+            const fitxers = arrossegant
+              || ((ev.dataTransfer.files && ev.dataTransfer.files.length) ? Array.from(ev.dataTransfer.files) : null);
             if (fitxers && fitxers.length) obreAmb(a.file, fitxers);
             arrossegant = null;
             document.body.classList.remove('arrossegant');
@@ -401,8 +414,13 @@
       return el;
     }
 
+    // Les apps numerades de 0 a 99 queden ancorades a dalt, fora de la zona
+    // amb desplaçament, perquè siguin sempre accessibles (p. ex. Guaita Fitxers).
+    const LIMIT_ANCORAT = 99;
+
     function pintar() {
       llista.innerHTML = '';
+      fixades.innerHTML = '';
       itemActiu = null;
       setSidetab();
       const llista_apps = dades.filter((a) => tabActual === 'ajuda' ? a.ajuda : !a.ajuda);
@@ -415,9 +433,19 @@
         llista.appendChild(d);
         return;
       }
+
+      const ancorades = llista_apps.filter((a) => (a.ordre || 0) <= LIMIT_ANCORAT);
+      const rodants = llista_apps.filter((a) => (a.ordre || 0) > LIMIT_ANCORAT);
+
+      ancorades.forEach((a) => {
+        const el = item(a);
+        if (a.file === fitxerActiu) { el.classList.add('actiu'); itemActiu = el; }
+        fixades.appendChild(el);
+      });
+
       let apartatActual = null;
       let centenaActual = null;
-      llista_apps.forEach((a) => {
+      rodants.forEach((a) => {
         const ap = a.apartat || '';
         let novaSeccio = false;
         if (ap !== apartatActual) {
@@ -446,6 +474,26 @@
       try { dades = await (await fetch('api/apps')).json(); } catch (e) { dades = []; }
       pintar();
     }
+
+    // ---- Plegat de la franja lateral ----
+    // Amagar #side conserva l'amplada que hi hagi a l'estil en línia, de manera
+    // que en desplegar-la torna exactament a com l'havia deixada l'usuari.
+    function pintaMarge() {
+      const plegat = document.body.classList.contains('plegat');
+      fletxa.textContent = plegat ? '▶' : '◀';
+      const t = plegat ? 'Desplega la franja lateral' : 'Replega la franja lateral';
+      marge.title = t;
+      marge.setAttribute('aria-label', t);
+    }
+    function alternaMarge() {
+      document.body.classList.toggle('plegat');
+      pintaMarge();
+    }
+    marge.addEventListener('click', alternaMarge);
+    marge.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); alternaMarge(); }
+    });
+    pintaMarge();
 
     tabs.forEach((t) => t.addEventListener('click', () => {
       tabs.forEach((x) => x.classList.remove('actiu'));

@@ -23,6 +23,9 @@ var shellFS embed.FS
 //go:embed web/index.html
 var indexFS embed.FS
 
+//go:embed web/guaita-bridge.js
+var bridgeFS embed.FS
+
 type appEntry struct {
 	File       string `json:"file"`
 	Nom        string `json:"nom"`
@@ -38,10 +41,11 @@ var titleRe = regexp.MustCompile(`(?is)<title[^>]*>(.*?)</title>`)
 var wsRe = regexp.MustCompile(`\s+`)
 var numPrefixRe = regexp.MustCompile(`^(\d+)`)
 var cleanPrefixRe = regexp.MustCompile(`^\d+\s*[-_.]?\s*`)
-// Ajuda: "HLP..." o bé "<num> HLP..." (p.ex. "130 HLP- Nom").
-var helpPrefixRe = regexp.MustCompile(`(?i)^(\d+\s+)?hlp([\s_.-]|$)`)
-// Neteja del prefix d'ajuda, amb el número ordinal opcional al davant.
-var helpCleanRe = regexp.MustCompile(`(?i)^(\d+\s*[-_.]?\s*)?hlp\s*[-_.]?\s*`)
+// Ajuda: "HLP…" o bé "<num> HLP…" amb separadors espai, guió baix, guió o punt
+// (p. ex. "130 HLP- Nom", "110_HLP-_Nom", "HLP_Nom").
+var helpPrefixRe = regexp.MustCompile(`(?i)^(\d+[\s_.-]+)?hlp([\s_.-]|$)`)
+// Neteja del prefix d'ajuda sencer, separadors inclosos.
+var helpCleanRe = regexp.MustCompile(`(?i)^(\d+[\s_.-]+)?hlp[\s_.-]*`)
 
 // isHelp indica si el fitxer és una pàgina d'ajuda (prefix HLP).
 func isHelp(name string) bool {
@@ -152,6 +156,7 @@ func scanApps() []appEntry {
 	var apps []appEntry
 	var helpFiles []string
 	helpSize := map[string]int64{}
+	helpTitol := map[string]string{}
 	ordreInfo := map[string]appEntry{}      // file de l'app -> app (per heretar via meta.App)
 	ordreInfoPerNum := map[int]appEntry{}   // prefix numèric -> app (fallback per prefix compartit)
 	for _, e := range entries {
@@ -172,6 +177,7 @@ func scanApps() []appEntry {
 		if isHelp(e.Name()) {
 			helpFiles = append(helpFiles, e.Name())
 			helpSize[e.Name()] = size
+			helpTitol[e.Name()] = readTitle(full)
 			continue
 		}
 		a := appEntry{File: e.Name(), Nom: readTitle(full), Ordre: 999, Mida: size}
@@ -226,7 +232,11 @@ func scanApps() []appEntry {
 	// apps, de manera que es llisten igual (amb separadors de centena). L'apartat
 	// s'hereta de l'app amb el mateix número, o via "app" declarat al JSON.
 	for _, file := range helpFiles {
-		h := appEntry{File: file, Nom: stripHelpPrefix(file), Mida: helpSize[file], Ajuda: true, Ordre: 999}
+		nom := helpTitol[file]
+		if nom == "" || nom == strings.TrimSuffix(file, filepath.Ext(file)) {
+			nom = stripHelpPrefix(file)
+		}
+		h := appEntry{File: file, Nom: nom, Mida: helpSize[file], Ajuda: true, Ordre: 999}
 		if n, ok := leadingNumber(file); ok {
 			h.Ordre = n
 		}
@@ -250,6 +260,11 @@ func scanApps() []appEntry {
 			if font, ok := ordreInfoPerNum[h.Ordre]; ok {
 				h.Apartat = font.Apartat
 			}
+		}
+		// L'ajuda general del launcher va sempre al final de tot, rere el separador.
+		if strings.EqualFold(file, "HLP_Guaita_apps-ajuda.html") {
+			h.Ordre = 100000
+			h.Apartat = ""
 		}
 		apps = append(apps, h)
 	}
@@ -297,6 +312,78 @@ func openBrowser(url string) {
 	}
 }
 
+// normalitzaNom redueix un nom de fitxer a la seva essència comparable:
+// minúscules, sense extensió, només lletres i xifres, sense el número ordinal
+// inicial ni el marcador HLP. Així "HLP GuaitaFitxersAjuda.html" i
+// "110_HLP-_GuaitaFitxersAjuda.html" esdevenen tots dos "guaitafitxersajuda".
+var nomesAlfanum = regexp.MustCompile(`[^a-z0-9]+`)
+var digitsInici = regexp.MustCompile(`^[0-9]+`)
+
+func normalitzaNom(nom string) string {
+	n := strings.ToLower(strings.TrimSuffix(nom, filepath.Ext(nom)))
+	n = nomesAlfanum.ReplaceAllString(n, "")
+	n = digitsInici.ReplaceAllString(n, "")
+	n = strings.TrimPrefix(n, "hlp")
+	return n
+}
+
+// resolTolerant busca dins d'apps el fitxer HTML que millor encaixa amb el nom
+// demanat: primer per coincidència exacta del nom normalitzat, i si no, el més
+// proper per contenció. Retorna "" si no hi ha cap candidat raonable.
+func resolTolerant(demanat string) string {
+	objectiu := normalitzaNom(demanat)
+	if objectiu == "" {
+		return ""
+	}
+	entries, err := os.ReadDir(appsDir())
+	if err != nil {
+		return ""
+	}
+	millor, millorDif := "", 1<<30
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		low := strings.ToLower(e.Name())
+		if !strings.HasSuffix(low, ".html") && !strings.HasSuffix(low, ".htm") {
+			continue
+		}
+		n := normalitzaNom(e.Name())
+		if n == "" {
+			continue
+		}
+		if n == objectiu {
+			return e.Name() // coincidència exacta: la millor possible
+		}
+		if strings.Contains(n, objectiu) || strings.Contains(objectiu, n) {
+			dif := len(n) - len(objectiu)
+			if dif < 0 {
+				dif = -dif
+			}
+			if dif < millorDif {
+				millor, millorDif = e.Name(), dif
+			}
+		}
+	}
+	return millor
+}
+
+const paginaAjudaNoTrobada = `<!doctype html><html lang="ca"><head><meta charset="utf-8">
+<title>Ajuda no trobada</title><style>
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+font-family:"Segoe UI",system-ui,sans-serif;background:#0b322e;color:#eaf3f1;text-align:center;padding:24px}
+.caixa{max-width:520px}
+.q{font-size:52px;color:#CDF500;margin-bottom:10px}
+h1{font-size:20px;font-weight:600;margin:0 0 10px}
+p{color:#9fc3bd;line-height:1.6;margin:8px 0}
+b{color:#CDF500;font-weight:600}
+</style></head><body><div class="caixa">
+<div class="q">?</div>
+<h1>Aquesta ajuda contextual no s'ha trobat</h1>
+<p>El fitxer d'ajuda que buscava aquesta app no és a la carpeta <b>apps</b> amb cap nom reconeixible.</p>
+<p>Intenta localitzar-la tu mateix a la pestanya <b>«l'ajuda»</b> de la barra lateral de Guaita apps.</p>
+</div></body></html>`
+
 func main() {
 	shell, _ := shellFS.ReadFile("web/shell.html")
 	portada, _ := indexFS.ReadFile("web/index.html")
@@ -318,8 +405,110 @@ func main() {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		json.NewEncoder(w).Encode(scanApps())
 	})
-	// FileServer sobre ./apps evita el path traversal fora de l'arrel.
-	mux.Handle("/apps/", http.StripPrefix("/apps/", http.FileServer(http.Dir(appsDir()))))
+	// Obre l'Explorer del sistema amb el fitxer o carpeta seleccionats. Ho fan
+	// servir les apps (p. ex. el "Localitza" de Guaita Fitxers) quan corren
+	// dins del launcher, sense necessitat del pont Python extern.
+	mux.HandleFunc("/api/reveal", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		if r.Method != http.MethodPost {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			json.NewEncoder(w).Encode(map[string]any{"ok": false, "msg": "cal POST"})
+			return
+		}
+		var cos struct {
+			Path string `json:"path"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&cos); err != nil || strings.TrimSpace(cos.Path) == "" {
+			json.NewEncoder(w).Encode(map[string]any{"ok": false, "msg": "falta el camp path"})
+			return
+		}
+		p := filepath.Clean(cos.Path)
+		if _, err := os.Stat(p); err != nil {
+			json.NewEncoder(w).Encode(map[string]any{"ok": false, "msg": "no s'ha trobat: " + p})
+			return
+		}
+		switch runtime.GOOS {
+		case "windows":
+			exec.Command("explorer", "/select,", p).Start()
+		case "darwin":
+			exec.Command("open", "-R", p).Start()
+		default:
+			exec.Command("xdg-open", filepath.Dir(p)).Start()
+		}
+		json.NewEncoder(w).Encode(map[string]any{"ok": true, "msg": "Obrint l'Explorer…"})
+	})
+	// Serveix ./apps injectant el pont Guaita a cada HTML, perquè totes les
+	// apps puguin rebre fitxers de la Safata sense modificar-les. La resta de
+	// fitxers (imatges, etc.) se serveixen tal qual.
+	bridge, _ := bridgeFS.ReadFile("web/guaita-bridge.js")
+	injectat := []byte("\n<script>/* Guaita bridge (injectat pel launcher) */\n" + string(bridge) + "\n</script>\n")
+	// Fons fosc del primer frame de pintat: evita el flaix blanc en carregar
+	// l'app dins l'iframe. El CSS propi de cada app el sobreescriu de seguida.
+	fonsInicial := []byte("<style>html{background:#121212}</style>")
+	injectaFons := func(cos []byte) []byte {
+		low := strings.ToLower(string(cos))
+		i := strings.Index(low, "<head>")
+		if i >= 0 {
+			i += len("<head>")
+		} else if i = strings.Index(low, "<html"); i >= 0 {
+			if j := strings.Index(low[i:], ">"); j >= 0 {
+				i += j + 1
+			} else {
+				i = 0
+			}
+		} else {
+			i = 0
+		}
+		out := make([]byte, 0, len(cos)+len(fonsInicial))
+		out = append(out, cos[:i]...)
+		out = append(out, fonsInicial...)
+		out = append(out, cos[i:]...)
+		return out
+	}
+	mux.HandleFunc("/apps/", func(w http.ResponseWriter, r *http.Request) {
+		rel := strings.TrimPrefix(r.URL.Path, "/apps/")
+		rel = filepath.FromSlash(rel)
+		full := filepath.Join(appsDir(), rel)
+		// Guarda contra el path traversal: el resultat ha de quedar dins d'apps.
+		if rp, err := filepath.Rel(appsDir(), full); err != nil || strings.HasPrefix(rp, "..") {
+			http.NotFound(w, r)
+			return
+		}
+		low := strings.ToLower(full)
+		if !strings.HasSuffix(low, ".html") && !strings.HasSuffix(low, ".htm") {
+			http.ServeFile(w, r, full)
+			return
+		}
+		cos, err := os.ReadFile(full)
+		if err != nil {
+			// Resolució tolerant: potser el fitxer existeix amb un altre prefix
+			// (número ordinal, separadors diferents). És el cas dels botons
+			// d'ajuda de les apps, que enllacen "HLP Nom.html" mentre que a la
+			// carpeta el fitxer es diu "110_HLP_Nom.html".
+			if alt := resolTolerant(filepath.Base(rel)); alt != "" {
+				cos, err = os.ReadFile(filepath.Join(appsDir(), alt))
+			}
+			if err != nil {
+				// Últim recurs: una pàgina amable en lloc d'un "Not Found".
+				w.Header().Set("Content-Type", "text/html; charset=utf-8")
+				w.WriteHeader(http.StatusNotFound)
+				w.Write([]byte(paginaAjudaNoTrobada))
+				return
+			}
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		cos = injectaFons(cos)
+		// Injecta abans de </body> si hi és; si no, al final (els navegadors
+		// executen igualment els scripts posteriors).
+		if i := strings.LastIndex(strings.ToLower(string(cos)), "</body>"); i >= 0 {
+			w.Write(cos[:i])
+			w.Write(injectat)
+			w.Write(cos[i:])
+		} else {
+			w.Write(cos)
+			w.Write(injectat)
+		}
+	})
 
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
